@@ -87,17 +87,20 @@ const DEMO_BRAND = {
     {
       id: 'warm-story',
       label: 'Warm, story-led',
+      icon: 'i-heart',
       sample: "Heritage isn't an aesthetic. It's a postcode and a person who can name the stitch. We learn first, then we make.",
     },
     {
       id: 'direct-candid',
       label: 'Direct, candid',
-      sample: "We don't 'reinterpret tradition' — we work with people doing it now and we pay them properly. Everything else is marketing.",
+      icon: 'i-bolt',
+      sample: "We don't 'reinterpret tradition'. We work with people doing it now and we pay them properly. Everything else is marketing.",
     },
     {
       id: 'reverent-grounded',
       label: 'Reverent, grounded',
-      sample: "Sindhi mirror work. Mid-century origins. Bibi taught us — she's been at it 31 years. Worth knowing whose hands made what you wear.",
+      icon: 'i-mountain',
+      sample: "Sindhi mirror work. Mid-century origins. Bibi taught us. She's been at it 31 years. Worth knowing whose hands made what you wear.",
     },
   ],
   trendGroups: [
@@ -128,19 +131,19 @@ const DEMO_BRAND = {
   ],
   postIterations: {
     heritage: [
-      { id: 'a', angle: 'Personal story', body: "My nani's dupatta has stitches I can't name. This week I'm trying to learn them, properly. If you've got heritage you don't fully know, you're not alone — pull a thread, see what unspools." },
+      { id: 'a', angle: 'Personal story', body: "My nani's dupatta has stitches I can't name. This week I'm trying to learn them, properly. If you've got heritage you don't fully know, you're not alone. Pull a thread, see what unspools." },
       { id: 'b', angle: 'Hot take',       body: "Half of what gets called 'heritage' on this app is aesthetics with no postcode. The actual craft has names, regions, and people still doing it for less than it's worth. Worth knowing the difference." },
       { id: 'c', angle: 'Data-driven',    body: "We pulled the numbers on our last 30 posts. The ones that named the artisan and the region got 3.8× the saves of pure product shots. Audiences want context, not catalog. #SouthAsianHeritageWeek" },
     ],
     founder: [
       { id: 'a', angle: 'Personal story', body: "Year one of running Tkxel: I underpaid myself, overpaid for marketing, and learned that the artisans we work with had been waiting twenty years for someone to put their names on the label. That last one is why we keep going." },
-      { id: 'b', angle: 'Hot take',       body: "Founder transparency on this app is mostly performance. Real transparency is boring — this is what the cost breakdown looks like, this is what we got wrong last quarter, this is what we're still figuring out." },
+      { id: 'b', angle: 'Hot take',       body: "Founder transparency on this app is mostly performance. Real transparency is boring. This is what the cost breakdown looks like, this is what we got wrong last quarter, this is what we're still figuring out." },
       { id: 'c', angle: 'Data-driven',    body: "Posts where we share an honest founder note get 2.6× more replies than launch posts. Replies turn into customers at 4× the rate of likes. The lesson: stop polishing, start talking." },
     ],
     craft: [
-      { id: 'a', angle: 'Personal story', body: "Spent the morning at Bibi's workshop in Hyderabad. She's been doing mirror work for 31 years. Her hands move faster than I can take notes. Some of what we sell started here — felt important to say." },
+      { id: 'a', angle: 'Personal story', body: "Spent the morning at Bibi's workshop in Hyderabad. She's been doing mirror work for 31 years. Her hands move faster than I can take notes. Some of what we sell started here. Felt important to say." },
       { id: 'b', angle: 'Hot take',       body: "If your 'handcrafted' brand can't show you the hands, it isn't. The reason most heritage brands hide the workshop is that the workshop is the asset, not the boutique." },
-      { id: 'c', angle: 'Data-driven',    body: "Workshop reels outperform studio reels 1.8× for us. The comment sentiment is different too — workshop content gets craft questions, studio content gets price questions. Tells you what your audience actually cares about." },
+      { id: 'c', angle: 'Data-driven',    body: "Workshop reels outperform studio reels 1.8× for us. The comment sentiment is different too. Workshop content gets craft questions, studio content gets price questions. Tells you what your audience actually cares about." },
     ],
   },
 };
@@ -177,17 +180,20 @@ const DEMO_INDIVIDUAL = {
     {
       id: 'direct-generous',
       label: 'Direct, generous',
-      sample: "Most design-system posts skip the part that matters — adoption. Token tables are easy. Getting a PM to ship without DM-ing a designer is hard.",
+      icon: 'i-compass',
+      sample: "Most design-system posts skip the part that matters: adoption. Token tables are easy. Getting a PM to ship without DM-ing a designer is hard.",
     },
     {
       id: 'confessional-specific',
       label: 'Confessional, specific',
+      icon: 'i-quote',
       sample: "Shipped a design system once. Engineers ignored it for six months. The fix: I'd built the wrong primitive. Lesson learned twice.",
     },
     {
       id: 'sharp-contrarian',
       label: 'Sharp, contrarian',
-      sample: "'AI replaces designers' is a take from people who don't ship. The real question is which 30% of the job goes first — and whether you're spending 30% of your time there.",
+      icon: 'i-diamond',
+      sample: "'AI replaces designers' is a take from people who don't ship. The real question is which 30% of the job goes first, and whether you're spending 30% of your time there.",
     },
   ],
   topics: [
@@ -235,10 +241,10 @@ const DEMO_INDIVIDUAL = {
     'system-teardowns': [
       { id: 'a', angle: 'Personal story', body: "First time I shipped a design system, I optimized the wrong thing for six months. I made the buttons perfect. Nobody used the buttons. The thing engineering needed was a layout primitive I hadn't built. Lesson learned twice." },
       { id: 'b', angle: 'Hot take',       body: "Most design-system posts on here are screenshots of token tables. Tokens aren't the system. The system is whether a PM can ship a feature without DM'ing a designer at 6pm. Measure that." },
-      { id: 'c', angle: 'Data-driven',    body: "Audit of 12 internal design systems I've worked on: the ones that got adopted shared one trait — they shipped one usable component before they had a doc site. The ones with great docs and no early component sat unused. Component first, doc second." },
+      { id: 'c', angle: 'Data-driven',    body: "Audit of 12 internal design systems I've worked on: the ones that got adopted shared one trait. They shipped one usable component before they had a doc site. The ones with great docs and no early component sat unused. Component first, doc second." },
     ],
     'public-work': [
-      { id: 'a', angle: 'Personal story', body: "Office hours this Friday. Four free 30-minute slots for designers stuck on a system decision. I'll learn something too — half the time the question reframes how I'd answer it. Reply if you want one." },
+      { id: 'a', angle: 'Personal story', body: "Office hours this Friday. Four free 30-minute slots for designers stuck on a system decision. I'll learn something too. Half the time the question reframes how I'd answer it. Reply if you want one." },
       { id: 'b', angle: 'Hot take',       body: "Building in public on this app has become its own genre, and most of it is the same three updates dressed differently. If you want it to land, share the decision you got wrong, not the dashboard going up and to the right." },
       { id: 'c', angle: 'Data-driven',    body: "Posts where I share something I got wrong get 2.4× the reply rate of posts where I share what worked. Replies become DMs become consulting calls. The 'wrong' content is the funnel." },
     ],
@@ -254,6 +260,14 @@ const stream = $('#stream');
 const crumbs = $('#crumbs');
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// Parse a raw SVG string into actual SVG DOM (innerHTML on an <svg> element
+// uses the HTML parser and silently lowercases names like `linearGradient`
+// and discards SVG-specific attributes). Use this when you need proper SVG.
+function parseSvg(svgString) {
+  const doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+  return doc.documentElement;
+}
 
 function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
@@ -347,8 +361,41 @@ async function scoutMsg(text, { beat = 600, typingFor = 700, charSpeed = 14 } = 
   typingNode.appendChild(textNode);
   scrollDown();
   await typewriterInto(textNode, text, charSpeed);
+  // After typewriter completes, auto-emphasise key tokens for visual hierarchy.
+  textNode.innerHTML = highlightKeywords(textNode.textContent);
   await sleep(beat);
   return typingNode;
+}
+
+// Wraps numbers, brand/user names, and a small allow-list of key actions in
+// <strong class="kw"> so they read as visual anchors against the lighter body.
+function highlightKeywords(text) {
+  if (!text) return '';
+  const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const tokens = [];
+  if (state && state.user && state.user.name) tokens.push(state.user.name);
+  if (state && state.brand && state.brand.displayName) tokens.push(state.brand.displayName);
+  if (state && state.brand && state.brand.name && (!state.brand.displayName || state.brand.name !== state.brand.displayName)) {
+    tokens.push(state.brand.name);
+  }
+  tokens.sort((a, b) => b.length - a.length);
+  const escForRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tokenAlt = tokens.length ? tokens.map(escForRe).join('|') : null;
+  const combined = new RegExp(
+    [
+      tokenAlt && `\\b(?:${tokenAlt})\\b`,
+      '\\b\\d{1,3}(?:,\\d{3})+\\b',
+      '\\b\\d+(?:\\.\\d+)?×',
+      '\\b\\d+(?:\\.\\d+)?%',
+      '\\bfive minutes\\b',
+      '\\bthree seconds\\b',
+      '\\bConnect\\b',
+      '\\bLooks right\\b',
+      '\\bPublish\\b',
+    ].filter(Boolean).join('|'),
+    'g'
+  );
+  return escape(text).replace(combined, (m) => `<strong class="kw">${m}</strong>`);
 }
 
 async function typewriterInto(node, text, baseSpeed = 14) {
@@ -381,23 +428,41 @@ function userMsg(text) {
    Each returns a Promise resolving to the user's choice.
    ========================================================================= */
 
-function quickReplies(options, { primaryIndex = -1 } = {}) {
+// Quick replies: pills register as a user-prompt bubble. All pills remain
+// visible; the chosen one is highlighted, the rest dim but stay clickable so
+// the user can change their mind. The choice commits after a short idle.
+function quickReplies(options, { primaryIndex = -1, settleMs = 1500 } = {}) {
   return new Promise((resolve) => {
     const wrap = el('div', { class: 'qreplies' });
+    let activeBtn = null;
+    let bubble = null;
+    let commitTimer = null;
+
+    const updateChoice = (btn, opt) => {
+      if (activeBtn === btn) return;
+      activeBtn = btn;
+      Array.from(wrap.children).forEach((c) => {
+        c.classList.toggle('qreply--chosen', c === btn);
+        c.classList.toggle('qreply--dim', c !== btn);
+      });
+      if (!bubble) {
+        bubble = userMsg(opt);
+      } else {
+        const t = bubble.querySelector('.msg__bubble');
+        if (t) t.textContent = opt;
+      }
+      if (commitTimer) clearTimeout(commitTimer);
+      commitTimer = setTimeout(() => {
+        wrap.classList.add('qreplies--chosen');
+        Array.from(wrap.children).forEach((c) => { c.disabled = true; });
+        resolve(opt);
+      }, settleMs);
+    };
+
     options.forEach((opt, i) => {
       const btn = el('button', {
         class: 'qreply' + (i === primaryIndex ? ' qreply--primary' : ''),
-        onclick: () => {
-          // Selected pill stays in the chat as the user's "answer".
-          // Unselected pills are removed so the row reads as a record.
-          Array.from(wrap.children).forEach((c) => {
-            if (c !== btn) c.remove();
-          });
-          btn.classList.add('qreply--chosen');
-          btn.disabled = true;
-          wrap.classList.add('qreplies--chosen');
-          resolve(opt);
-        },
+        onclick: () => updateChoice(btn, opt),
       }, opt);
       wrap.appendChild(btn);
     });
@@ -405,12 +470,31 @@ function quickReplies(options, { primaryIndex = -1 } = {}) {
   });
 }
 
-function selectionChips(options, { allowCustom = false, customLabel = 'Something else' } = {}) {
+function selectionChips(options, {
+  allowCustom = false,
+  customLabel = 'Something else',
+  maxSelections = 0, // 0 = unlimited
+} = {}) {
   return new Promise((resolve) => {
     const selected = new Set();
+    // Group chips + helper + Done into a single bordered surface so the
+    // "Pick up to N" label visually belongs to the chip set, not the air.
+    const group = el('div', { class: 'chips-group' });
+    const helperRow = maxSelections > 0
+      ? el('div', { class: 'chips-helper' }, `Pick up to ${maxSelections}`)
+      : null;
+    if (helperRow) group.appendChild(helperRow);
     const wrap = el('div', { class: 'chips' });
     const allOptions = [...options];
     if (allowCustom) allOptions.push(customLabel);
+
+    const updateCapState = () => {
+      const atCap = maxSelections > 0 && selected.size >= maxSelections;
+      Array.from(wrap.children).forEach((chip) => {
+        const pressed = chip.getAttribute('aria-pressed') === 'true';
+        chip.classList.toggle('chip--capped', atCap && !pressed);
+      });
+    };
 
     allOptions.forEach((opt) => {
       const isCustom = allowCustom && opt === customLabel;
@@ -419,23 +503,29 @@ function selectionChips(options, { allowCustom = false, customLabel = 'Something
         'aria-pressed': 'false',
         onclick: async () => {
           if (isCustom) {
-            // Don't toggle; open inline text input
+            if (maxSelections > 0 && selected.size >= maxSelections) return;
             const customText = await inlineTextInput({ placeholder: 'Type your custom goal…', submitLabel: 'Add' });
             if (customText) {
               selected.add(customText);
-              const tag = el('button', {
-                class: 'chip',
-                'aria-pressed': 'true',
-              }, customText);
+              const tag = el('button', { class: 'chip', 'aria-pressed': 'true' }, customText);
               wrap.insertBefore(tag, btn);
               done.disabled = false;
+              updateCapState();
             }
             return;
           }
           const on = btn.getAttribute('aria-pressed') === 'true';
+          if (!on && maxSelections > 0 && selected.size >= maxSelections) {
+            // Brief shake feedback at the cap.
+            btn.classList.remove('chip--shake');
+            void btn.offsetWidth;
+            btn.classList.add('chip--shake');
+            return;
+          }
           btn.setAttribute('aria-pressed', String(!on));
           on ? selected.delete(opt) : selected.add(opt);
           done.disabled = selected.size === 0;
+          updateCapState();
         },
       }, opt);
       wrap.appendChild(btn);
@@ -447,7 +537,6 @@ function selectionChips(options, { allowCustom = false, customLabel = 'Something
       onclick: () => {
         if (selected.size === 0) return;
         const list = Array.from(selected);
-        // Drop the unselected chips; freeze the selected ones in place.
         Array.from(wrap.children).forEach((chip) => {
           if (chip.getAttribute('aria-pressed') !== 'true') chip.remove();
         });
@@ -456,13 +545,17 @@ function selectionChips(options, { allowCustom = false, customLabel = 'Something
           chip.classList.add('chip--chosen');
         });
         wrap.classList.add('chips--chosen');
+        if (helperRow) helperRow.remove();
         doneRow.remove();
+        group.classList.add('is-settled');
+        userMsg(list.join(', '));
         resolve(list);
       },
     }, 'Done');
-    const doneRow = el('div', { class: 'qreplies' }, [done]);
-    append(wrap);
-    append(doneRow);
+    const doneRow = el('div', { class: 'chips-group__actions' }, [done]);
+    group.appendChild(wrap);
+    group.appendChild(doneRow);
+    append(group);
   });
 }
 
@@ -555,9 +648,9 @@ async function openingHero() {
   await typewriterInto(titleEl, `Hi, ${state.user.name}.`, 55);
   await sleep(600);
 
-  // Beat 3: "I'm Scout."
+  // Beat 3: "I'm Scout — your marketing strategist."
   greet.sub.classList.add('hero__stage--in');
-  await typewriterInto(subEl, "I'm Scout.", 55);
+  await typewriterInto(subEl, "I'm Scout, your marketing strategist.", 45);
   await sleep(800);
 
   // Beat 4: question line.
@@ -642,15 +735,17 @@ function buildHero() {
   ]);
 }
 
-function heroBlock(acct, iconId, label, desc) {
+function heroBlock(acct, _iconId, label, desc) {
   return el('button', {
     class: 'hero-block',
     'data-acct': acct,
     'data-picked': 'false',
   }, [
-    el('div', { class: 'hero-block__icon', html: icon(iconId) }),
-    el('div', { class: 'hero-block__label' }, label),
-    el('div', { class: 'hero-block__desc' }, desc),
+    el('div', { class: 'hero-block__body' }, [
+      el('span', { class: 'hero-block__label' }, label),
+      el('div', { class: 'hero-block__desc' }, desc),
+    ]),
+    el('span', { class: 'hero-block__chevron', html: icon('i-chevron-right') }),
   ]);
 }
 
@@ -700,20 +795,19 @@ async function narratedProcess(_label, lines, { lineBeat = 1100, exitBeat = 280,
 /* =========================================================================
    6. CONFIRMATION CARD with INLINE EDIT
    ========================================================================= */
-function confirmationCard({ title, rows, primary = 'Looks right', secondary = 'Edit', onEditField } = {}) {
+function confirmationCard({ title, rows, primary = 'Looks right', onEditField } = {}) {
   return new Promise((resolve) => {
     const rowEls = rows.map(([label, value, key]) => makeConfRow(label, value, key, onEditField));
 
     const card = el('div', { class: 'conf' }, [
       el('div', { class: 'conf__title' }, [
         el('div', { class: 'conf__title-left' }, [
-          el('span', { class: 'conf__title-mark', html: icon('i-logo') }),
           document.createTextNode(title),
         ]),
       ]),
       el('div', { class: 'conf__rows' }, rowEls),
+      el('div', { class: 'conf__hint' }, 'Tap any row to edit. Sign off when it reads right.'),
       el('div', { class: 'conf__actions' }, [
-        el('button', { class: 'btn-ghost', onclick: () => { /* edit hint */ } }, secondary + ' fields above'),
         el('button', { class: 'btn-primary', onclick: () => { card.remove(); userMsg(primary); resolve('confirm'); } }, primary),
       ]),
     ]);
@@ -804,7 +898,6 @@ function productLineTreeCard(lines) {
     const card = el('div', { class: 'pl-tree' }, [
       el('div', { class: 'conf__title' }, [
         el('div', { class: 'conf__title-left' }, [
-          el('span', { class: 'conf__title-mark', html: icon('i-logo') }),
           document.createTextNode('Brand knowledge structure'),
         ]),
       ]),
@@ -814,7 +907,6 @@ function productLineTreeCard(lines) {
       ]),
       el('div', { class: 'pl-tree__items' }, items),
       el('div', { class: 'conf__actions' }, [
-        el('button', { class: 'btn-ghost', onclick: () => {} }, 'Edit lines'),
         el('button', {
           class: 'btn-primary',
           onclick: () => { card.remove(); userMsg('Looks right'); resolve('confirm'); },
@@ -845,8 +937,11 @@ function connectSocial() {
       const row = el('button', {
         class: 'platform platform--' + p.id + (isActive ? '' : ' platform--soon'),
         disabled: isActive ? null : 'true',
+        // Keep the widget visible while the OAuth modal is open. The caller
+        // (step5_x_connect) is responsible for marking the card as connected
+        // after authorization completes.
         onclick: isActive
-          ? () => { card.remove(); resolve('connect'); }
+          ? () => resolve({ result: 'connect', card })
           : null,
       }, [
         el('span', { class: 'platform__icon', html: icon(p.icon) }),
@@ -867,7 +962,7 @@ function connectSocial() {
       el('div', { class: 'connect__actions' }, [
         el('button', {
           class: 'btn-ghost',
-          onclick: () => { card.remove(); userMsg('Skip for now'); resolve('skip'); },
+          onclick: () => { card.remove(); userMsg('Skip for now'); resolve({ result: 'skip', card: null }); },
         }, 'Skip for now'),
       ]),
     ]);
@@ -879,13 +974,61 @@ function connectSocial() {
    9. INLINE PREVIEWS, X profile (established + new) + trends
    ========================================================================= */
 function xProfilePreview(profile) {
-  // Edge-to-edge card. Banner runs flush to the rounded corners; the avatar
-  // overlaps the banner/content boundary, like Twitter's own profile UI.
-  const verifiedBadge = profile.verified
-    ? el('span', { class: 'preview__verified', 'aria-label': 'Verified', html: icon('i-check') })
+  // Stats (top topics, audience, peak activity) are now rendered inside the
+  // brand drawer instead of below the header. The chat surfaces only the
+  // Twitter-faithful header here.
+  xProfileHeader(profile);
+}
+
+// Twitter white-mode profile header — read as if pasted from twitter.com.
+function xProfileHeader(profile) {
+  const verified = profile.verified
+    ? el('span', { class: 'x-header__verified', 'aria-label': 'Verified', html: icon('i-check') })
     : null;
 
-  const topTopicEls = (profile.topTopics || []).map(t => el('div', { class: 'topic-bar' }, [
+  const card = el('div', { class: 'x-header' }, [
+    el('div', { class: 'x-header__banner' }),
+    el('div', { class: 'x-header__action-row' }, [
+      el('button', { class: 'x-header__follow', type: 'button', disabled: 'true' }, 'Following'),
+    ]),
+    el('div', { class: 'x-header__avatar' }),
+    el('div', { class: 'x-header__body' }, [
+      el('div', { class: 'x-header__name' }, [
+        document.createTextNode(profile.displayName || profile.name),
+        verified,
+      ]),
+      el('div', { class: 'x-header__handle' }, profile.handle),
+      profile.bio ? el('p', { class: 'x-header__bio' }, profile.bio) : null,
+      el('div', { class: 'x-header__meta' }, [
+        profile.location ? el('span', { class: 'x-header__meta-item' }, [
+          el('span', { class: 'x-header__meta-icon', html: icon('i-people') }),
+          document.createTextNode(profile.location),
+        ]) : null,
+        profile.joinDate ? el('span', { class: 'x-header__meta-item' }, [
+          el('span', { class: 'x-header__meta-icon', html: icon('i-cal') }),
+          document.createTextNode(`Joined ${profile.joinDate}`),
+        ]) : null,
+      ]),
+      el('div', { class: 'x-header__counts' }, [
+        el('span', { class: 'x-header__count' }, [
+          el('strong', {}, profile.following || '0'),
+          document.createTextNode(' '),
+          el('span', { class: 'x-header__count-label' }, 'Following'),
+        ]),
+        el('span', { class: 'x-header__count' }, [
+          el('strong', {}, profile.followers || '0'),
+          document.createTextNode(' '),
+          el('span', { class: 'x-header__count-label' }, 'Followers'),
+        ]),
+      ]),
+    ]),
+  ]);
+  append(card);
+}
+
+// Scout's analysis layered on top of the Twitter clone above.
+function xProfileStats(profile) {
+  const topTopicEls = (profile.topTopics || []).map(t => el('div', { class: 'topic-bar topic-bar--lg' }, [
     el('div', { class: 'topic-bar__row' }, [
       el('span', { class: 'topic-bar__name' }, t.name),
       el('span', { class: 'topic-bar__pct' }, `+${t.engagement}%`),
@@ -895,61 +1038,41 @@ function xProfilePreview(profile) {
     ]),
   ]));
 
-  const card = el('div', { class: 'preview preview--full' }, [
-    el('div', { class: 'preview__banner' }),
-    el('div', { class: 'preview__identity' }, [
-      el('div', { class: 'preview__avatar' }),
-      el('div', { class: 'preview__name-row' }, [
-        el('div', { class: 'preview__name' }, [
-          document.createTextNode(profile.displayName || profile.name),
-          verifiedBadge,
-        ]),
-        el('div', { class: 'preview__handle' }, profile.handle),
-      ]),
+  // Peak activity strip — parse hour range from peakActivity text if possible, else center it.
+  const peakStrip = el('div', { class: 'peak-strip' }, [
+    el('div', { class: 'peak-strip__track' }, [
+      el('div', { class: 'peak-strip__highlight' }),
     ]),
-    profile.bio ? el('p', { class: 'preview__bio' }, profile.bio) : null,
-    el('div', { class: 'preview__meta-row' }, [
-      profile.location ? el('span', { class: 'preview__meta-item' }, [
-        el('span', { class: 'preview__meta-icon', html: icon('i-people') }),
-        document.createTextNode(profile.location),
-      ]) : null,
-      profile.joinDate ? el('span', { class: 'preview__meta-item' }, [
-        el('span', { class: 'preview__meta-icon', html: icon('i-cal') }),
-        document.createTextNode(`Joined ${profile.joinDate}`),
-      ]) : null,
+    el('div', { class: 'peak-strip__labels' }, [
+      el('span', {}, '12a'), el('span', {}, '6a'), el('span', {}, '12p'), el('span', {}, '6p'), el('span', {}, '12a'),
     ]),
-    el('div', { class: 'preview__stats-row' }, [
-      stat(profile.following, 'Following'),
-      stat(profile.followers, 'Followers'),
-      stat(profile.postCount, 'Posts'),
+  ]);
+
+  const audienceBlock = (label, text) => el('div', { class: 'x-stats__audience-block' }, [
+    el('div', { class: 'x-stats__avatars' }, [
+      el('span', { class: 'x-stats__avatar' }),
+      el('span', { class: 'x-stats__avatar' }),
+      el('span', { class: 'x-stats__avatar' }),
     ]),
-    el('div', { class: 'preview__divider' }),
-    el('div', { class: 'preview__section' }, [
-      el('div', { class: 'preview__section-title' }, 'Industry'),
-      el('div', { class: 'preview__industry' }, profile.industry),
-    ]),
-    el('div', { class: 'preview__divider' }),
-    el('div', { class: 'preview__section' }, [
-      el('div', { class: 'preview__section-title' }, 'Top performing topics'),
+    el('div', { class: 'x-stats__eyebrow' }, label),
+    el('div', { class: 'x-stats__audience-text' }, text),
+  ]);
+
+  const card = el('div', { class: 'x-stats' }, [
+    el('div', { class: 'x-stats__section' }, [
+      el('div', { class: 'x-stats__eyebrow' }, 'Top performing topics'),
       el('div', { class: 'topic-bars' }, topTopicEls),
     ]),
-    el('div', { class: 'preview__divider' }),
-    el('div', { class: 'preview__section' }, [
-      el('div', { class: 'preview__audience-grid' }, [
-        el('div', {}, [
-          el('div', { class: 'preview__section-title' }, 'Primary audience'),
-          el('div', { class: 'preview__audience-text' }, profile.primaryAudience),
-        ]),
-        el('div', {}, [
-          el('div', { class: 'preview__section-title' }, 'Secondary audience'),
-          el('div', { class: 'preview__audience-text' }, profile.secondaryAudience),
-        ]),
+    el('div', { class: 'x-stats__section' }, [
+      el('div', { class: 'x-stats__audience-grid' }, [
+        audienceBlock('Primary audience', profile.primaryAudience),
+        audienceBlock('Secondary audience', profile.secondaryAudience),
       ]),
     ]),
-    el('div', { class: 'preview__divider' }),
-    el('div', { class: 'preview__section' }, [
-      el('div', { class: 'preview__section-title' }, 'Peak activity'),
-      el('div', { class: 'preview__industry' }, profile.peakActivity),
+    el('div', { class: 'x-stats__section' }, [
+      el('div', { class: 'x-stats__eyebrow' }, 'Peak activity'),
+      peakStrip,
+      el('div', { class: 'x-stats__peak-text' }, profile.peakActivity || ''),
     ]),
   ]);
   append(card);
@@ -957,7 +1080,7 @@ function xProfilePreview(profile) {
 
 function stat(value, label) {
   return el('div', { class: 'preview__stat' }, [
-    el('div', { class: 'preview__stat-value' }, value || '—'),
+    el('div', { class: 'preview__stat-value' }, value || '0'),
     el('div', { class: 'preview__stat-label' }, label),
   ]);
 }
@@ -984,7 +1107,7 @@ function xProfilePreviewEmpty(profile) {
       ]) : null,
     ]),
     el('div', { class: 'preview__stats-row' }, [
-      stat(profile.following || '—',  'Following'),
+      stat(profile.following || '0',  'Following'),
       stat(profile.followers,         'Followers'),
       stat(profile.postCount || '0',  'Posts'),
     ]),
@@ -1012,12 +1135,6 @@ function topicRow(name, stat) {
     el('span', { class: 'topic-row__stat' }, stat),
   ]);
 }
-function kv(label, val) {
-  return el('div', { class: 'kv' }, [
-    el('div', { class: 'kv__label' }, label),
-    el('div', { class: 'kv__val' }, val),
-  ]);
-}
 
 /* =========================================================================
    10. TREND CARDS PREVIEW
@@ -1027,39 +1144,6 @@ function kv(label, val) {
    A mock X post with high engagement, framing what Scout is going to help
    the user achieve. Visual proof anchors the value prop.
    ========================================================================= */
-function successPostTeaser() {
-  const card = el('div', { class: 'success-post' }, [
-    el('div', { class: 'success-post__head' }, [
-      el('div', { class: 'success-post__avatar' }),
-      el('div', { class: 'success-post__id' }, [
-        el('div', { class: 'success-post__name-row' }, [
-          el('span', { class: 'success-post__name' }, 'a brand like yours'),
-          el('span', { class: 'success-post__verified', html: icon('i-check') }),
-        ]),
-        el('div', { class: 'success-post__handle' }, '@on_flagstaff · 2d'),
-      ]),
-      el('span', { class: 'success-post__badge' }, [
-        el('span', { class: 'success-post__badge-icon', html: icon('i-fire') }),
-        document.createTextNode('Hit'),
-      ]),
-    ]),
-    el('div', { class: 'success-post__body' },
-      'Most "heritage" fashion isn\'t. Short thread on why the embroidery on your kurta probably has a postal code, and why that matters.'),
-    el('div', { class: 'success-post__media' }, [
-      el('span', { class: 'success-post__media-overlay' }, '↑ 4.2× expected reach'),
-    ]),
-    el('div', { class: 'success-post__metrics' }, [
-      successMetric('i-reply',    '892',    'replies'),
-      successMetric('i-repost',   '1.2k',   'reposts'),
-      successMetric('i-heart',    '12.4k',  'likes'),
-      successMetric('i-bookmark', '3.8k',   'bookmarks'),
-    ]),
-    el('div', { class: 'success-post__footer' },
-      'Outperforming 94% of posts in this niche this week.'),
-  ]);
-  append(card);
-  return card;
-}
 
 function successMetric(iconId, value, label) {
   return el('div', { class: 'success-post__metric' }, [
@@ -1259,20 +1343,6 @@ function renderKB() {
   panel.appendChild(grid);
 }
 
-function confirmKBBlock(id) {
-  // Auto-expand a block, surface action buttons, resolve on user click.
-  return new Promise((resolve) => {
-    ['brand', 'trending', 'algorithm'].forEach(k => state.kb[k].expanded = false);
-    state.kb[id].expanded = true;
-    state.kb.actionCallback = (result) => {
-      state.kb.actionCallback = null;
-      state.kb[id].expanded = false;
-      renderKB();
-      resolve(result);
-    };
-    renderKB();
-  });
-}
 
 function addKBFact(kbId, label, value) {
   const kb = state.kb[kbId];
@@ -1285,11 +1355,6 @@ function addKBFact(kbId, label, value) {
   renderKB();
 }
 
-function setActiveKB(kbId) {
-  if (!state.kb[kbId]) return;
-  state.kb.activeId = kbId;
-  renderKB();
-}
 
 function renderDashboard() {
   const dash = $('#dash');
@@ -1484,10 +1549,14 @@ async function step1_opening() {
   // topics/expertise). Render only now that the persona is known.
   renderKB();
 
-  const ack = state.accountType === 'brand'
-    ? "Got it. Let's get your first post out together — about five minutes."
-    : `Got it, ${state.user.name}. Let's get your first post out together — about five minutes.`;
-  await scoutMsg(ack, { typingFor: 900, beat: 400 });
+  const ackLead = state.accountType === 'brand'
+    ? "Got it. I'll learn your brand so every post I suggest is built around you, not templates."
+    : `Got it, ${state.user.name}. I'll learn how you think and write so every post I suggest sounds like you, not a template.`;
+  await scoutMsg(ackLead, { typingFor: 900, beat: 300 });
+  await scoutMsg(
+    "By the end I'll have a clear read on your brand, your audience, and what's working in your niche. Roughly five minutes from here.",
+    { typingFor: 1000, beat: 400 }
+  );
 }
 
 async function step3_product_lines_brand_only() {
@@ -1554,6 +1623,7 @@ async function step3_product_lines_brand_only() {
 
   // Each product line becomes a fact in the Product KB
   state.productLines.forEach(l => addKBFact('brand', l.name, `${l.audience} · ${l.tone}`));
+  refreshBrandDrawer();
 }
 
 async function step4_goals() {
@@ -1562,28 +1632,67 @@ async function step4_goals() {
   // achieve. Short copy, no upfront KPI dump (that surfaces later when it's
   // useful).
   await scoutMsg(
-    "Before I dig in, what are you trying to achieve on X? Pick what matters most.",
+    "Before I dig in, what are you trying to achieve on X? Pick up to 3, the ones that matter most.",
     { typingFor: 900, beat: 300 }
   );
   state.goals = await selectionChips([
     'Grow audience', 'Drive traffic to site', 'Build thought leadership',
     'Boost sales', 'Increase brand awareness', 'Generate leads',
-  ]);
+  ], { maxSelections: 3 });
 
   const headline = state.goals.slice(0, 2).join(' and ') + (state.goals.length > 2 ? ' (and more)' : '');
   await scoutMsg(
-    `Got it, ${headline}. I'll read everything that follows through that lens.`,
-    { typingFor: 800, beat: 400 }
+    `Got it, ${headline}. Here's how I'll measure that:`,
+    { typingFor: 800, beat: 300 }
+  );
+
+  const kpiMap = {
+    'Grow audience':            'Follower growth rate · profile visits from posts',
+    'Drive traffic to site':    'Outbound link CTR · referral sessions from X',
+    'Build thought leadership': 'Bookmark rate · reply quality · saves-to-likes ratio',
+    'Boost sales':              'Link-in-bio clicks · post-to-conversion path',
+    'Increase brand awareness': 'Impressions · reach lift · share-of-voice in niche',
+    'Generate leads':           'Reply-to-DM rate · profile-to-form conversions',
+  };
+  renderKpiCard(state.goals, kpiMap);
+
+  await scoutMsg(
+    "These become the targets I'll optimize your content around.",
+    { typingFor: 700, beat: 400 }
   );
   addKBFact('brand', 'Goals', state.goals.join(', '));
+  addKBFact('brand', 'KPIs', state.goals.map(g => kpiMap[g] ? kpiMap[g].split(' · ')[0] : 'Engagement quality').join(', '));
+  refreshBrandDrawer();
+}
+
+function renderKpiCard(goals, kpiMap) {
+  const rows = goals.map(g => {
+    const kpi = (kpiMap[g] || 'Engagement quality').split(' · ');
+    return el('div', { class: 'kpi-row' }, [
+      el('span', { class: 'kpi-row__icon', html: icon('i-trend') }),
+      el('span', { class: 'kpi-row__goal' }, g),
+      el('span', { class: 'kpi-row__arrow' }, '→'),
+      el('span', { class: 'kpi-row__kpi' }, [
+        el('strong', { class: 'kw' }, kpi[0]),
+        kpi.length > 1 ? document.createTextNode(' · ' + kpi.slice(1).join(' · ')) : null,
+      ]),
+    ]);
+  });
+  const card = el('div', { class: 'kpi-card' }, [
+    el('div', { class: 'kpi-card__head' }, [
+      document.createTextNode('How I will measure that'),
+    ]),
+    el('div', { class: 'kpi-card__rows' }, rows),
+  ]);
+  append(card);
 }
 
 async function step5_x_connect() {
   await scoutMsg(
-    "First step — connect the account where you publish. I'll read what's working and build from there.",
+    "First step, connect the account where you publish. I'll read what's working and build from there.",
     { typingFor: 1100, beat: 500 }
   );
-  const result = await connectSocial();
+  const { result, card } = await connectSocial();
 
   if (result === 'skip') {
     state.skipped.add('x-connect');
@@ -1594,16 +1703,41 @@ async function step5_x_connect() {
     return 'skipped-entirely';
   }
 
-  // OAuth simulation. After Authorize, the user-side message ("Authorized X")
-  // posts — never on the platform-pick click, since that just opens the modal.
+  // OAuth simulation. The connect card stays visible behind the modal so the
+  // user keeps context. The X row marks as "Connecting…" while modal is open,
+  // then flips to "Connected" after authorization.
+  if (card) markConnectXState(card, 'connecting');
   await fakeOAuthModal();
+  if (card) markConnectXState(card, 'connected');
   userMsg('Authorized X');
 
   await scoutMsg(
-    "Connected. Reading your account now.",
+    "Connected. Thanks. Let me read what's there.",
     { typingFor: 700, beat: 400 }
   );
+  // After Scout's ack, retire the widget gracefully.
+  if (card) {
+    card.classList.add('connect--retiring');
+    setTimeout(() => card.remove(), 400);
+  }
   return 'connected-scan';
+}
+
+// Reflect connection progress on the visible X platform row inside the
+// connect widget. Keeps the user oriented while the OAuth modal is open.
+function markConnectXState(card, stateName) {
+  const xRow = card.querySelector('.platform--x');
+  if (!xRow) return;
+  const cta = xRow.querySelector('.platform__cta');
+  if (!cta) return;
+  if (stateName === 'connecting') {
+    xRow.classList.add('platform--connecting');
+    cta.textContent = 'Connecting…';
+  } else if (stateName === 'connected') {
+    xRow.classList.remove('platform--connecting');
+    xRow.classList.add('platform--connected');
+    cta.textContent = 'Connected';
+  }
 }
 
 function fakeOAuthModal() {
@@ -1655,7 +1789,7 @@ async function step6_profile_scan() {
       { icon: 'i-bookmark', text: "Bookmark patterns on others' posts hint that your audience values context, not just product." },
     ]);
     await scoutMsg(
-      "Your account is fresh, so I don't have engagement data yet. I'll lean on your brand context, niche trends, and the signals around your account until we build your own performance history.",
+      "Your account is fresh, so I don't have engagement data yet. I'll lean on your brand context, niche trends, and the signals around your account until we build your own performance history. Honestly, that means we get to set the strategy from scratch. No bad habits to unlearn.",
       { typingFor: 1300, beat: 400 }
     );
     xProfilePreviewEmpty(state.brand);
@@ -1712,40 +1846,371 @@ function buildProfileSummary() {
   };
 }
 
-// FIRST major proposal: bundles identity + tone signals into a single
-// confirmation card. The user reacts to one rich surface, edits inline,
-// then approves. Replaces the old stepIndustryConfirm + step9_tone split.
-async function step_knowledge_confirm() {
+// First drawer open: review what Scout learned from the profile scan + materials.
+// Drawer opens, fills sections with writing animation, reveals Accept, waits for
+// the user, then closes. Identity/Themes/Products/Top topics/Audience(primary)/
+// Peak activity are visible. Tone, goals, refined audience appear in the second
+// open later.
+async function step_brand_review_first() {
+  const isBrand = state.accountType === 'brand';
   await scoutMsg(
-    "Here's the read. Edit anything that's off, then sign off.",
-    { typingFor: 900, beat: 400 }
+    isBrand
+      ? "Here's what I've pulled together about your brand. Take a look on the right and accept when it reads right."
+      : "Here's what I've pulled together about you. Take a look on the right and accept when it reads right.",
+    { typingFor: 1300, beat: 400 }
+  );
+  openBrandDrawer();
+  await refreshBrandDrawer();
+
+  addKBFact('brand', 'Niche', state.brand.niche);
+  addKBFact('brand', 'Themes', state.brand.themes.join(', '));
+  if (isBrand) addKBFact('brand', 'Products', state.brand.products.join(', '));
+
+  revealBrandDrawerAccept();
+  await new Promise((resolve) => { drawerState.acceptResolver = resolve; });
+  userMsg('Accept');
+  closeBrandDrawer();
+}
+
+// ------------------------ Brand / About-you drawer ------------------------
+// A right-side panel that lives from the moment Scout starts learning until
+// the user explicitly accepts it. Every state mutation (audience, tone,
+// goals, product lines) refreshes the drawer; the user can pencil any field.
+const drawerState = {
+  node: null,
+  tab: null,
+  acceptResolver: null,
+  rendered: new Set(),
+  writeQueue: Promise.resolve(),
+  minimized: false,
+};
+
+function openBrandDrawer() {
+  if (drawerState.node) return;
+  // Each open is a fresh render — clear which sections have been written.
+  drawerState.rendered = new Set();
+  const isBrand = state.accountType === 'brand';
+  const drawer = el('aside', { class: 'brand-drawer', 'aria-label': isBrand ? 'About your brand' : 'About you' }, [
+    el('button', {
+      class: 'brand-drawer__minimize',
+      'aria-label': 'Minimize',
+      onclick: () => setBrandDrawerMinimized(true),
+      html: icon('i-collapse'),
+    }),
+    el('div', { class: 'brand-drawer__head' }, [
+      el('h2', { class: 'brand-drawer__title' }, isBrand ? 'About your brand' : 'About you'),
+      el('p', { class: 'brand-drawer__sub' }, 'Scout is filling this as she learns.'),
+    ]),
+    el('div', { class: 'brand-drawer__body' }),
+    el('div', { class: 'brand-drawer__foot' }, [
+      el('button', {
+        class: 'btn-primary brand-drawer__accept',
+        onclick: () => {
+          if (drawerState.acceptResolver) {
+            const r = drawerState.acceptResolver;
+            drawerState.acceptResolver = null;
+            closeBrandDrawer();
+            r('accept');
+          }
+        },
+      }, 'Accept'),
+    ]),
+  ]);
+  // Re-open pill, shown while minimized.
+  const tab = el('button', {
+    class: 'brand-drawer-tab',
+    'aria-label': 'Open ' + (isBrand ? 'brand profile' : 'profile'),
+    onclick: () => setBrandDrawerMinimized(false),
+  }, [
+    el('span', { class: 'brand-drawer-tab__icon', html: icon('i-arrow-right') }),
+    el('span', { class: 'brand-drawer-tab__label' }, isBrand ? 'About your brand' : 'About you'),
+  ]);
+  const backdrop = el('div', { class: 'brand-drawer-backdrop' });
+  document.body.appendChild(backdrop);
+  document.body.appendChild(drawer);
+  document.body.appendChild(tab);
+  drawerState.node = drawer;
+  drawerState.tab = tab;
+  drawerState.backdrop = backdrop;
+  drawerState.rendered = new Set();
+  drawerState.writeQueue = Promise.resolve();
+  drawerState.minimized = false;
+  requestAnimationFrame(() => {
+    drawer.classList.add('brand-drawer--open');
+    backdrop.classList.add('brand-drawer-backdrop--open');
+  });
+}
+
+function setBrandDrawerMinimized(min) {
+  if (!drawerState.node) return;
+  drawerState.minimized = min;
+  drawerState.node.classList.toggle('brand-drawer--minimized', min);
+  drawerState.tab?.classList.toggle('brand-drawer-tab--visible', min);
+}
+
+function closeBrandDrawer() {
+  if (!drawerState.node) return;
+  drawerState.node.classList.remove('brand-drawer--open');
+  drawerState.tab?.classList.remove('brand-drawer-tab--visible');
+  drawerState.backdrop?.classList.remove('brand-drawer-backdrop--open');
+  setTimeout(() => {
+    drawerState.node?.remove();
+    drawerState.tab?.remove();
+    drawerState.backdrop?.remove();
+    drawerState.node = null;
+    drawerState.tab = null;
+    drawerState.backdrop = null;
+    drawerState.rendered.clear();
+  }, 480);
+}
+
+// Compute the ordered list of sections that should exist based on current state.
+// Each section emits a unique id, an eyebrow label, and the DOM body (sans eyebrow).
+function computeBrandDrawerSections() {
+  const isBrand = state.accountType === 'brand';
+  const out = [];
+
+  if (state.brand && state.brand.name) {
+    out.push({
+      id: 'identity',
+      eyebrow: 'Identity',
+      writeText: state.brand.name,
+      build: () => el('div', {}, [
+        el('div', { class: 'brand-drawer__name', 'data-write': '1' }),
+        el('div', { class: 'brand-drawer__sub-line' }, [
+          state.brand.niche || '',
+          state.brand.location ? ' · ' + state.brand.location : '',
+        ].join('')),
+        state.brand.positioning ? el('p', { class: 'brand-drawer__positioning' }, state.brand.positioning) : null,
+      ].filter(Boolean)),
+    });
+  }
+  if (state.brand && state.brand.themes && state.brand.themes.length) {
+    out.push({
+      id: 'themes',
+      eyebrow: 'Themes',
+      build: () => el('div', { class: 'brand-drawer__pills' },
+        state.brand.themes.map(t => el('span', { class: 'brand-drawer__pill' }, t))
+      ),
+    });
+  }
+  if (isBrand && state.brand && state.brand.products && state.brand.products.length) {
+    out.push({
+      id: 'products',
+      eyebrow: 'Products',
+      build: () => el('ul', { class: 'brand-drawer__list' },
+        state.brand.products.map(p => el('li', {}, p))
+      ),
+    });
+  }
+  if (!isBrand && state.topics && state.topics.length) {
+    out.push({
+      id: 'topics',
+      eyebrow: 'Topics',
+      build: () => el('div', { class: 'brand-drawer__pills' },
+        state.topics.map(t => el('span', { class: 'brand-drawer__pill' }, t))
+      ),
+    });
+  }
+  if (isBrand && state.productLines && state.productLines.length) {
+    out.push({
+      id: 'product-lines',
+      eyebrow: 'Product lines',
+      build: () => el('div', { class: 'brand-drawer__lines' },
+        state.productLines.map(line => el('div', { class: 'brand-drawer__line' }, [
+          el('div', { class: 'brand-drawer__line-name' }, line.name),
+          el('div', { class: 'brand-drawer__line-meta' }, `${line.audience} · ${line.tone}`),
+        ]))
+      ),
+    });
+  }
+  // Top performing topics — moved here from xProfileStats so the drawer is
+  // the single surface for Scout's profile read.
+  if (state.brand && state.brand.topTopics && state.brand.topTopics.length) {
+    out.push({
+      id: 'top-topics',
+      eyebrow: 'Top performing topics',
+      build: () => el('div', { class: 'brand-drawer__topic-bars' },
+        state.brand.topTopics.map(t => el('div', { class: 'brand-drawer__topic-bar' }, [
+          el('div', { class: 'brand-drawer__topic-row' }, [
+            el('span', { class: 'brand-drawer__topic-name' }, t.name),
+            el('span', { class: 'brand-drawer__topic-pct' }, `+${t.engagement}%`),
+          ]),
+          el('div', { class: 'brand-drawer__topic-track' }, [
+            el('div', {
+              class: 'brand-drawer__topic-fill',
+              style: `width: ${Math.min(100, t.engagement)}%;`,
+            }),
+          ]),
+        ]))
+      ),
+    });
+  }
+  // Audience: primary block uses avatar cluster + persona-default. Once the
+  // user validates a custom audience via audience_infer, surface that string
+  // as a narrated overwrite.
+  if (state.brand && (state.brand.primaryAudience || state.audience)) {
+    out.push({
+      id: 'audience',
+      eyebrow: 'Audience',
+      writeText: state.audience || state.brand.primaryAudience,
+      build: () => el('div', {}, [
+        el('div', { class: 'brand-drawer__audience-row' }, [
+          el('div', { class: 'brand-drawer__avatar-cluster' }, [
+            el('span', { class: 'brand-drawer__avatar' }),
+            el('span', { class: 'brand-drawer__avatar' }),
+            el('span', { class: 'brand-drawer__avatar' }),
+          ]),
+          el('p', { class: 'brand-drawer__audience', 'data-write': '1' }),
+        ]),
+        state.brand?.secondaryAudience ? el('div', { class: 'brand-drawer__secondary' }, state.brand.secondaryAudience) : null,
+      ].filter(Boolean)),
+    });
+  }
+  // Tone only surfaces after the user has explicitly picked one (toneSample set).
+  if (state.toneSample) {
+    out.push({
+      id: 'tone',
+      eyebrow: 'Tone',
+      writeText: state.tone,
+      build: () => el('div', {}, [
+        el('div', { class: 'brand-drawer__primary', 'data-write': '1' }),
+        el('p', { class: 'brand-drawer__sample' }, state.toneSample),
+      ]),
+    });
+  }
+  // Peak activity — moved here from xProfileStats.
+  if (state.brand && state.brand.peakActivity) {
+    out.push({
+      id: 'peak-activity',
+      eyebrow: 'Peak activity',
+      build: () => el('div', {}, [
+        el('div', { class: 'brand-drawer__peak-strip' }, [
+          el('div', { class: 'brand-drawer__peak-track' }, [
+            el('div', { class: 'brand-drawer__peak-highlight' }),
+          ]),
+          el('div', { class: 'brand-drawer__peak-labels' }, [
+            el('span', {}, '12a'), el('span', {}, '6a'), el('span', {}, '12p'), el('span', {}, '6p'), el('span', {}, '12a'),
+          ]),
+        ]),
+        el('div', { class: 'brand-drawer__peak-text' }, state.brand.peakActivity),
+      ]),
+    });
+  }
+  if (state.goals && state.goals.length) {
+    out.push({
+      id: 'goals',
+      eyebrow: 'Goals',
+      build: () => el('div', { class: 'brand-drawer__goals' },
+        state.goals.map(g => el('div', { class: 'brand-drawer__goal' }, g))
+      ),
+    });
+  }
+  return out;
+}
+
+// Idempotent: only animates new sections. Each new section appends with a
+// fade + write animation. Queued so concurrent calls don't interleave.
+function refreshBrandDrawer() {
+  if (!drawerState.node) return;
+  const body = drawerState.node.querySelector('.brand-drawer__body');
+  if (!body) return;
+  drawerState.writeQueue = drawerState.writeQueue.then(async () => {
+    const sections = computeBrandDrawerSections();
+    for (const sec of sections) {
+      if (drawerState.rendered.has(sec.id)) continue;
+      drawerState.rendered.add(sec.id);
+      await writeDrawerSection(body, sec);
+    }
+  }).catch((e) => console.error('brand drawer write error', e));
+  return drawerState.writeQueue;
+}
+
+async function writeDrawerSection(body, sec) {
+  // Build the section shell with an empty value container.
+  const valueWrap = sec.build();
+  const sectionEl = el('section', { class: 'brand-drawer__section', 'data-drawer-section': sec.id }, [
+    el('div', { class: 'brand-drawer__eyebrow' }, sec.eyebrow),
+    valueWrap,
+  ]);
+  body.appendChild(sectionEl);
+  // Force a paint, then run the entry animation.
+  requestAnimationFrame(() => sectionEl.classList.add('brand-drawer__section--in'));
+  await sleep(260);
+
+  // Find write targets (elements marked data-write) and stream the text into them.
+  const writeTargets = sectionEl.querySelectorAll('[data-write="1"]');
+  if (writeTargets.length && sec.writeText) {
+    for (const target of writeTargets) {
+      target.classList.add('brand-drawer__writing');
+      await typewriterInto(target, sec.writeText, 18);
+      target.classList.remove('brand-drawer__writing');
+    }
+  }
+  // Brief settle pause before the next section starts.
+  await sleep(220);
+}
+
+function revealBrandDrawerAccept() {
+  if (!drawerState.node) return;
+  drawerState.node.classList.add('brand-drawer--awaiting');
+}
+
+// Audience is inferred, not asked. Scout proposes a specific audience based on
+// brand + X profile + niche scan, with the reasoning that grounds it. User
+// validates with a quick-reply.
+async function step_audience_infer() {
+  const xConnected = !state.skipped.has('x-connect');
+  const isBrand = state.accountType === 'brand';
+
+  const lead = xConnected
+    ? "Based on everything, your brand, your X data, and what's working in your niche, here's who I'd target:"
+    : "Based on your brand and what's working in your niche right now, here's who I'd target:";
+  await scoutMsg(lead, { typingFor: 1100, beat: 300 });
+
+  const proposal = state.brand.audienceDefault || state.audience;
+  // Insight pulled from persona/data signals; persona-specific.
+  const insight = isBrand
+    ? 'They respond best to heritage-explained posts paired with modern visuals. Saves run 3× the niche average on context-rich posts versus pure product shots.'
+    : 'They respond best to specific examples over abstract principles. Bookmark rate is 2.4× higher when posts name the tool, the task, and the tradeoff.';
+  await scoutMsg(proposal, { typingFor: 1000, beat: 300 });
+  await scoutMsg(insight, { typingFor: 1300, beat: 400 });
+
+  const verdict = await quickReplies(
+    ["That's right", 'Adjust audience', 'Different audience in mind'],
+    { primaryIndex: 0 }
   );
 
-  const isBrand = state.accountType === 'brand';
-  const rows = [
-    ['Name',        state.brand.name,                    'name'],
-    ['Niche',       state.brand.niche,                   'niche'],
-    ['Positioning', state.brand.positioning,             'positioning'],
-    ['Audience',    state.audience,                      'audience'],
-    ['Themes',      state.brand.themes,                  'themes'],
-  ];
-  if (isBrand) rows.push(['Products', state.brand.products, 'products']);
-
-  await confirmationCard({
-    title: isBrand ? 'How I read your brand' : 'How I read you',
-    rows,
-    onEditField: (key, val) => {
-      if (key === 'audience') state.audience = val;
-      else if (key === 'themes') state.brand.themes = (typeof val === 'string') ? val.split(/[·,]/).map(s => s.trim()).filter(Boolean) : val;
-      else if (key === 'products') state.brand.products = val;
-      else state.brand[key] = val;
-    },
-  });
-
-  addKBFact('brand', 'Niche',    state.brand.niche);
+  if (verdict.startsWith('Adjust') || verdict.startsWith('Different')) {
+    const next = await inlineTextInput({
+      placeholder: 'Who are you actually targeting?',
+      submitLabel: 'Use this',
+      initial: verdict.startsWith('Adjust') ? proposal : '',
+    });
+    state.audience = next || proposal;
+    await scoutMsg("Updated. I'll work with that.", { typingFor: 600, beat: 300 });
+  } else {
+    state.audience = proposal;
+    await scoutMsg("Good. That's the lens I'll write into.", { typingFor: 700, beat: 300 });
+  }
   addKBFact('brand', 'Audience', state.audience);
-  addKBFact('brand', 'Themes',   state.brand.themes.join(', '));
-  if (isBrand) addKBFact('brand', 'Products', state.brand.products.join(', '));
+  refreshBrandDrawer();
+}
+
+// Second drawer open: the final review just before Scout shifts to trends.
+// Reopens the drawer with everything Scout has gathered, including new
+// sections (tone, goals, validated audience). Same lifecycle as the first.
+async function step_brand_review_final() {
+  await scoutMsg(
+    "Here's the complete picture on your right. Take a look, and accept when it reads right.",
+    { typingFor: 1200, beat: 400 }
+  );
+  openBrandDrawer();
+  await refreshBrandDrawer();
+  revealBrandDrawerAccept();
+  await new Promise((resolve) => { drawerState.acceptResolver = resolve; });
+  userMsg('Accept');
+  closeBrandDrawer();
 }
 
 // Tone/voice as its own beat: 3 editable cards, each a sample post in a
@@ -1756,45 +2221,61 @@ async function step_tone_voice() {
   const directions = state.brand.toneDirections || [];
   if (!directions.length) return;
 
-  await scoutMsg(
-    "Three voices I could write you in. Edit any of them so it sounds like you, then pick one.",
-    { typingFor: 1100, beat: 500 }
-  );
+  const reasoning = state.accountType === 'brand'
+    ? "Three voices that fit your brand. The first leans into the founder story your About page already tells. The second matches the directness rising in your niche right now. The third is the reverent register most heritage brands play in. Works, but more crowded."
+    : "Three voices that fit you. The first is the direct, useful register your essays already run on. The second is more confessional, specific stories about what you got wrong. The third is sharper, more contrarian. Works, but raises the stakes.";
+  await scoutMsg(reasoning, { typingFor: 1300, beat: 400 });
+  await scoutMsg("Pick the one that sounds like you.", { typingFor: 700, beat: 400 });
 
   await new Promise((resolve) => {
     const list = el('div', { class: 'tone-list' });
+    let activeCard = null;
+    let bubble = null;
+    let commitTimer = null;
+
+    const commit = (d) => {
+      state.tone = d.label;
+      state.brand.tone = d.label;
+      state.toneSample = d.sample;
+      addKBFact('brand', 'Tone', d.label);
+      refreshBrandDrawer();
+      Array.from(list.children).forEach(c => { c.style.pointerEvents = 'none'; });
+      (async () => {
+        await scoutMsg("Got it. Calibrating to that voice.", { typingFor: 700, beat: 400 });
+        resolve();
+      })();
+    };
 
     directions.forEach((d) => {
-      const ta = el('textarea', { class: 'tone-card__text', rows: '3' }, d.sample);
-
-      const pickBtn = el('button', { class: 'btn-primary tone-card__pick' }, 'Pick this voice');
-      const card = el('div', { class: 'tone-card' }, [
+      const card = el('button', { class: 'tone-card', type: 'button' }, [
         el('div', { class: 'tone-card__head' }, [
-          el('span', { class: 'tone-card__label' }, d.label),
+          el('span', { class: 'tone-card__pill' }, [
+            el('span', { class: 'tone-card__pill-icon', html: icon(d.icon || 'i-sparkle') }),
+            el('span', { class: 'tone-card__pill-label' }, d.label),
+          ]),
         ]),
-        ta,
-        el('div', { class: 'tone-card__actions' }, [pickBtn]),
+        el('p', { class: 'tone-card__text' }, d.sample),
+        el('span', { class: 'tone-card__pick' }, [
+          document.createTextNode('Pick this voice'),
+          el('span', { class: 'tone-card__pick-arrow' }, '→'),
+        ]),
       ]);
 
-      pickBtn.addEventListener('click', () => {
-        const text = ta.value.trim() || d.sample;
-        state.tone = d.label;
-        state.brand.tone = d.label;
-        state.toneSample = text;
-        // Freeze the chosen card in the chat; drop the others.
+      card.addEventListener('click', () => {
+        if (activeCard === card) return;
+        activeCard = card;
         Array.from(list.children).forEach((c) => {
-          if (c !== card) c.remove();
+          c.classList.toggle('tone-card--active', c === card);
+          c.classList.toggle('tone-card--dim', c !== card);
         });
-        ta.value = text;
-        ta.readOnly = true;
-        card.querySelector('.tone-card__actions')?.remove();
-        card.classList.add('tone-card--chosen');
-        list.classList.add('tone-list--chosen');
-        addKBFact('brand', 'Tone', d.label);
-        (async () => {
-          await scoutMsg("Got it. Calibrating to that voice.", { typingFor: 700, beat: 400 });
-          resolve();
-        })();
+        const label = `Picked: ${d.label}`;
+        if (!bubble) bubble = userMsg(label);
+        else {
+          const t = bubble.querySelector('.msg__bubble');
+          if (t) t.textContent = label;
+        }
+        if (commitTimer) clearTimeout(commitTimer);
+        commitTimer = setTimeout(() => commit(d), 1500);
       });
       list.appendChild(card);
     });
@@ -1814,6 +2295,7 @@ async function step_topics_individual() {
     ? state.brand.topics
     : (DEMO_INDIVIDUAL.topics || []);
   state.topics = await selectionChips(pool, { allowCustom: true, customLabel: 'Add your own' });
+  refreshBrandDrawer();
   await scoutMsg("Got it. I'll keep an eye on those.", { typingFor: 600, beat: 300 });
   addKBFact('brand', 'Topics', state.topics.join(', '));
 }
@@ -1900,126 +2382,144 @@ async function step7_intel_scan() {
   await sleep(1400);
 }
 
-// SECOND major proposal: three trend groups, each bundling theme + tone +
-// format. User picks one to ride.
-async function step_trend_groups() {
+// Merged direction-picker: three full drafts, each grounded in a different
+// trend angle and rendered with theme + tone + format chips + drafted body +
+// a generated image. User picks one to edit and publish.
+async function step_post_directions() {
   const groups = (state.brand.trendGroups || []).slice(0, 3);
-  if (!groups.length) {
-    console.warn('No trendGroups defined for persona; skipping step_trend_groups.');
-    return;
-  }
+  const iterMap = state.brand.postIterations || {};
+  if (!groups.length) return;
+
+  // Visual eyebrow that frames the entire first-post moment.
+  append(el('div', { class: 'first-post-banner' }, [
+    el('span', { class: 'first-post-banner__dot' }),
+    document.createTextNode('Your first post'),
+  ]));
 
   await scoutMsg(
-    "Three angles standing out in your niche right now. Each one bundles a tone and a format I'd recommend. Pick the one you want to ride and I'll draft posts.",
-    { typingFor: 1200, beat: 500 }
+    "I've drafted three directions for your first post. Each rides a different angle and bundles a tone, a format, and a visual. Pick the one that sounds like you.",
+    { typingFor: 1300, beat: 400 }
   );
 
-  return new Promise((resolve) => {
-    const list = el('div', { class: 'trend-group-list' });
+  // Cinematic narration — Scout drafts the post in the open.
+  await narratedProcess('Drafting your first post', [
+    { icon: 'i-quote',   text: 'Pulling from your voice and audience signals.' },
+    { icon: 'i-trend',   text: 'Cross-checking the live trend window.' },
+    { icon: 'i-image',   text: 'Generating a visual for each angle.' },
+    { icon: 'i-sparkle', text: 'Stitching everything together.' },
+  ], { lineBeat: 800 });
 
-    groups.forEach((g) => {
+  // Build one direction per trend group, defaulting to its "Personal story"
+  // iteration as the leading draft body.
+  const directions = groups.map((g) => {
+    const its = iterMap[g.id] || [];
+    const lead = its[0] || { angle: 'Direction', body: g.summary || '' };
+    return { group: g, body: lead.body, angle: lead.angle, iterationId: lead.id };
+  });
+
+  return new Promise((resolve) => {
+    const list = el('div', { class: 'directions-list' });
+    let activeCard = null;
+    let bubble = null;
+    let commitTimer = null;
+
+    const commit = (d) => {
+      state.selectedTrendGroupId = d.group.id;
+      state.selectedIterationId = d.iterationId;
+      state.draftPost = d.body;
+      addKBFact('trending', 'Selected angle', d.group.theme);
+      Array.from(list.children).forEach(c => { c.style.pointerEvents = 'none'; });
+      list.classList.add('directions-list--chosen');
+      laterRow.remove();
+      resolve(d.iterationId);
+    };
+
+    directions.forEach((d, i) => {
       const card = el('button', {
-        class: 'trend-group-card',
+        class: 'direction-card',
+        type: 'button',
         onclick: () => {
-          state.selectedTrendGroupId = g.id;
-          // Keep the picked card; drop the others.
+          if (activeCard === card) return;
+          activeCard = card;
           Array.from(list.children).forEach((c) => {
-            if (c !== card) c.remove();
+            c.classList.toggle('direction-card--active', c === card);
+            c.classList.toggle('direction-card--dim', c !== card);
           });
-          card.classList.add('trend-group-card--chosen');
-          card.disabled = true;
-          list.classList.add('trend-group-list--chosen');
-          addKBFact('trending', 'Selected angle', g.theme);
-          (async () => {
-            await scoutMsg(`Good pick. Drafting three angles on ${g.theme}.`, { typingFor: 700, beat: 400 });
-            resolve(g.id);
-          })();
+          const label = `Picked: ${d.group.theme}`;
+          if (!bubble) bubble = userMsg(label);
+          else {
+            const t = bubble.querySelector('.msg__bubble');
+            if (t) t.textContent = label;
+          }
+          if (commitTimer) clearTimeout(commitTimer);
+          commitTimer = setTimeout(() => commit(d), 1500);
         },
       }, [
-        el('div', { class: 'trend-group-card__head' }, [
-          el('span', { class: 'trend-group-card__icon', html: icon('i-fire') }),
-          el('span', { class: 'trend-group-card__theme' }, g.theme),
-          el('span', { class: 'trend-group-card__signal' }, g.signal || ''),
+        // Generated image preview (mock — gradient with shimmer that resolves
+        // into a labelled visual after a short delay).
+        directionImage(d, i),
+        el('div', { class: 'direction-card__head' }, [
+          el('span', { class: 'direction-card__theme' }, d.group.theme),
+          el('span', { class: 'direction-card__signal' }, d.group.signal || ''),
         ]),
-        g.summary ? el('div', { class: 'trend-group-card__summary' }, g.summary) : null,
-        el('div', { class: 'trend-group-card__chips' }, [
-          el('span', { class: 'trend-group-card__chip trend-group-card__chip--tone' }, [
-            el('span', { class: 'trend-group-card__chip-label' }, 'Tone'),
-            document.createTextNode(g.tone),
+        el('div', { class: 'direction-card__body' }, d.body),
+        el('div', { class: 'direction-card__chips' }, [
+          el('span', { class: 'direction-card__chip' }, [
+            el('span', { class: 'direction-card__chip-label' }, 'Tone'),
+            document.createTextNode(d.group.tone),
           ]),
-          el('span', { class: 'trend-group-card__chip trend-group-card__chip--format' }, [
-            el('span', { class: 'trend-group-card__chip-label' }, 'Format'),
-            document.createTextNode(g.format),
+          el('span', { class: 'direction-card__chip' }, [
+            el('span', { class: 'direction-card__chip-label' }, 'Format'),
+            document.createTextNode(d.group.format),
           ]),
+        ]),
+        el('span', { class: 'direction-card__pick' }, [
+          document.createTextNode('Use this direction'),
+          el('span', { class: 'tone-card__pick-arrow' }, '→'),
         ]),
       ]);
       list.appendChild(card);
     });
 
+    const laterRow = el('div', { class: 'qreplies iteration-list__later' }, [
+      el('button', {
+        class: 'qreply',
+        onclick: () => {
+          if (commitTimer) clearTimeout(commitTimer);
+          state.skipped.add('first-post');
+          userMsg('Save these and decide later');
+          Array.from(list.children).forEach(c => { c.style.pointerEvents = 'none'; c.classList.add('direction-card--dim'); });
+          laterRow.remove();
+          resolve('later');
+        },
+      }, 'Save these and decide later'),
+    ]);
+
     append(list);
+    append(laterRow);
   });
 }
 
-// THIRD major proposal: three drafted posts on the selected trend group,
-// same format, three different angles. User picks one to edit and publish.
-async function step_post_iterations() {
-  const groupId = state.selectedTrendGroupId;
-  const iterations = (state.brand.postIterations && state.brand.postIterations[groupId]) || [];
-  if (!iterations.length) {
-    console.warn('No postIterations defined for selected trend group; skipping step_post_iterations.');
-    return;
-  }
-
-  await narratedProcess('Drafting three angles', [
-    { icon: 'i-quote',   text: 'Pulling from your voice and audience signals.' },
-    { icon: 'i-sparkle', text: 'Writing angle one — personal story.' },
-    { icon: 'i-sparkle', text: 'Writing angle two — hot take.' },
-    { icon: 'i-sparkle', text: 'Writing angle three — data-driven.' },
-  ], { lineBeat: 800 });
-
-  await scoutMsg(
-    "Three angles on the same idea. Pick the one that sounds like you — you can edit it next.",
-    { typingFor: 900, beat: 400 }
-  );
-
-  return new Promise((resolve) => {
-    const list = el('div', { class: 'iteration-list' });
-
-    iterations.forEach((it) => {
-      const card = el('button', {
-        class: 'iteration-card',
-        onclick: () => {
-          state.selectedIterationId = it.id;
-          state.draftPost = it.body;
-          // Keep the chosen iteration; drop the rest.
-          Array.from(list.children).forEach((c) => {
-            if (c !== card) c.remove();
-          });
-          card.classList.add('iteration-card--chosen');
-          card.disabled = true;
-          list.classList.add('iteration-list--chosen');
-          resolve(it.id);
-        },
-      }, [
-        el('div', { class: 'iteration-card__head' }, [
-          el('div', { class: 'iteration-card__avatar' }),
-          el('div', { class: 'iteration-card__id' }, [
-            el('div', { class: 'iteration-card__name-row' }, [
-              el('span', { class: 'iteration-card__name' }, state.brand.displayName || state.brand.name),
-              state.brand.verified ? el('span', { class: 'iteration-card__verified', html: icon('i-check') }) : null,
-            ]),
-            el('div', { class: 'iteration-card__handle' }, state.brand.handle || ''),
-          ]),
-          el('span', { class: 'iteration-card__angle' }, it.angle),
-        ]),
-        el('div', { class: 'iteration-card__body' }, it.body),
-        el('div', { class: 'iteration-card__select' }, 'Pick this one →'),
-      ]);
-      list.appendChild(card);
-    });
-
-    append(list);
-  });
+// Mock image generation — a gradient placeholder with a shimmer animation
+// that "resolves" into a labelled visual after a short delay. Each direction
+// gets a different gradient/icon to suggest distinct generated art.
+function directionImage(d, i) {
+  const palettes = [
+    { gradient: 'linear-gradient(135deg, #fde68a 0%, #f59e0b 60%, #b45309 100%)', icon: 'i-flame' },
+    { gradient: 'linear-gradient(135deg, #c7d2fe 0%, #818cf8 60%, #4f46e5 100%)', icon: 'i-bolt' },
+    { gradient: 'linear-gradient(135deg, #bbf7d0 0%, #34d399 60%, #047857 100%)', icon: 'i-mountain' },
+  ];
+  const p = palettes[i % palettes.length];
+  const wrap = el('div', { class: 'direction-card__image direction-card__image--loading', style: `background: ${p.gradient};` }, [
+    el('div', { class: 'direction-card__image-shimmer' }),
+    el('div', { class: 'direction-card__image-label' }, [
+      el('span', { class: 'direction-card__image-icon', html: icon(p.icon) }),
+      document.createTextNode('Generated visual'),
+    ]),
+  ]);
+  // After a short delay, drop the loading shimmer.
+  setTimeout(() => wrap.classList.remove('direction-card__image--loading'), 900 + i * 300);
+  return wrap;
 }
 
 // Edit the chosen draft, then publish (simulated).
@@ -2109,10 +2609,107 @@ function renderPublishedPost(body) {
   append(card);
 }
 
+// Profile score — return-loop hook. When someone sees the post and considers
+// following, they visit the profile. 2-3 seconds to convert them. Specific,
+// actionable items the user can fix later.
+async function step_profile_score() {
+  // Skip the scan if X wasn't connected — nothing to score.
+  if (state.skipped.has('x-connect')) return;
+
+  await scoutMsg(
+    "One more thing. When someone sees your post and considers following, they visit your profile. It has about three seconds to convert them. Let me score it.",
+    { typingFor: 1400, beat: 400 }
+  );
+
+  await narratedProcess('Scoring your profile', [
+    { icon: 'i-search', text: 'Checking your bio.' },
+    { icon: 'i-image',  text: 'Evaluating profile photo and banner.' },
+    { icon: 'i-quote',  text: 'Looking at your pinned post.' },
+    { icon: 'i-link',   text: 'Checking for a website link and CTA.' },
+  ], { lineBeat: 700 });
+
+  const isBrand = state.accountType === 'brand';
+  const items = isBrand ? [
+    { state: 'ok',   text: 'Profile photo reads clear and on-brand.' },
+    { state: 'ok',   text: 'Bio communicates niche in one line.' },
+    { state: 'warn', text: 'No CTA in bio. Add a link to shop or newsletter.' },
+    { state: 'bad',  text: 'No pinned post. Your strongest piece should sit at the top.' },
+    { state: 'ok',   text: 'Website link present.' },
+    { state: 'warn', text: 'Banner is generic. A heritage visual would carry your positioning.' },
+  ] : [
+    { state: 'ok',   text: 'Profile photo reads clear.' },
+    { state: 'ok',   text: 'Bio names the role and the audience.' },
+    { state: 'warn', text: 'No CTA in bio. Your office-hours page deserves a line.' },
+    { state: 'bad',  text: 'Pinned post is from four months ago. Swap in a recent essay.' },
+    { state: 'ok',   text: 'Website link present.' },
+    { state: 'warn', text: 'Banner is generic. A craft visual would carry your positioning.' },
+  ];
+
+  const pct = Math.round(items.filter(i => i.state === 'ok').length / items.length * 100);
+  state.profileScore = pct;
+
+  await new Promise((resolve) => {
+    const card = el('div', { class: 'profile-score' }, [
+      el('div', { class: 'profile-score__head' }, [
+        el('div', { class: 'profile-score__head-left' }, [
+          document.createTextNode('Profile score'),
+        ]),
+        el('span', { class: 'profile-score__pct' }, pct + '%'),
+      ]),
+      el('div', { class: 'profile-score__bar' }, [
+        el('div', { class: 'profile-score__bar-fill', style: `width: ${pct}%;` }),
+      ]),
+      el('ul', { class: 'profile-score__list' },
+        items.map(i => {
+          const iconId = i.state === 'ok' ? 'i-check' : i.state === 'warn' ? 'i-warn' : 'i-x-mark';
+          return el('li', { class: 'profile-score__item profile-score__item--' + i.state }, [
+            el('span', { class: 'profile-score__item-icon', html: icon(iconId) }),
+            el('span', { class: 'profile-score__item-text' }, i.text),
+          ]);
+        }),
+      ),
+      el('div', { class: 'conf__actions' }, [
+        el('button', {
+          class: 'btn-ghost',
+          onclick: () => { card.remove(); userMsg("I'll fix these later"); resolve('later'); },
+        }, "I'll fix these later"),
+        el('button', {
+          class: 'btn-primary',
+          onclick: () => { card.remove(); userMsg('Show me how'); resolve('how'); },
+        }, 'Show me how'),
+      ]),
+    ]);
+    append(card);
+  });
+
+  await scoutMsg(
+    "I'll keep these in your dashboard. Each one becomes a quick win when you have a few minutes.",
+    { typingFor: 1000, beat: 400 }
+  );
+}
+
+// "Building your infrastructure" — the theatrical payoff. Five lines, each
+// representing real setup work, narrated with checkmarks. The KB widget is
+// already populated; this is the moment Scout names what was built.
+async function step_infrastructure_build() {
+  await scoutMsg(
+    "You've given me everything I need. Let me set up your marketing infrastructure.",
+    { typingFor: 1100, beat: 400 }
+  );
+
+  await narratedProcess('Building your marketing infrastructure', [
+    { icon: 'i-check', text: 'Brand knowledge base. Locked.' },
+    { icon: 'i-check', text: "X algorithm rules and content guardrails. Loaded." },
+    { icon: 'i-check', text: 'Trend monitoring for your niche. Active.' },
+    { icon: 'i-check', text: 'Optimal posting windows for your audience. Calibrated.' },
+    { icon: 'i-check', text: 'Content strategy. Configured.' },
+  ], { lineBeat: 900 });
+}
+
 async function step13_handoff() {
   const lead = state.publishedPost
-    ? `Your first post is live, ${state.user.name}. The dashboard tracks it from here — drafts, trends, and what's working all sit there.`
-    : `Everything's set, ${state.user.name}. The dashboard is where you'll work from here.`;
+    ? `Everything's ready, ${state.user.name}. Your first post is live. The dashboard tracks it from here, alongside drafts, trends, and what's working.`
+    : `Everything's ready, ${state.user.name}. The dashboard is where you'll work from here. Take your time, look around, or jump straight in.`;
   await scoutMsg(lead, { typingFor: 1200, beat: 700 });
   await sleep(1100);
   enterApp();
@@ -2139,30 +2736,42 @@ async function runConversation() {
   stream.dataset.started = '1';
 
   // Act 1 — Greet and connect.
-  await step1_opening();                                      // hero + accountType ack
+  await step1_opening();                                      // hero + strategist intro
 
   const xPath = await step5_x_connect();                      // connect → OAuth (or skip)
   if (xPath === 'connected-scan') {
     await step6_profile_scan();                               // narrate scan + show preview
   }
 
-  // Act 2 — Materials and the FIRST major proposal.
+  // Act 2 — Materials, then the first drawer review (Scout's read of the brand).
   await stepMaterials();                                      // website / docs / verbal
-  await step_knowledge_confirm();                             // identity confirm (sans tone)
+  await step_brand_review_first();                            // drawer opens → fills → accept → closes
   await step_tone_voice();                                    // tone-direction card pick
 
   // Act 3 — Topics/products + goals.
   if (state.accountType === 'brand') await step3_product_lines_brand_only();
   else                               await step_topics_individual();
-  await step4_goals();
+  await step4_goals();                                        // goals → KPI translation
 
-  // Act 4 — Market scan, SECOND proposal (trend groups), THIRD proposal (post iterations), publish.
+  // Act 4 — Market scan, audience inference, final drawer review before trends.
   await step7_intel_scan();
-  await step_trend_groups();
-  await step_post_iterations();
-  await step_edit_publish();
+  await step_audience_infer();                                // Scout proposes, user validates
+  await step_brand_review_final();                            // drawer reopens with new sections → accept → closes
 
-  // Act 5 — Hand off to dashboard.
+  // Act 5 — Merged directions → drafts → publish (or save for later).
+  const iterChoice = await step_post_directions();
+  if (iterChoice === 'later') {
+    await scoutMsg(
+      "Saved. The drafts will be waiting on your dashboard when you're ready.",
+      { typingFor: 800, beat: 400 }
+    );
+  } else {
+    await step_edit_publish();
+  }
+
+  // Act 6 — Profile score (return loop) → infrastructure build → handoff.
+  await step_profile_score();
+  await step_infrastructure_build();
   await step13_handoff();
 }
 
@@ -2204,20 +2813,618 @@ function bindDemoControls() {
 }
 
 /* =========================================================================
+   17b. PRE-CONVERSATION SPLASH (3 screens)
+   Names the pain → shows the knowledge → shows the outcome.
+   ========================================================================= */
+const SPLASH_FLAG_KEY = 'flagstaff_seen_splash';
+const splashState = { index: 0, dismissed: false };
+
+async function runSplash() {
+  const stage = $('#splash-stage');
+  const dots = $$('.splash__dot');
+  const skipBtn = $('#splash-skip');
+  if (!stage) return endSplash();
+
+  let activeScreen = null;
+  let inflight = false;
+
+  const mount = async (idx, dir = 'forward') => {
+    if (inflight) return;
+    inflight = true;
+    const next = buildSplashScreen(idx);
+    if (activeScreen) {
+      activeScreen.classList.add('splash__screen--out');
+      await sleep(360);
+      activeScreen.remove();
+    }
+    stage.appendChild(next);
+    activeScreen = next;
+    dots.forEach((d, i) => d.classList.toggle('splash__dot--active', i === idx));
+    splashState.index = idx;
+    // Kick off per-screen animations after mount.
+    requestAnimationFrame(() => playSplashScreen(idx, next));
+    inflight = false;
+  };
+
+  const advance = () => {
+    if (splashState.index < 2) mount(splashState.index + 1, 'forward');
+    else endSplash();
+  };
+  const back = () => {
+    if (splashState.index > 0) mount(splashState.index - 1, 'back');
+  };
+
+  // Wire skip + click-through via event delegation on stage.
+  if (skipBtn) skipBtn.addEventListener('click', endSplash, { once: false });
+  stage.addEventListener('click', (e) => {
+    const action = e.target.closest('[data-splash-action]')?.dataset.splashAction;
+    if (!action) return;
+    if (action === 'next') advance();
+    else if (action === 'back') back();
+    else if (action === 'finish') endSplash();
+  });
+
+  mount(0, 'forward');
+}
+
+function endSplash() {
+  splashState.dismissed = true;
+  try { localStorage.setItem(SPLASH_FLAG_KEY, '1'); } catch (e) {}
+  // Fade-out the splash view, then mount the conversation view + hero.
+  const view = $('#view-splash');
+  if (view) {
+    view.style.transition = 'opacity 320ms ease-out';
+    view.style.opacity = '0';
+    setTimeout(() => {
+      showView('view-conv');
+      runConversation();
+    }, 280);
+  } else {
+    showView('view-conv');
+    runConversation();
+  }
+}
+
+function buildSplashScreen(idx) {
+  const screen = el('section', { class: 'splash__screen' });
+  // LEFT: text content + CTA. RIGHT: graphics/animation block.
+  screen.appendChild(buildSplashTextSide(idx));
+  const blocks = el('div', { class: 'splash__blocks' });
+  if (idx === 0)      blocks.appendChild(buildSplashScreen1Right());
+  else if (idx === 1) blocks.appendChild(buildSplashScreen2Right());
+  else                blocks.appendChild(buildSplashScreen3Right());
+  screen.appendChild(blocks);
+  return screen;
+}
+
+function buildSplashTextSide(idx) {
+  // Left-aligned text content. Heading + body. CTA pinned to bottom-right of
+  // this left half via margin-top: auto on the wrap.
+  const titles = [
+    'Posts that sound like you. Not the rest of the internet.',
+    'Scout learns your brand from who you actually are.',
+    'Posts that move the numbers, not just impressions.',
+  ];
+  const bodies = [
+    "We're building an AI marketing partner that learns your voice, your audience, and what's working in your niche, then writes the posts only you could write.",
+    "Your brand, your audience, your voice, your numbers. Strategy built from you. Not stitched from templates.",
+    "Scout learns what works for your niche, then doubles down. Growth, bookmarks, share-of-voice, replies that turn into customers.",
+  ];
+  const ctaLabels = ['Next', 'Next', 'Get started'];
+  const finalScreen = idx === 2;
+
+  return el('div', { class: 'splash__bottom' }, [
+    el('div', { class: 'splash__copy' }, [
+      el('h1', { class: 'splash__copy-title' }, titles[idx]),
+      el('p', { class: 'splash__copy-body' }, bodies[idx]),
+    ]),
+    el('div', { class: 'splash__copy-cta-wrap' }, [
+      el('button', {
+        class: 'splash__copy-cta',
+        'data-splash-action': finalScreen ? 'finish' : 'next',
+        type: 'button',
+      }, [
+        document.createTextNode(ctaLabels[idx]),
+        el('span', { html: icon('i-arrow-right') }),
+      ]),
+    ]),
+  ]);
+}
+
+
+/* ---- Screen 1: Noise vs polished post ---- */
+
+function buildSplashScreen1Right() {
+  // Rotating post wheel: nine substantial post cards arranged in a circle
+  // whose centre sits below the visible mask. Each card carries a real
+  // post caption + image so the wheel reads as a feed of work, not just
+  // skeleton placeholders. Hearts drift up occasionally from random posts.
+  const POSTS = [
+    { ext: 'jpeg', caption: "Heritage isn't an aesthetic. It's a postcode." },
+    { ext: 'png',  caption: 'Where the embroidery actually comes from.' },
+    { ext: 'png',  caption: "Spent the morning at Bibi's workshop." },
+    { ext: 'png',  caption: 'New drop. Same hands, same story.' },
+    { ext: 'png',  caption: "What we got wrong in our first capsule." },
+    { ext: 'png',  caption: 'Three reasons your audience saves your posts.' },
+    { ext: 'png',  caption: "Mid-century roots, modern silhouettes." },
+    { ext: 'png',  caption: 'Workshop notes from Sindh.' },
+    { ext: 'jpeg', caption: 'The hands behind the label.' },
+  ];
+  const N = POSTS.length;
+  const tiles = POSTS.map((p, i) => {
+    const angle = (i / N) * 360;
+    const imgSrc = `/Posts/${i + 1}.${p.ext}`;
+    return el('div', {
+      class: 'splash-wheel__tile',
+      'data-tile-idx': String(i),
+      style: `--angle: ${angle}deg;`,
+    }, [
+      el('div', {
+        class: 'splash-wheel__tile-inner',
+        style: `--init-r: ${-angle}deg;`,
+      }, [
+        buildPostSkeleton(imgSrc, p.caption),
+      ]),
+    ]);
+  });
+
+  const heartLayer = el('div', { class: 'splash-wheel-hearts', id: 'splash-wheel-hearts', 'aria-hidden': 'true' });
+
+  return el('div', { class: 'splash__block splash-wheel-block' }, [
+    el('div', { class: 'splash-wheel-mask' }, [
+      el('div', { class: 'splash-wheel' }, tiles),
+      heartLayer,
+    ]),
+  ]);
+}
+
+// Skeleton-style post card with a real caption + image. Mirrors the visual
+// vocabulary of /Skeleton.svg: avatar dot + name bar + caption text + media
+// + metric bars.
+function buildPostSkeleton(imgSrc, caption) {
+  return el('div', { class: 'post-skeleton' }, [
+    el('div', { class: 'post-skeleton__head' }, [
+      el('div', { class: 'post-skeleton__avatar' }),
+      el('div', { class: 'post-skeleton__id' }, [
+        el('div', { class: 'post-skeleton__bar post-skeleton__bar--name' }),
+        el('div', { class: 'post-skeleton__bar post-skeleton__bar--handle' }),
+      ]),
+    ]),
+    caption
+      ? el('div', { class: 'post-skeleton__caption' }, caption)
+      : el('div', { class: 'post-skeleton__text' }, [
+          el('div', { class: 'post-skeleton__bar post-skeleton__bar--line' }),
+          el('div', { class: 'post-skeleton__bar post-skeleton__bar--line post-skeleton__bar--line-short' }),
+        ]),
+    el('div', { class: 'post-skeleton__media', style: `background-image: url('${imgSrc}');` }),
+    el('div', { class: 'post-skeleton__metrics' }, [
+      el('div', { class: 'post-skeleton__metric' }),
+      el('div', { class: 'post-skeleton__metric' }),
+      el('div', { class: 'post-skeleton__metric' }),
+      el('div', { class: 'post-skeleton__metric' }),
+    ]),
+  ]);
+}
+
+/* ---- Screen 2: Knowledge tray + profile ---- */
+function buildSplashScreen2Right() {
+  // Splash 2 right-block redesign:
+  //  - Subtle brain SVG far in the background.
+  //  - Scout avatar using the SAME 4-circle loader animation as the
+  //    conversation: 2×2 dots pulse counter-clockwise while "thinking",
+  //    then settle into the static logo as content fills.
+  //  - A larger drawer card anchored to the bottom-right corner of the
+  //    block — cropped on the right and bottom so only the upper-left
+  //    portion is visible (suggests a real drawer extending off-screen).
+  // The brain SVG sits behind everything.
+  const scoutAvatarSvg = `
+    <svg viewBox="0 0 32 32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8"  cy="8"  r="6" class="scout-loader__c scout-loader__c--1"/>
+      <circle cx="8"  cy="24" r="6" class="scout-loader__c scout-loader__c--2"/>
+      <circle cx="24" cy="24" r="6" class="scout-loader__c scout-loader__c--3"/>
+      <circle cx="24" cy="8"  r="6" class="scout-loader__c scout-loader__c--4"/>
+    </svg>
+  `;
+  const scoutAvatar = parseSvg(scoutAvatarSvg);
+
+  return el('div', { class: 'splash__block splash2-block' }, [
+    el('div', { class: 'splash2-block__brain', html: '<svg viewBox="0 0 22 22"><use href="#i-brain"/></svg>' }),
+
+    // Scout avatar — identical to the conversation's thinking indicator.
+    el('div', {
+      class: 'splash2-scout-avatar msg__avatar msg__avatar--scout msg__avatar--loading',
+      id: 'splash2-scout-avatar',
+    }, [scoutAvatar]),
+
+    // Drawer card cropped at the bottom-right. Larger, with extended height
+    // and width that overflow the block on the right/bottom edges.
+    el('div', { class: 'splash2-drawer-card', id: 'splash2-drawer-card' }),
+  ]);
+}
+
+// Build the inner contents of the brand drawer card. Designed as a clean,
+// elegant info card with generous whitespace and a clear hierarchy: title →
+// IDENTITY → AUDIENCE → THEMES → TONE. Each section is independently
+// fade-in-able so JS can reveal them sequentially.
+function buildSplash2BrandPanel() {
+  return el('div', { class: 'splash2-panel splash2-panel--brand' }, [
+    el('div', { class: 'splash2-panel__header' }, [
+      el('div', { class: 'splash2-panel__eyebrow' }, [
+        el('span', { class: 'splash2-panel__eyebrow-dot' }),
+        document.createTextNode('Live'),
+      ]),
+      el('h3', { class: 'splash2-panel__title' }, 'About your brand'),
+    ]),
+
+    el('section', { class: 'splash2-section', 'data-section': 'identity' }, [
+      el('div', { class: 'splash2-section__label' }, 'Identity'),
+      el('div', { class: 'splash2-section__main' }, 'Tkxel'),
+      el('div', { class: 'splash2-section__sub' }, 'Heritage fashion · Karachi'),
+    ]),
+
+    el('section', { class: 'splash2-section', 'data-section': 'audience' }, [
+      el('div', { class: 'splash2-section__label' }, 'Audience'),
+      el('div', { class: 'splash2-section__row' }, [
+        el('div', { class: 'splash2-avatars' }, [
+          el('span', { class: 'splash2-avatars__a', style: '--c: #fbcfe8;' }),
+          el('span', { class: 'splash2-avatars__a', style: '--c: #c7d2fe;' }),
+          el('span', { class: 'splash2-avatars__a', style: '--c: #bbf7d0;' }),
+        ]),
+        el('div', { class: 'splash2-section__main' }, 'Women 22–34'),
+      ]),
+      el('div', { class: 'splash2-section__sub' }, 'Pakistan & diaspora · culturally curious, mobile-first'),
+    ]),
+
+    el('section', { class: 'splash2-section', 'data-section': 'themes' }, [
+      el('div', { class: 'splash2-section__label' }, 'Themes'),
+      el('div', { class: 'splash2-pills' }, [
+        el('span', { class: 'splash2-pill' }, 'Heritage'),
+        el('span', { class: 'splash2-pill' }, 'Sustainability'),
+        el('span', { class: 'splash2-pill' }, 'Local artisanship'),
+      ]),
+    ]),
+
+    el('section', { class: 'splash2-section', 'data-section': 'tone' }, [
+      el('div', { class: 'splash2-section__label' }, 'Tone'),
+      el('div', { class: 'splash2-tone' }, [
+        el('span', { class: 'splash2-tone__mark', html: icon('i-heart') }),
+        el('span', { class: 'splash2-tone__label' }, 'Warm, story-led'),
+      ]),
+    ]),
+  ]);
+}
+
+// Build the inner contents of the "What's working" panel. Same surface as
+// the brand panel but populated with trend signals.
+function buildSplash2TrendingPanel() {
+  return el('div', { class: 'splash2-panel splash2-panel--trending' }, [
+    el('div', { class: 'splash2-panel__header' }, [
+      el('div', { class: 'splash2-panel__eyebrow splash2-panel__eyebrow--warm' }, [
+        el('span', { class: 'splash2-panel__eyebrow-dot' }),
+        document.createTextNode('Trending'),
+      ]),
+      el('h3', { class: 'splash2-panel__title' }, "What's working"),
+    ]),
+
+    el('section', { class: 'splash2-section', 'data-section': 'topic' }, [
+      el('div', { class: 'splash2-section__label' }, 'Top topic'),
+      el('div', { class: 'splash2-section__main' }, 'Heritage origin stories'),
+      el('div', { class: 'splash2-topic-bar' }, [
+        el('div', { class: 'splash2-topic-bar__track' }, [
+          el('div', { class: 'splash2-topic-bar__fill', style: 'width: 92%;' }),
+        ]),
+        el('div', { class: 'splash2-topic-bar__pct' }, '+92%'),
+      ]),
+    ]),
+
+    el('section', { class: 'splash2-section', 'data-section': 'trend' }, [
+      el('div', { class: 'splash2-section__label' }, 'Top trend'),
+      el('div', { class: 'splash2-trend' }, [
+        el('span', { class: 'splash2-trend__hash' }, '#'),
+        document.createTextNode('SouthAsianHeritageWeek'),
+      ]),
+      el('div', { class: 'splash2-section__sub' }, [
+        el('strong', {}, '+4.2× '),
+        document.createTextNode('week-on-week · spiking now'),
+      ]),
+    ]),
+
+    el('section', { class: 'splash2-section', 'data-section': 'peak' }, [
+      el('div', { class: 'splash2-section__label' }, 'Peak window'),
+      el('div', { class: 'splash2-peak' }, [
+        el('div', { class: 'splash2-peak__strip' }, [
+          el('div', { class: 'splash2-peak__highlight' }),
+        ]),
+        el('div', { class: 'splash2-peak__labels' }, [
+          el('span', {}, '12a'), el('span', {}, '6a'), el('span', {}, '12p'), el('span', {}, '6p'), el('span', {}, '12a'),
+        ]),
+      ]),
+      el('div', { class: 'splash2-section__main' }, 'Weekdays 2–4pm PKT'),
+    ]),
+  ]);
+}
+
+/* ---- Screen 3: Outcomes ---- */
+
+
+function buildSplashScreen3Right() {
+  const labels = ['Founder note', 'Craft reel', 'Origin story', 'Hot take', 'Behind-the-scenes', 'Data piece'];
+  const heights = [42, 58, 92, 36, 50, 28]; // % heights, "Origin story" is the standout
+  const bars = el('div', { class: 'splash-bars' },
+    labels.map((label, i) => el('div', {
+      class: 'splash-bar' + (i === 2 ? ' splash-bar--top' : ''),
+    }, [
+      el('div', { class: 'splash-bar__fill', 'data-bar-height': String(heights[i]) }),
+      el('div', { class: 'splash-bar__label' }, label),
+    ])),
+  );
+  const topPost = el('div', { class: 'splash-top-post-wrap' }, [
+    // Rising heart particles above the top-post — visualises "live engagement."
+    el('div', { class: 'splash-top-post__hearts', 'aria-hidden': 'true' }, [
+      el('span', { class: 'splash-top-post__heart', style: 'left: 18%; animation-delay: 0s;' }, '♥'),
+      el('span', { class: 'splash-top-post__heart', style: 'left: 52%; animation-delay: 1.4s;' }, '♥'),
+      el('span', { class: 'splash-top-post__heart', style: 'left: 78%; animation-delay: 2.6s;' }, '♥'),
+    ]),
+    el('div', { class: 'splash-top-post' }, [
+      el('div', { class: 'splash-top-post__name-row' }, [
+        document.createTextNode('a brand like yours'),
+        el('span', { class: 'splash-polished__verified', html: icon('i-check') }),
+      ]),
+      el('div', { class: 'splash-top-post__handle' }, '@on_flagstaff · 2d'),
+      el('div', { class: 'splash-top-post__body' }, "Heritage isn't an aesthetic. It's a postcode and a person who can name the stitch."),
+      el('div', { class: 'splash-top-post__metric' }, '↑ 4.2× expected reach · saves > likes'),
+    ]),
+  ]);
+  const ticker = el('div', { class: 'splash-ticker' }, [
+    el('span', { class: 'splash-ticker__item' }, [el('strong', { id: 'splash-tick-replies' }, '892'), document.createTextNode(' replies')]),
+    el('span', { class: 'splash-ticker__item' }, [el('strong', { id: 'splash-tick-likes' }, '12,403'), document.createTextNode(' likes')]),
+    el('span', { class: 'splash-ticker__item' }, [el('strong', { id: 'splash-tick-saves' }, '3,812'), document.createTextNode(' saves')]),
+  ]);
+  return el('div', { class: 'splash__block splash__block--wide' }, [
+    el('div', { class: 'splash-dashboard' }, [
+      el('div', { class: 'splash-dashboard__eyebrow' }, [
+        el('span', { class: 'splash-dashboard__eyebrow-dot' }),
+        document.createTextNode('1 of 6 posts above niche avg'),
+      ]),
+      ticker,
+      el('div', { class: 'splash-dashboard__row' }, [bars, topPost]),
+    ]),
+  ]);
+}
+
+/* ---- Per-screen animation kickoff ---- */
+function playSplashScreen(idx, root) {
+  if (idx === 0) {
+    playSplashWheelHearts(root);
+    return;
+  }
+  if (idx === 1) {
+    playSplashScreen2Sequence(root);
+    return;
+  }
+  if (idx === 2) {
+    playSplashHeroStat(root);
+    playSplashBars(root);
+    playSplashTicker(root);
+    return;
+  }
+}
+
+// Splash 1: hearts spawn rarely at random x positions along the wheel arc
+// and float upward. Reduced motion → no spawn. Cleaned up on unmount.
+function playSplashWheelHearts(root) {
+  const layer = root.querySelector('#splash-wheel-hearts');
+  if (!layer) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let stopped = false;
+  const spawn = () => {
+    if (stopped || !root.isConnected) return;
+    const x = 20 + Math.random() * 60; // 20–80% across the wheel
+    const heart = el('span', {
+      class: 'splash-wheel-heart',
+      style: `left: ${x.toFixed(1)}%;`,
+    }, '♥');
+    layer.appendChild(heart);
+    setTimeout(() => heart.remove(), 4500);
+    // Long gaps between hearts so the page reads as calm.
+    setTimeout(spawn, 3500 + Math.random() * 3500);
+  };
+  setTimeout(spawn, 1400);
+  const observer = new MutationObserver(() => {
+    if (!root.isConnected) { stopped = true; observer.disconnect(); }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+// Splash 2 sequence:
+//  1. Scout pill animates in (top-left of right block)
+//  2. Drawer dissolves up from the bottom-right corner
+//  3. Drawer's heading appears
+//  4. Section rows fill in one by one (eyebrow + value, typewriter on the value)
+//  5. Drawer slides back down out of view
+//  6. Scout re-emerges with new activity label
+//  7. A second drawer appears with "Thoughts" content
+// The whole loop repeats while the screen is mounted.
+async function playSplashScreen2Sequence(root) {
+  const scoutAvatar = root.querySelector('#splash2-scout-avatar');
+  const drawerCard = root.querySelector('#splash2-drawer-card');
+  if (!scoutAvatar || !drawerCard) return;
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const mountPanel = (kind) => {
+    drawerCard.innerHTML = '';
+    drawerCard.appendChild(kind === 'brand' ? buildSplash2BrandPanel() : buildSplash2TrendingPanel());
+  };
+
+  // Scout "thinking" → 4-circle loader animates.
+  // Scout "settled" → static logo (same as conversation's scoutMsg).
+  const setScoutThinking = () => {
+    scoutAvatar.classList.add('msg__avatar--loading');
+    scoutAvatar.innerHTML = '';
+    scoutAvatar.appendChild(parseSvg(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="8"  cy="8"  r="6" class="scout-loader__c scout-loader__c--1"/>
+        <circle cx="8"  cy="24" r="6" class="scout-loader__c scout-loader__c--2"/>
+        <circle cx="24" cy="24" r="6" class="scout-loader__c scout-loader__c--3"/>
+        <circle cx="24" cy="8"  r="6" class="scout-loader__c scout-loader__c--4"/>
+      </svg>
+    `));
+  };
+  const setScoutSettled = () => {
+    scoutAvatar.classList.remove('msg__avatar--loading');
+    scoutAvatar.innerHTML = '<svg><use href="#i-logo"/></svg>';
+  };
+
+  const showScout = async () => {
+    setScoutThinking();
+    scoutAvatar.classList.add('splash2-scout-avatar--in');
+    await sleep(reduced ? 0 : 320);
+  };
+  const hideScout = async () => {
+    scoutAvatar.classList.remove('splash2-scout-avatar--in');
+    await sleep(reduced ? 0 : 220);
+  };
+  const revealPanel = async () => {
+    drawerCard.classList.add('splash2-drawer-card--in');
+    await sleep(reduced ? 0 : 420);
+    // Scout has now arrived at an answer — swap loader for static logo.
+    setScoutSettled();
+    // Reveal sections sequentially.
+    const sections = drawerCard.querySelectorAll('.splash2-section');
+    drawerCard.querySelector('.splash2-panel__header')?.classList.add('splash2-panel__header--in');
+    await sleep(reduced ? 0 : 260);
+    for (const s of sections) {
+      s.classList.add('splash2-section--in');
+      await sleep(reduced ? 0 : 220);
+    }
+    // Topic bar fills (trending panel only).
+    const topicFill = drawerCard.querySelector('.splash2-topic-bar__fill');
+    if (topicFill) {
+      const target = topicFill.style.width;
+      topicFill.style.width = '0%';
+      requestAnimationFrame(() => { topicFill.style.width = target || '92%'; });
+    }
+    await sleep(reduced ? 0 : 1600);
+  };
+  const hidePanel = async () => {
+    drawerCard.classList.remove('splash2-drawer-card--in');
+    await sleep(reduced ? 0 : 360);
+    drawerCard.innerHTML = '';
+  };
+
+  // Loop while mounted.
+  let stopped = false;
+  const observer = new MutationObserver(() => {
+    if (!root.isConnected) { stopped = true; observer.disconnect(); }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  while (!stopped && root.isConnected) {
+    await showScout();
+    mountPanel('brand');
+    await revealPanel();
+    await hidePanel();
+    await hideScout();
+    if (stopped || !root.isConnected) break;
+    await sleep(reduced ? 0 : 400);
+
+    await showScout();
+    mountPanel('trending');
+    await revealPanel();
+    await hidePanel();
+    await hideScout();
+    if (stopped || !root.isConnected) break;
+    await sleep(reduced ? 0 : 700);
+  }
+}
+
+
+
+function playSplashHeroStat(root) {
+  const node = root.querySelector('#splash-hero-stat');
+  if (!node) return;
+  const target = parseFloat(node.dataset.target || '3.8');
+  const start = performance.now();
+  const dur = 1100;
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const v = (target * eased).toFixed(1);
+    node.textContent = `↑ ${v}×`;
+    if (t < 1 && root.isConnected) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+  // Sparkbars (sub stats).
+  root.querySelectorAll('.splash-stat-sub__bar-fill').forEach((b, i) => {
+    setTimeout(() => { b.style.width = (b.dataset.barPct || '0') + '%'; }, 200 + i * 120);
+  });
+}
+
+function playSplashBars(root) {
+  const bars = root.querySelectorAll('.splash-bar__fill');
+  bars.forEach((b, i) => {
+    const h = b.dataset.barHeight || '0';
+    setTimeout(() => { b.style.height = h + '%'; }, 200 + i * 70);
+  });
+}
+
+function playSplashTicker(root) {
+  const targets = [
+    { id: 'splash-tick-replies', step: 1, max: 12 },
+    { id: 'splash-tick-likes', step: 8, max: 60 },
+    { id: 'splash-tick-saves', step: 3, max: 30 },
+  ];
+  targets.forEach(t => {
+    const node = root.querySelector('#' + t.id);
+    if (!node) return;
+    let added = 0;
+    const tick = () => {
+      if (!root.isConnected || added >= t.max) return;
+      const cur = parseInt(node.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+      const next = cur + t.step;
+      node.textContent = next.toLocaleString();
+      added += t.step;
+      setTimeout(tick, 1200);
+    };
+    setTimeout(tick, 1400);
+  });
+}
+
+/* =========================================================================
    18. BOOT
    ========================================================================= */
 function boot() {
+  console.log('[Flagstaff] boot');
   bindDemoControls();
   setCrumbs(['Home', 'Onboarding', 'Conversation']);
   setComposerEnabled(false);
 
-  // The conversation view owns everything from the start hook through to
-  // handoff. The hero opens with the start prompt; clicking Start advances
-  // to the greeting + profile selection. KB blocks render only after the
-  // user picks Individual / Brand, since they're persona-specific.
-  showView('view-conv');
-  setTimeout(() => runConversation(), 200);
+  // Splash gating:
+  // - ?nosplash in the URL bypasses (for fast iteration when working on later flow)
+  // - ?splash in the URL forces splash (clears the flag)
+  // - Default: always show the splash. It's a brand moment and is skippable.
+  const params = new URLSearchParams(location.search);
+  if (params.has('nosplash')) {
+    try { localStorage.setItem(SPLASH_FLAG_KEY, '1'); } catch (e) {}
+    showView('view-conv');
+    setTimeout(() => runConversation(), 200);
+    return;
+  }
+  if (params.has('splash')) {
+    try { localStorage.removeItem(SPLASH_FLAG_KEY); } catch (e) {}
+  }
+
+  console.log('[Flagstaff] mounting splash');
+  showView('view-splash');
+  setTimeout(() => runSplash(), 100);
 }
 
-document.addEventListener('DOMContentLoaded', boot);
+// The script is at the end of <body> so DOMContentLoaded may have already
+// fired by the time this runs. Handle both cases.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  // DOM already parsed — boot immediately.
+  boot();
+}
 })();
