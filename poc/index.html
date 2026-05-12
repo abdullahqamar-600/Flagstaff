@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Flagstaff Social — Onboarding POC</title>
-  <link rel="stylesheet" href="./styles.css?v=12" />
+  <link rel="stylesheet" href="./styles.css?v=13" />
 </head>
 <body class="mode-onboarding">
   <!-- Reusable SVG sprite (icons referenced by id from JS) -->
@@ -125,10 +125,13 @@
                   <span class="splash__dot" data-idx="1"></span>
                   <span class="splash__dot" data-idx="2"></span>
                 </div>
-                <button class="splash__cta" id="splash-cta" type="button">
-                  <span class="splash__cta-label" id="splash-cta-label">Next</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </button>
+                <div class="splash__foot-actions">
+                  <button class="splash__skip" id="splash-skip" type="button">Skip</button>
+                  <button class="splash__cta" id="splash-cta" type="button">
+                    <span class="splash__cta-label" id="splash-cta-label">Next</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
             <!-- RIGHT: persistent visual container; inner content swaps between screens. -->
@@ -136,7 +139,6 @@
               <div class="splash__right-stage" id="splash-right-stage"></div>
             </div>
           </div>
-          <button class="splash__skip" id="splash-skip" type="button">Skip</button>
           <div class="splash__brand" aria-label="Flagstaff Social">
             <span class="splash__brand-mark"><svg><use href="#i-logo"/></svg></span>
             <span class="splash__brand-name">Flagstaff</span>

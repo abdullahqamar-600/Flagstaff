@@ -5009,16 +5009,16 @@ body.mode-hero .conv__stream {
   display: inline-flex; gap: 8px;
 }
 
-/* Skip — anchored to top-right of the splash. */
+/* Skip — sits in the foot row immediately before the CTA. */
+.splash__foot-actions {
+  display: inline-flex; align-items: center; gap: 8px;
+}
 .splash__skip {
-  position: absolute;
-  top: 28px; right: 56px;
-  z-index: 4;
-  background: transparent; border: 0; padding: 6px 10px;
+  background: transparent; border: 0; padding: 12px 14px;
   color: var(--text-tertiary);
-  font-size: 13px; font-weight: 500;
+  font-size: 14px; font-weight: 500;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
 }
 
@@ -5075,15 +5075,7 @@ body.mode-hero .conv__stream {
   background: var(--primary);
   width: 24px;
 }
-.splash__skip {
-  background: transparent; border: 0; padding: 6px 10px;
-  color: var(--text-tertiary);
-  font-size: 14px; font-weight: 500;
-  cursor: pointer; margin-left: auto;
-  border-radius: 8px;
-  transition: color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
-}
-.splash__skip:hover { color: var(--text-primary); background: rgba(255,255,255,0.5); }
+.splash__skip:hover { color: var(--text-primary); background: rgba(15, 23, 42, 0.04); }
 
 /* Left text pane — fills the left column, vertically centred. */
 .splash__copy {
@@ -5099,7 +5091,7 @@ body.mode-hero .conv__stream {
   font-size: clamp(40px, 4vw, 56px);
   line-height: 1.05;
   letter-spacing: -0.025em;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-primary);
 }
 .splash__copy-body {
@@ -5745,7 +5737,7 @@ body.mode-hero .conv__stream {
 .splash2-drawer__title {
   margin: 0;
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--text-primary);
@@ -6053,12 +6045,12 @@ body.mode-hero .conv__stream {
   justify-content: center;
 }
 .splash-wheel-mask {
-  /* The wheel pivots at the bottom of the section; only the upper half of
-     the arc is visible — a half-circle of posts rises through the middle.
-     Tiles stay upright (no individual rotation). */
-  --wheel-radius: 380px;
-  --tile-w: 280px;
-  --tile-h: 350px;
+  /* A static half-circle of post cards. The wheel pivots below the section
+     so only the upper arc is visible; nothing rotates — tiles read as a
+     fanned, upright spread of work. */
+  --wheel-radius: 420px;
+  --tile-w: 308px;   /* +10% from 280 */
+  --tile-h: 385px;   /* +10% from 350 */
   position: absolute;
   inset: 0;
   width: 100%;
@@ -6067,16 +6059,11 @@ body.mode-hero .conv__stream {
 }
 .splash-wheel {
   position: absolute;
-  /* Pivot at the section's bottom-centre so the visible top arc of the
-     orbit reads as a half-circle of posts. */
-  left: 50%; top: 100%;
+  /* Pivot raised slightly above the section's bottom so the visible arc
+     has more headroom and feels balanced against the whitespace up top. */
+  left: 50%; top: 88%;
   width: 0; height: 0;
-  animation: wheelSpin 100s linear infinite;
   transform-origin: center;
-}
-@keyframes wheelSpin {
-  from { transform: rotate(0); }
-  to   { transform: rotate(360deg); }
 }
 .splash-wheel__tile {
   position: absolute;
@@ -6084,24 +6071,15 @@ body.mode-hero .conv__stream {
   top: calc(var(--wheel-radius) * -1 - var(--tile-h) / 2);
   width: var(--tile-w);
   height: var(--tile-h);
-  /* Each tile sits at a fixed angle relative to the wheel's pivot, which
-     places it along the orbit. The wheel rotates, the tile rides with it. */
+  /* Each tile sits at a fixed angle on the orbit. No animation. */
   transform: rotate(var(--angle, 0deg));
   transform-origin: center calc(50% + var(--wheel-radius));
 }
 .splash-wheel__tile-inner {
   width: 100%; height: 100%;
-  /* Counter-rotate by the tile's own angle ONLY, so the tile is always
-     upright. The wheel's own rotation rotates the parent — we don't try to
-     counter that, so individual tiles do NOT bend. They simply travel
-     along the arc with the rotating wheel. */
+  /* Cancel the parent rotation once (no animation), so the tile sits
+     upright at its position on the arc. */
   transform: rotate(var(--init-r, 0deg));
-  animation: wheelTileCounter 90s linear infinite;
-}
-/* Counter-rotation: cancels the parent wheel's rotation so tiles stay upright. */
-@keyframes wheelTileCounter {
-  from { transform: rotate(var(--init-r, 0deg)); }
-  to   { transform: rotate(calc(var(--init-r, 0deg) - 360deg)); }
 }
 
 /* Heart-flow overlay: hearts spawn at random x positions along the visible
