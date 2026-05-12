@@ -2467,18 +2467,16 @@ async function step_post_directions() {
           commitTimer = setTimeout(() => commit(d), 1500);
         },
       }, [
-        // Twitter-style author row.
+        // Author row — avatar + name + verified + handle + dot + time.
         el('div', { class: 'direction-card__author' }, [
           el('span', { class: 'direction-card__avatar' }),
           el('div', { class: 'direction-card__id' }, [
             el('div', { class: 'direction-card__name-row' }, [
               document.createTextNode(displayName),
               el('span', { class: 'direction-card__name-verified', html: icon('i-check') }),
-            ]),
-            el('div', { class: 'direction-card__handle-row' }, [
-              document.createTextNode(handle),
-              el('span', { class: 'direction-card__dot' }, '·'),
-              document.createTextNode('Draft'),
+              el('span', { class: 'direction-card__handle' }, handle),
+              el('span', { class: 'direction-card__sep' }, '·'),
+              el('span', { class: 'direction-card__time' }, 'now'),
             ]),
           ]),
         ]),
@@ -2491,23 +2489,29 @@ async function step_post_directions() {
           el('span', { class: 'direction-card__chip' }, d.group.tone),
           el('span', { class: 'direction-card__chip' }, d.group.format),
         ]),
-        // Twitter-style action row.
+        // X-style action row — reply, repost, like, views, bookmark, share.
         el('div', { class: 'direction-card__actions' }, [
           el('span', { class: 'direction-card__action' }, [
             el('span', { html: icon('i-reply') }),
-            document.createTextNode('Reply'),
+            el('span', { class: 'direction-card__action-n' }, '12'),
           ]),
           el('span', { class: 'direction-card__action' }, [
             el('span', { html: icon('i-repost') }),
-            document.createTextNode('Repost'),
+            el('span', { class: 'direction-card__action-n' }, '4'),
           ]),
           el('span', { class: 'direction-card__action' }, [
             el('span', { html: icon('i-heart') }),
-            document.createTextNode('Like'),
+            el('span', { class: 'direction-card__action-n' }, '87'),
+          ]),
+          el('span', { class: 'direction-card__action' }, [
+            el('span', { html: icon('i-trend') }),
+            el('span', { class: 'direction-card__action-n' }, '1.2K'),
+          ]),
+          el('span', { class: 'direction-card__action' }, [
+            el('span', { html: icon('i-bookmark') }),
           ]),
           el('span', { class: 'direction-card__action' }, [
             el('span', { html: icon('i-share') }),
-            document.createTextNode('Share'),
           ]),
         ]),
         el('span', { class: 'direction-card__pick' }, [
