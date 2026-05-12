@@ -3043,11 +3043,11 @@ function buildPostSkeleton(imgSrc, caption) {
   ]);
 }
 
-/* ---- Screen 2: Knowledge blocks ----
-   The same Brand + Trending knowledge blocks the user sees inside the
-   conversation, here scaled up and shown filling section by section.
-   Just Scout's logo at the top — no status pill — so the focus stays on
-   the work being built. */
+/* ---- Screen 2: Knowledge drawer ----
+   The same side-drawer the user opens during the conversation (brand-drawer).
+   Scout's mark sits at the top-left of the section; the drawer takes the
+   rest. Content alternates between Brand and Trending — same look as the
+   in-conversation drawer, with sections filling in sequentially. */
 function buildSplashScreen2Right() {
   const scoutAvatarSvg = `
     <svg viewBox="0 0 32 32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -3064,92 +3064,60 @@ function buildSplashScreen2Right() {
       el('div', { class: 'splash2-canvas__halo' }),
     ]),
 
-    // Scout's logo only — sized like a presenter mark, animates with the
-    // same loader pattern as the conversation's thinking indicator.
     el('div', {
       class: 'splash2-mark msg__avatar--scout msg__avatar--loading',
       id: 'splash2-scout-avatar',
     }, [scoutAvatar]),
 
-    // Stacked-card composition: the active block sits on top; the next
-    // block peeks from behind. Animation swaps which one is on top.
-    el('div', { class: 'splash2-kb-stack' }, [
-      el('div', { class: 'kb-block splash2-kb splash2-kb--trending', id: 'splash2-kb-trending' }),
-      el('div', { class: 'kb-block splash2-kb splash2-kb--brand',    id: 'splash2-kb-brand' }),
-    ]),
+    // Drawer container — same vocabulary as the in-conversation brand-drawer.
+    el('div', { class: 'splash2-drawer', id: 'splash2-drawer' }),
   ]);
 }
 
-// Splash 2 KB facts — same shape as the in-conversation knowledge block.
-// Each block has a title, summary, and a list of {label, value} facts.
-const SPLASH2_BRAND_FACTS = [
-  { label: 'IDENTITY',  value: 'Tkxel · Heritage fashion, Karachi' },
-  { label: 'AUDIENCE',  value: 'Women 22–34 · Pakistan & diaspora' },
-  { label: 'THEMES',    value: 'Heritage · Sustainability · Local craft' },
-  { label: 'TONE',      value: 'Warm, story-led · names the artisan' },
-];
-const SPLASH2_TRENDING_FACTS = [
-  { label: 'TOP TOPIC',  value: 'Heritage origin stories · +92% engagement' },
-  { label: 'TOP TREND',  value: '#SouthAsianHeritageWeek · +4.2× w/w' },
-  { label: 'PEAK WINDOW', value: 'Weekdays 2–4pm PKT' },
-  { label: 'BEST FORMAT', value: 'Image + caption with attribution' },
-];
+// Splash 2 drawer content — alternates between Brand and Trending. Same
+// language as the in-conversation brand-drawer: title, sub, then a list of
+// labelled sections.
+const SPLASH2_BRAND_CONTENT = {
+  title: 'About your brand',
+  sub:   "How Scout sees you, refreshed every time you sit down to post.",
+  sections: [
+    { label: 'IDENTITY',  value: 'Tkxel · Heritage fashion, Karachi' },
+    { label: 'AUDIENCE',  value: 'Women 22–34 · Pakistan & diaspora' },
+    { label: 'THEMES',    value: 'Heritage · Sustainability · Local craft' },
+    { label: 'TONE',      value: 'Warm, story-led · names the artisan' },
+  ],
+};
+const SPLASH2_TRENDING_CONTENT = {
+  title: "What's working",
+  sub:   "Live signal Scout is tracking in your niche right now.",
+  sections: [
+    { label: 'TOP TOPIC',   value: 'Heritage origin stories · +92% engagement' },
+    { label: 'TOP TREND',   value: '#SouthAsianHeritageWeek · +4.2× w/w' },
+    { label: 'PEAK WINDOW', value: 'Weekdays 2–4pm PKT' },
+    { label: 'BEST FORMAT', value: 'Image + caption with attribution' },
+  ],
+};
 
-// Render a KB block in the splash. Phases:
-//   'empty'   → dimmed, title + placeholder
-//   'active'  → building dots, title + summary preview
-//   'filled'  → static, summary preview only
-//   'expanded'→ full fact list rendered
-function renderSplash2Kb(node, kind, phase, facts, opts = {}) {
+// Render the splash 2 drawer with title, sub, and the section list. Each
+// section is independently fade-in-able so JS can reveal them in sequence.
+function renderSplash2Drawer(node, content) {
   if (!node) return;
-  const meta = kind === 'brand'
-    ? { title: 'Brand',    empty: 'Identity, products, niche, voice' }
-    : { title: 'Trending', empty: "What's working in your niche right now" };
-
-  node.className = 'kb-block splash2-kb splash2-kb--' + kind;
-  if (phase === 'empty')    node.classList.add('kb-block--empty');
-  if (phase === 'active')   node.classList.add('kb-block--active');
-  if (phase === 'filled')   node.classList.add('kb-block--filled');
-  if (phase === 'expanded') node.classList.add('kb-block--expanded');
-
   node.innerHTML = '';
-
-  // Head
-  const head = el('div', { class: 'kb-block__head' }, [
-    el('div', { class: 'kb-block__title' }, meta.title),
-  ]);
-  node.appendChild(head);
-
-  // Summary (one-line preview when not expanded)
-  if (phase !== 'expanded') {
-    const summary = phase === 'empty'
-      ? meta.empty
-      : facts.slice(0, 3).map(f => f.label[0] + f.label.slice(1).toLowerCase()).join(' · ');
-    node.appendChild(el('div', { class: 'kb-block__summary' }, summary));
-  }
-
-  // Building indicator on the active phase
-  if (phase === 'active') {
-    node.appendChild(el('div', { class: 'kb-block__status', 'aria-live': 'polite' }, [
-      document.createTextNode(opts.activityText || 'Building'),
-      el('span', { class: 'kb-block__status-dot' }, '.'),
-      el('span', { class: 'kb-block__status-dot' }, '.'),
-      el('span', { class: 'kb-block__status-dot' }, '.'),
+  node.appendChild(el('div', { class: 'splash2-drawer__head' }, [
+    el('h3', { class: 'splash2-drawer__title' }, content.title),
+    el('p',  { class: 'splash2-drawer__sub' }, content.sub),
+  ]));
+  const body = el('div', { class: 'splash2-drawer__body' });
+  content.sections.forEach((s, i) => {
+    body.appendChild(el('div', {
+      class: 'splash2-drawer__section splash2-section--pre',
+      'data-section-i': String(i),
+    }, [
+      el('div', { class: 'splash2-drawer__eyebrow' }, s.label),
+      el('div', { class: 'splash2-drawer__value' },   s.value),
     ]));
-  }
-
-  // Body (only when expanded) — facts list, reveals are handled by caller.
-  if (phase === 'expanded') {
-    const body = el('div', { class: 'kb-block__body' });
-    facts.forEach((f, i) => {
-      const factEl = el('div', { class: 'kb-block__fact splash2-fact', 'data-fact-i': String(i) }, [
-        el('span', { class: 'kb-block__fact-label' }, f.label),
-        el('span', { class: 'kb-block__fact-value' }, f.value),
-      ]);
-      body.appendChild(factEl);
-    });
-    node.appendChild(body);
-  }
+  });
+  node.appendChild(body);
 }
 
 /* ---- Screen 3: Outcomes ----
@@ -3284,10 +3252,8 @@ function playSplashWheelHearts(root) {
 // The whole loop repeats while the screen is mounted.
 async function playSplashScreen2Sequence(root) {
   const scoutAvatar = root.querySelector('#splash2-scout-avatar');
-  const brandKb     = root.querySelector('#splash2-kb-brand');
-  const trendingKb  = root.querySelector('#splash2-kb-trending');
-  const stack       = root.querySelector('.splash2-kb-stack');
-  if (!scoutAvatar || !brandKb || !trendingKb || !stack) return;
+  const drawer      = root.querySelector('#splash2-drawer');
+  if (!scoutAvatar || !drawer) return;
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const beat = (ms) => sleep(reduced ? 0 : ms);
 
@@ -3308,40 +3274,30 @@ async function playSplashScreen2Sequence(root) {
     scoutAvatar.innerHTML = '<svg><use href="#i-logo"/></svg>';
   };
 
-  // Bring one block to the front; the other tucks behind.
-  const bringToFront = (front, back) => {
-    front.classList.add('splash2-kb--front');
-    front.classList.remove('splash2-kb--back');
-    back.classList.add('splash2-kb--back');
-    back.classList.remove('splash2-kb--front');
-  };
-
-  // Fill the FRONT block: empty (peek) → active (building) → expanded.
-  const fillFrontBlock = async (node, kind, facts, activityText) => {
-    renderSplash2Kb(node, kind, 'active', facts, { activityText });
-    node.classList.add('splash2-kb--front');
+  const fillDrawer = async (content) => {
     setScoutThinking();
-    await beat(900);
-    renderSplash2Kb(node, kind, 'expanded', facts);
-    node.classList.add('splash2-kb--front');
-    const factEls = node.querySelectorAll('.splash2-fact');
-    factEls.forEach(f => f.classList.add('splash2-fact--pre'));
-    await beat(60);
-    for (const f of factEls) {
-      f.classList.remove('splash2-fact--pre');
-      f.classList.add('splash2-fact--in');
-      await beat(220);
+    renderSplash2Drawer(drawer, content);
+    // Reveal title/sub, then each section sequentially.
+    await beat(200);
+    drawer.querySelector('.splash2-drawer__head')?.classList.add('splash2-section--in');
+    await beat(260);
+    const sections = drawer.querySelectorAll('.splash2-drawer__section');
+    for (const s of sections) {
+      s.classList.remove('splash2-section--pre');
+      s.classList.add('splash2-section--in');
+      await beat(280);
     }
     setScoutSettled();
-    await beat(900);
+    await beat(1600);
   };
 
-  const resetEmpty = () => {
-    renderSplash2Kb(brandKb,    'brand',    'empty', SPLASH2_BRAND_FACTS);
-    renderSplash2Kb(trendingKb, 'trending', 'empty', SPLASH2_TRENDING_FACTS);
+  const fadeOutDrawer = async () => {
+    drawer.classList.add('splash2-drawer--out');
+    await beat(360);
+    drawer.classList.remove('splash2-drawer--out');
+    drawer.innerHTML = '';
   };
 
-  // Loop while mounted.
   let stopped = false;
   const observer = new MutationObserver(() => {
     if (!root.isConnected) { stopped = true; observer.disconnect(); }
@@ -3349,25 +3305,15 @@ async function playSplashScreen2Sequence(root) {
   observer.observe(document.body, { childList: true, subtree: true });
 
   while (!stopped && root.isConnected) {
-    // Start: both empty. Brand is in front.
-    resetEmpty();
-    bringToFront(brandKb, trendingKb);
-    await beat(400);
-
-    // Fill Brand on top.
-    await fillFrontBlock(brandKb, 'brand', SPLASH2_BRAND_FACTS, 'Learning your brand');
+    await fillDrawer(SPLASH2_BRAND_CONTENT);
     if (stopped || !root.isConnected) break;
-    // Swap: Brand tucks behind, Trending rises to front.
-    await beat(800);
-    bringToFront(trendingKb, brandKb);
-    await beat(600);
+    await fadeOutDrawer();
+    await beat(300);
 
-    // Fill Trending on top.
-    await fillFrontBlock(trendingKb, 'trending', SPLASH2_TRENDING_FACTS, 'Tracking your niche');
+    await fillDrawer(SPLASH2_TRENDING_CONTENT);
     if (stopped || !root.isConnected) break;
-
-    // Hold the finished state for a beat before restarting.
-    await beat(2800);
+    await fadeOutDrawer();
+    await beat(300);
   }
 }
 

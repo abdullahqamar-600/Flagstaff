@@ -578,8 +578,8 @@ a { color: var(--text-link); text-decoration: none; }
 }
 .conf__title {
   padding: 20px 24px 12px;
-  font-size: 16px;
-  font-weight: var(--weight-semibold);
+  font-size: 18px;
+  font-weight: 500;
   border-bottom: 0;
   display: flex; align-items: center; justify-content: space-between;
 }
@@ -884,7 +884,7 @@ a { color: var(--text-link); text-decoration: none; }
   flex-shrink: 0;
 }
 .connect__icon svg { width: 18px; height: 18px; }
-.connect__title { font-size: var(--text-md); font-weight: var(--weight-semibold); }
+.connect__title { font-size: 18px; font-weight: 500; }
 .connect__sub { font-size: var(--text-sm); color: var(--text-secondary); margin-top: 2px; }
 .connect__actions { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
 .btn-x {
@@ -908,7 +908,7 @@ a { color: var(--text-link); text-decoration: none; }
   animation: cardIn var(--duration-slow) var(--ease-emphasized) both;
 }
 .score__head { display: flex; align-items: center; justify-content: space-between; }
-.score__title { font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.score__title { font-size: 18px; font-weight: 500; }
 .score__pct { font-size: var(--text-2xl); font-weight: var(--weight-semibold); color: var(--primary); }
 .score__bar {
   height: 8px; background: var(--surface-canvas);
@@ -1707,6 +1707,9 @@ a { color: var(--text-link); text-decoration: none; }
   width: 44px; height: 44px;
   border-radius: 50%;
   background: var(--ai-gradient);
+  background-image: url('/Profile.png');
+  background-size: cover;
+  background-position: center;
   flex-shrink: 0;
 }
 .success-post__id {
@@ -3997,8 +4000,13 @@ body.mode-hero .conv__stream {
   animation: cardIn var(--duration-slow) var(--ease-emphasized) both;
 }
 .x-header__banner {
-  height: 120px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #6366f1 100%);
+  height: 140px;
+  background:
+    linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #6366f1 100%),
+    url('/Banner.jpeg');
+  background-image: url('/Banner.jpeg'), linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #6366f1 100%);
+  background-size: cover;
+  background-position: center;
 }
 .x-header__action-row {
   display: flex; justify-content: flex-end;
@@ -4022,7 +4030,10 @@ body.mode-hero .conv__stream {
   width: 84px; height: 84px;
   margin: -42px 14px 0;
   border-radius: 999px;
-  background: linear-gradient(135deg, #c7d2fe, #818cf8);
+  background: linear-gradient(135deg, #c7d2fe, #818cf8) center / cover no-repeat;
+  background-image: url('/Profile.png');
+  background-size: cover;
+  background-position: center;
   border: 3px solid #fff;
 }
 .x-header__body { padding: 8px 14px 14px; }
@@ -4127,9 +4138,14 @@ body.mode-hero .conv__stream {
   width: 36px; height: 36px;
   border-radius: 999px;
   background: linear-gradient(135deg, #c7d2fe, #818cf8);
+  background-size: cover;
+  background-position: center;
   border: 2px solid #fff;
   margin-left: -10px;
 }
+.x-stats__avatar:nth-child(1) { background-image: url('https://i.pravatar.cc/120?img=47'); }
+.x-stats__avatar:nth-child(2) { background-image: url('https://i.pravatar.cc/120?img=32'); }
+.x-stats__avatar:nth-child(3) { background-image: url('https://i.pravatar.cc/120?img=23'); }
 .x-stats__avatar:first-child { margin-left: 0; }
 .x-stats__audience-text {
   font-size: 16px;
@@ -4360,9 +4376,14 @@ body.mode-hero .conv__stream {
   width: 28px; height: 28px;
   border-radius: 999px;
   background: linear-gradient(135deg, #c7d2fe, #818cf8);
+  background-size: cover;
+  background-position: center;
   border: 2px solid #eef0f3;
   margin-left: -8px;
 }
+.brand-drawer__avatar:nth-child(1) { background-image: url('https://i.pravatar.cc/120?img=47'); }
+.brand-drawer__avatar:nth-child(2) { background-image: url('https://i.pravatar.cc/120?img=32'); }
+.brand-drawer__avatar:nth-child(3) { background-image: url('https://i.pravatar.cc/120?img=23'); }
 .brand-drawer__avatar:first-child { margin-left: 0; }
 
 /* Top performing topics. */
@@ -4546,6 +4567,9 @@ body.mode-hero .conv__stream {
   width: 40px; height: 40px;
   border-radius: 999px;
   background: linear-gradient(135deg, #c7d2fe, #818cf8);
+  background-image: url('/Profile.png');
+  background-size: cover;
+  background-position: center;
   flex-shrink: 0;
 }
 .direction-card__id {
@@ -5581,59 +5605,72 @@ body.mode-hero .conv__stream {
 .splash2-mark.msg__avatar--loading .scout-loader__c--3 { animation-delay: 700ms; }
 .splash2-mark.msg__avatar--loading .scout-loader__c--4 { animation-delay: 1050ms; }
 
-/* Stacked-card layout — both knowledge blocks share the same anchor; one
-   sits in front, the other peeks from behind. Animation swaps which one
-   is on top. */
-.splash2-kb-stack {
+/* Splash 2 drawer — same visual vocabulary as the in-conversation
+   brand-drawer. Lives flush against the right edge of the section so it
+   reads as a real drawer panel; the Scout mark sits at the top-left of
+   the section, the drawer fills the rest. */
+.splash2-drawer {
   position: relative;
   z-index: 2;
   flex: 1;
   min-height: 0;
-  display: block;
-}
-.splash2-kb {
-  position: absolute;
-  left: 0; right: 0;
-  width: 100%;
-  padding: 24px 28px;
-  border-radius: 22px;
-  font-size: 14px;
   background: #fff;
   border: 1px solid var(--border-subtle);
-  transition:
-    top 520ms var(--ease-emphasized),
-    transform 520ms var(--ease-emphasized),
-    opacity 520ms var(--ease-emphasized),
-    box-shadow 520ms var(--ease-emphasized),
-    background-color 360ms var(--ease-standard);
-}
-/* Front card — primary, raised, fully opaque. */
-.splash2-kb.splash2-kb--front {
-  top: 36px;
-  bottom: 0;
-  z-index: 2;
-  opacity: 1;
-  transform: scale(1);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
-}
-/* Back card — peeks behind, slightly smaller, dimmer. */
-.splash2-kb.splash2-kb--back {
-  top: 0;
-  bottom: 24px;
-  z-index: 1;
-  opacity: 0.65;
-  transform: scale(0.96);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.10);
+  padding: 28px 32px 32px;
+  display: flex; flex-direction: column;
+  gap: 22px;
   overflow: hidden;
+  transition: opacity 360ms var(--ease-standard);
 }
-.splash2-kb.splash2-kb--back .kb-block__body,
-.splash2-kb.splash2-kb--back .kb-block__status {
-  display: none;
+.splash2-drawer--out { opacity: 0; }
+.splash2-drawer__head {
+  display: flex; flex-direction: column; gap: 6px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 320ms var(--ease-emphasized), transform 320ms var(--ease-emphasized);
 }
-.splash2-kb.kb-block--empty.splash2-kb--front  { background: #fff; }
-.splash2-kb.kb-block--active.splash2-kb--front { background: #fff; }
-.splash2-kb.kb-block--filled.splash2-kb--front { background: #fff; }
-.splash2-kb.kb-block--expanded.splash2-kb--front { background: #fff; }
+.splash2-drawer__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.splash2-drawer__sub {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+.splash2-drawer__body {
+  display: flex; flex-direction: column;
+  gap: 18px;
+}
+.splash2-drawer__section {
+  display: flex; flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 360ms var(--ease-emphasized), transform 360ms var(--ease-emphasized);
+}
+.splash2-section--pre { opacity: 0; transform: translateY(8px); }
+.splash2-section--in  { opacity: 1; transform: translateY(0); }
+.splash2-drawer__eyebrow {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+.splash2-drawer__value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
 .splash2-kb .kb-block__title {
   font-size: 16px;
   font-weight: 700;
@@ -5793,30 +5830,19 @@ body.mode-hero .conv__stream {
 }
 
 /* =========================================================================
-   SPLASH 3 — A 3×3 post grid fills the right section. The middle tile is a
-   WHITE engagement stat card with an upward-trending sparkline. A subtle
-   white gradient hugs the outer edges of the section so cards near the
-   border read as receding — soft depth, no hard frame.
+   SPLASH 3 — A visible container holds a 3×3 post grid. The container has
+   a soft white-gradient inner surface for depth. The middle stat tile is
+   FLAT — no card chrome — so the metric reads as content inside the same
+   container, not a separate card on top.
    ========================================================================= */
 .splash3-block {
-  background: #fff;
-  padding: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f5f8 100%);
+  padding: 24px;
   position: relative;
   display: flex;
   align-items: stretch;
   justify-content: stretch;
   overflow: hidden;
-}
-.splash3-block::before {
-  /* Inner white-gradient halo on the section's edges — gives the centre
-     a sense of focus and softens the outer ring of tiles. */
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background:
-    radial-gradient(120% 110% at 50% 50%, transparent 55%, rgba(255,255,255,0.65) 88%, #fff 100%);
 }
 .splash3-grid {
   display: grid;
@@ -5840,18 +5866,22 @@ body.mode-hero .conv__stream {
   width: 100%; height: 100%;
 }
 
-/* Stat tile — white surface, raised, centered on the grid. */
+/* Stat tile — FLAT. No card border, no shadow, no background. Just the
+   metric sitting in the grid like another tile, in the surface itself. */
 .splash3-tile--stat {
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
-  padding: 18px;
-  align-items: stretch;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 12px 8px;
+  align-items: center;
+  justify-content: center;
 }
 .splash3-stat {
   width: 100%;
   display: flex; flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 6px;
 }
 .splash3-stat__eyebrow {
@@ -5869,7 +5899,7 @@ body.mode-hero .conv__stream {
   animation: splashLiveDot 1.6s ease-in-out infinite;
 }
 .splash3-stat__value {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: -0.02em;
@@ -5882,9 +5912,9 @@ body.mode-hero .conv__stream {
   line-height: 1.35;
 }
 .splash3-stat__chart {
-  margin-top: auto;
+  margin-top: 8px;
   width: 100%;
-  height: 50px;
+  height: 56px;
 }
 .splash3-stat__svg { width: 100%; height: 100%; display: block; }
 .splash3-stat__svg-line {
@@ -5923,27 +5953,26 @@ body.mode-hero .conv__stream {
   justify-content: center;
 }
 .splash-wheel-mask {
-  /* A circle of post cards centred in the section. Pivot is at the centre,
-     so tiles orbit around the middle. Radius matches a comfortable orbit
-     that leaves room for larger tile size. */
-  --wheel-radius: 300px;
-  --tile-w: 260px;
-  --tile-h: 330px;
+  /* The wheel pivots at the bottom of the section; only the upper half of
+     the arc is visible — a half-circle of posts rises through the middle.
+     Tiles stay upright (no individual rotation). */
+  --wheel-radius: 460px;
+  --tile-w: 240px;
+  --tile-h: 300px;
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* Soft circular vignette so cards fade gently at the corners. */
-  mask-image: radial-gradient(115% 105% at 50% 50%, #000 65%, transparent 95%);
-  -webkit-mask-image: radial-gradient(115% 105% at 50% 50%, #000 65%, transparent 95%);
 }
 .splash-wheel {
   position: absolute;
-  /* Pivot at the centre — tiles orbit around the centre of the section. */
-  left: 50%; top: 50%;
+  /* Pivot at the section's bottom-centre so the visible top arc of the
+     orbit reads as a half-circle of posts. */
+  left: 50%; top: 100%;
   width: 0; height: 0;
   animation: wheelSpin 100s linear infinite;
+  transform-origin: center;
 }
 @keyframes wheelSpin {
   from { transform: rotate(0); }
@@ -5955,15 +5984,21 @@ body.mode-hero .conv__stream {
   top: calc(var(--wheel-radius) * -1 - var(--tile-h) / 2);
   width: var(--tile-w);
   height: var(--tile-h);
+  /* Each tile sits at a fixed angle relative to the wheel's pivot, which
+     places it along the orbit. The wheel rotates, the tile rides with it. */
   transform: rotate(var(--angle, 0deg));
   transform-origin: center calc(50% + var(--wheel-radius));
 }
 .splash-wheel__tile-inner {
   width: 100%; height: 100%;
+  /* Counter-rotate by the tile's own angle ONLY, so the tile is always
+     upright. The wheel's own rotation rotates the parent — we don't try to
+     counter that, so individual tiles do NOT bend. They simply travel
+     along the arc with the rotating wheel. */
   transform: rotate(var(--init-r, 0deg));
-  animation: wheelTileCounter 80s linear infinite;
+  animation: wheelTileCounter 90s linear infinite;
 }
-/* Counter-rotation: keeps each tile upright while its parent wheel spins. */
+/* Counter-rotation: cancels the parent wheel's rotation so tiles stay upright. */
 @keyframes wheelTileCounter {
   from { transform: rotate(var(--init-r, 0deg)); }
   to   { transform: rotate(calc(var(--init-r, 0deg) - 360deg)); }
