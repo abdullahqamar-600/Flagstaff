@@ -4078,12 +4078,14 @@ body.mode-hero .conv__stream {
    X profile — Header (Twitter clone)
    ========================================================================= */
 .x-header {
-  margin-left: 40px;
-  max-width: 480px;
+  width: 100%;
+  margin-left: 0;
+  max-width: 720px;
   background: #fff;
   border: 0;
   border-radius: 20px;
   overflow: hidden;
+  align-self: flex-start;
   animation: cardIn var(--duration-slow) var(--ease-emphasized) both;
 }
 .x-header__banner {
