@@ -4382,6 +4382,17 @@ body.mode-connecting #kb-panel { display: none; }
   border: 1px solid var(--border-subtle); border-radius: var(--radius-full); cursor: pointer;
 }
 .msg__edit-cancel:hover { background: var(--neutral-50); }
+.msg__edit-picker {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 100%; margin-top: 6px;
+}
+.msg__edit-qreplies {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.msg__edit-qreplies .qreply--chosen {
+  background: var(--primary); color: #fff;
+}
 
 /* =========================================================================
    Confirmation card — quiet hint replacing the dead "Edit fields above"

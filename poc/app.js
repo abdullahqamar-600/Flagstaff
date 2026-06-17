@@ -443,7 +443,7 @@ async function typewriterInto(node, text, baseSpeed = 14) {
   scrollDown();
 }
 
-function userMsg(text) {
+function userMsg(text, { options = null } = {}) {
   // User messages render as a white right-aligned bubble. No avatar / name —
   // the bubble itself is the differentiation from Scout's plain-text turns.
   const bubble = el('div', { class: 'msg__bubble' }, text);
@@ -454,35 +454,67 @@ function userMsg(text) {
   ]);
 
   editBtn.addEventListener('click', () => {
-    const current = bubble.textContent;
-    const ta = el('textarea', { class: 'msg__edit-ta' }, current);
-    ta.rows = Math.max(2, Math.ceil(current.length / 48));
+    if (options && options.length) {
+      // Re-show the original quick reply options
+      bubble.style.display = 'none';
+      editBtn.style.display = 'none';
 
-    const save = el('button', { class: 'msg__edit-save', type: 'button' }, 'Save');
-    const cancel = el('button', { class: 'msg__edit-cancel', type: 'button' }, 'Cancel');
+      const cancelBtn = el('button', { class: 'msg__edit-cancel', type: 'button' }, 'Cancel');
+      const pills = options.map((opt) => {
+        const btn = el('button', {
+          class: 'qreply' + (opt === text ? ' qreply--chosen' : ''),
+        }, opt);
+        btn.addEventListener('click', () => {
+          bubble.textContent = opt;
+          picker.remove();
+          bubble.style.display = '';
+          editBtn.style.display = '';
+          // Update stored text so future edits reflect the new value
+          editBtn._options = options;
+        });
+        return btn;
+      });
+      cancelBtn.addEventListener('click', () => {
+        picker.remove();
+        bubble.style.display = '';
+        editBtn.style.display = '';
+      });
+      const picker = el('div', { class: 'msg__edit-picker' }, [
+        el('div', { class: 'qreplies msg__edit-qreplies' }, pills),
+        el('div', { class: 'msg__edit-actions' }, [cancelBtn]),
+      ]);
+      node.appendChild(picker);
+    } else {
+      const current = bubble.textContent;
+      const ta = el('textarea', { class: 'msg__edit-ta' }, current);
+      ta.rows = Math.max(2, Math.ceil(current.length / 48));
 
-    const actions = el('div', { class: 'msg__edit-actions' }, [cancel, save]);
-    const editor = el('div', { class: 'msg__editor' }, [ta, actions]);
+      const save = el('button', { class: 'msg__edit-save', type: 'button' }, 'Save');
+      const cancel = el('button', { class: 'msg__edit-cancel', type: 'button' }, 'Cancel');
 
-    bubble.style.display = 'none';
-    editBtn.style.display = 'none';
-    node.appendChild(editor);
-    ta.focus();
-    ta.setSelectionRange(ta.value.length, ta.value.length);
+      const actions = el('div', { class: 'msg__edit-actions' }, [cancel, save]);
+      const editor = el('div', { class: 'msg__editor' }, [ta, actions]);
 
-    cancel.addEventListener('click', () => {
-      editor.remove();
-      bubble.style.display = '';
-      editBtn.style.display = '';
-    });
+      bubble.style.display = 'none';
+      editBtn.style.display = 'none';
+      node.appendChild(editor);
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
 
-    save.addEventListener('click', () => {
-      const val = ta.value.trim();
-      if (val) bubble.textContent = val;
-      editor.remove();
-      bubble.style.display = '';
-      editBtn.style.display = '';
-    });
+      cancel.addEventListener('click', () => {
+        editor.remove();
+        bubble.style.display = '';
+        editBtn.style.display = '';
+      });
+
+      save.addEventListener('click', () => {
+        const val = ta.value.trim();
+        if (val) bubble.textContent = val;
+        editor.remove();
+        bubble.style.display = '';
+        editBtn.style.display = '';
+      });
+    }
   });
 
   const node = el('div', { class: 'msg msg--user' }, [bubble, editBtn]);
@@ -512,7 +544,7 @@ function quickReplies(options, { primaryIndex = -1, settleMs = 1500 } = {}) {
         c.classList.toggle('qreply--dim', c !== btn);
       });
       if (!bubble) {
-        bubble = userMsg(opt);
+        bubble = userMsg(opt, { options });
       } else {
         const t = bubble.querySelector('.msg__bubble');
         if (t) t.textContent = opt;
