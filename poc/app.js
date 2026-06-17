@@ -24,6 +24,7 @@ const state = {
   kb: {
     activeId: 'brand',         // Scout starts by filling Brand
     actionCallback: null,      // set during a confirmation moment; cleared on resolve
+    kbReveal: new Set(),   // tracks which brand card sections are unlocked
     brand:     { facts: [], expanded: false },
     trending:  { facts: [], expanded: false },
     algorithm: { facts: [], expanded: false },
@@ -88,6 +89,8 @@ const DEMO_BRAND = {
       id: 'warm-story',
       label: 'Warm, story-led',
       icon: 'i-heart',
+      recommended: true,
+      recommendedReason: "Story-led posts in your niche save 3× more than product-only content, and your audience responds strongest to personal context behind the craft.",
       sample: "Heritage isn't an aesthetic. It's a postcode and a person who can name the stitch. We learn first, then we make.",
     },
     {
@@ -181,6 +184,8 @@ const DEMO_INDIVIDUAL = {
       id: 'direct-generous',
       label: 'Direct, generous',
       icon: 'i-compass',
+      recommended: true,
+      recommendedReason: "Your top posts lead with a concrete observation, not a take. Your audience bookmarks things they can use — this voice matches that pattern best.",
       sample: "Most design-system posts skip the part that matters: adoption. Token tables are easy. Getting a PM to ship without DM-ing a designer is hard.",
     },
     {
@@ -307,6 +312,15 @@ function append(node) {
 function showView(id) {
   $$('.view').forEach(v => v.classList.remove('view--active'));
   $('#' + id).classList.add('view--active');
+  document.body.classList.toggle('mode-conv', id === 'view-conv' || id === 'view-dash');
+  // Sync sidebar active state
+  $$('.sidebar__btn[data-nav]').forEach(b => b.removeAttribute('aria-current'));
+  const navMap = { 'view-home': 'home', 'view-dash': 'analytics', 'view-conv': 'posts' };
+  const activeNav = navMap[id];
+  if (activeNav) {
+    const btn = document.querySelector(`.sidebar__btn[data-nav="${activeNav}"]`);
+    if (btn) btn.setAttribute('aria-current', 'page');
+  }
 }
 
 function setCrumbs(parts) {
@@ -356,20 +370,26 @@ async function scoutMsg(text, { beat = 600, typingFor = 700, charSpeed = 14 } = 
   const avatar = typingNode.querySelector('.msg__avatar--scout');
   avatar.classList.remove('msg__avatar--loading');
   avatar.innerHTML = '<svg><use href="#i-logo"/></svg>';
+  // Strip **bold** markers from the raw text before typewriter (so asterisks never show),
+  // but preserve the content — highlightKeywords will bold them via the escaped HTML pass.
+  const displayText = text.replace(/\*\*(.+?)\*\*/g, '$1');
   // Append text node and stream characters into it.
   const textNode = el('div', { class: 'msg__text' });
   typingNode.appendChild(textNode);
   scrollDown();
-  await typewriterInto(textNode, text, charSpeed);
+  await typewriterInto(textNode, displayText, charSpeed);
   // After typewriter completes, auto-emphasise key tokens for visual hierarchy.
-  textNode.innerHTML = highlightKeywords(textNode.textContent);
+  // Also re-bold any **…** spans that were in the original text.
+  const boldPhrases = [];
+  text.replace(/\*\*(.+?)\*\*/g, (_, p) => boldPhrases.push(p));
+  textNode.innerHTML = highlightKeywords(textNode.textContent, boldPhrases);
   await sleep(beat);
   return typingNode;
 }
 
 // Wraps numbers, brand/user names, and a small allow-list of key actions in
 // <strong class="kw"> so they read as visual anchors against the lighter body.
-function highlightKeywords(text) {
+function highlightKeywords(text, boldPhrases = []) {
   if (!text) return '';
   const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const tokens = [];
@@ -395,7 +415,16 @@ function highlightKeywords(text) {
     ].filter(Boolean).join('|'),
     'g'
   );
-  return escape(text).replace(combined, (m) => `<strong class="kw">${m}</strong>`);
+  let result = escape(text).replace(combined, (m) => `<strong class="kw">${m}</strong>`);
+  // Bold any explicitly marked phrases (from **…** in original text)
+  boldPhrases.forEach((phrase) => {
+    const safe = escForRe(escape(phrase));
+    result = result.replace(new RegExp(safe, 'g'), (m) => {
+      // Don't double-wrap if already inside <strong>
+      return m.startsWith('<strong') ? m : `<strong class="kw">${m}</strong>`;
+    });
+  });
+  return result;
 }
 
 async function typewriterInto(node, text, baseSpeed = 14) {
@@ -417,9 +446,46 @@ async function typewriterInto(node, text, baseSpeed = 14) {
 function userMsg(text) {
   // User messages render as a white right-aligned bubble. No avatar / name —
   // the bubble itself is the differentiation from Scout's plain-text turns.
-  const node = el('div', { class: 'msg msg--user' }, [
-    el('div', { class: 'msg__bubble' }, text),
+  const bubble = el('div', { class: 'msg__bubble' }, text);
+
+  const editBtn = el('button', { class: 'msg__edit-btn', type: 'button', 'aria-label': 'Edit message' }, [
+    el('span', { html: icon('i-pencil') }),
+    document.createTextNode('Edit'),
   ]);
+
+  editBtn.addEventListener('click', () => {
+    const current = bubble.textContent;
+    const ta = el('textarea', { class: 'msg__edit-ta' }, current);
+    ta.rows = Math.max(2, Math.ceil(current.length / 48));
+
+    const save = el('button', { class: 'msg__edit-save', type: 'button' }, 'Save');
+    const cancel = el('button', { class: 'msg__edit-cancel', type: 'button' }, 'Cancel');
+
+    const actions = el('div', { class: 'msg__edit-actions' }, [cancel, save]);
+    const editor = el('div', { class: 'msg__editor' }, [ta, actions]);
+
+    bubble.style.display = 'none';
+    editBtn.style.display = 'none';
+    node.appendChild(editor);
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+
+    cancel.addEventListener('click', () => {
+      editor.remove();
+      bubble.style.display = '';
+      editBtn.style.display = '';
+    });
+
+    save.addEventListener('click', () => {
+      const val = ta.value.trim();
+      if (val) bubble.textContent = val;
+      editor.remove();
+      bubble.style.display = '';
+      editBtn.style.display = '';
+    });
+  });
+
+  const node = el('div', { class: 'msg msg--user' }, [bubble, editBtn]);
   return append(node);
 }
 
@@ -479,7 +545,7 @@ function selectionChips(options, {
     const selected = new Set();
     const group = el('div', { class: 'chips-group' });
     const helperRow = maxSelections > 0
-      ? el('div', { class: 'chips-helper' }, `Pick up to ${maxSelections}`)
+      ? el('div', { class: 'chips-helper' }, `Pick ${maxSelections}`)
       : null;
     if (helperRow) group.appendChild(helperRow);
     const wrap = el('div', { class: 'chips' });
@@ -649,6 +715,15 @@ function awaitComposer({ placeholder = 'Message Scout…' } = {}) {
 }
 
 async function openingHero() {
+  // Only skip the picker if we have both an accountType in session AND an active
+  // checkpoint — meaning the user was mid-conversation and reloaded.
+  // A fresh login (no checkpoint) should always show the picker.
+  try {
+    const s  = JSON.parse(sessionStorage.getItem('fs_session') || '{}');
+    const ck = JSON.parse(sessionStorage.getItem(CHECKPOINT_KEY) || 'null');
+    if (s.accountType && ck) { state.accountType = s.accountType; return; }
+  } catch (e) {}
+
   // Greeting hero: Scout logo animates in, then the greeting beats type out,
   // then the profile-type picker reveals. No "Start" hook — splash 3's CTA
   // already framed the journey, so we land directly on Scout's introduction.
@@ -692,6 +767,11 @@ async function openingHero() {
     hero.querySelectorAll('.hero-block').forEach((b) => {
       b.addEventListener('click', () => {
         state.accountType = b.dataset.acct;
+        // Persist immediately so reload skips the picker
+        try {
+          const s = JSON.parse(sessionStorage.getItem('fs_session') || '{}');
+          sessionStorage.setItem('fs_session', JSON.stringify({ ...s, accountType: state.accountType }));
+        } catch (e) {}
         hero.querySelectorAll('.hero-block').forEach(x => x.setAttribute('data-picked', String(x === b)));
         resolve();
       }, { once: true });
@@ -1052,8 +1132,8 @@ function xProfileHeader(profile) {
     ? el('span', { class: 'x-header__verified', 'aria-label': 'Verified', html: icon('i-check') })
     : null;
   const isBrand = state.accountType === 'brand';
-  const bannerSrc  = isBrand ? '/BannerBrand.jpeg'  : '/Banner.jpeg';
-  const avatarSrc  = isBrand ? '/ProfileBrand.jpeg' : '/Profile.png';
+  const bannerSrc  = isBrand ? '/BannerBrand.jpeg'  : '/BannerIndividual.jpeg';
+  const avatarSrc  = isBrand ? '/ProfileBrand.jpeg' : '/ProfileIndividual.png';
 
   const card = el('div', { class: 'x-header' }, [
     el('div', { class: 'x-header__banner', style: `background-image: url('${bannerSrc}');` }),
@@ -1153,8 +1233,8 @@ function stat(value, label) {
 
 function xProfilePreviewEmpty(profile) {
   const isBrand = state.accountType === 'brand';
-  const bannerSrc = isBrand ? '/BannerBrand.jpeg'  : '/Banner.jpeg';
-  const avatarSrc = isBrand ? '/ProfileBrand.jpeg' : '/Profile.png';
+  const bannerSrc = isBrand ? '/BannerBrand.jpeg'  : '/BannerIndividual.jpeg';
+  const avatarSrc = isBrand ? '/ProfileBrand.jpeg' : '/ProfileIndividual.png';
   const card = el('div', { class: 'preview preview--empty' }, [
     el('div', { class: 'preview__banner', style: `background-image: url('${bannerSrc}');` }),
     el('div', { class: 'preview__identity' }, [
@@ -1274,9 +1354,350 @@ function kbBlockLabel(metaId) {
   return meta ? meta.label : metaId;
 }
 
+/* ── New split-panel KB renderer ─────────────────────────────────────── */
+const KB_NEW_META = {
+  brand:     { title: 'About You',         subtitle: 'Identity, products, niche, voice' },
+  trending:  { title: 'Trending',           subtitle: 'Trends, competitors, audience patterns' },
+  algorithm: { title: 'Platform Algorithm', subtitle: 'X algorithm and content rules' },
+};
+
+function renderKBNew(panel) {
+  let inner = panel.querySelector('.kb-panel__inner');
+
+  if (!inner) {
+    // Remove old structure (has inline display styles that override CSS)
+    panel.querySelectorAll('.kb-panel__head, .kb-panel__grid').forEach(n => n.remove());
+
+    // First build: create inner wrapper + all 3 cards
+    inner = el('div', { class: 'kb-panel__inner' });
+    panel.appendChild(inner);
+
+    const order = ['brand', 'trending', 'algorithm'];
+    order.forEach((kbId, i) => {
+      const card = buildKBNewCard(kbId, i === 0);
+      inner.appendChild(card);
+      // Stagger entry animation
+      setTimeout(() => card.classList.add('kb-card--visible'), 100 + i * 110);
+    });
+  }
+
+  // Update each card's content
+  ['brand', 'trending', 'algorithm'].forEach(kbId => {
+    const card = inner.querySelector(`[data-kb-card="${kbId}"]`);
+    if (card) updateKBNewCard(card, kbId);
+  });
+}
+
+function buildKBNewCard(kbId, isActive) {
+  const meta = KB_NEW_META[kbId];
+  const card = el('div', {
+    class: `kb-card ${isActive ? 'kb-card--active' : 'kb-card--upcoming'}`,
+    'data-kb-card': kbId,
+  }, [
+    el('div', { class: 'kb-card__hd' }, [
+      el('div', {}, [
+        el('div', { class: 'kb-card__title' }, meta.title),
+        el('div', { class: 'kb-card__subtitle' }, meta.subtitle),
+      ]),
+      isActive
+        ? el('div', { class: 'kb-card__status-tag' }, [
+            el('span', { class: 'kb-card__status-spin' }, '↻'),
+            document.createTextNode(' Building...'),
+          ])
+        : null,
+    ]),
+  ]);
+  return card;
+}
+
+function updateKBNewCard(card, kbId) {
+  const kb = state.kb[kbId];
+  const activeId = state.kb.activeId || 'brand';
+  const isActive = activeId === kbId;
+
+  // Promote card to active if newly active
+  if (isActive && card.classList.contains('kb-card--upcoming')) {
+    card.classList.remove('kb-card--upcoming');
+    card.classList.add('kb-card--active');
+    card.style.opacity = '1';
+    card.style.transform = 'none';
+    if (!card.querySelector('.kb-card__status-tag')) {
+      const hd = card.querySelector('.kb-card__hd');
+      if (hd) hd.appendChild(el('div', { class: 'kb-card__status-tag' }, [
+        el('span', { class: 'kb-card__status-spin' }, '↻'),
+        document.createTextNode(' Building...'),
+      ]));
+    }
+  }
+
+  if (!isActive) {
+    // Brand card keeps its content even after activeId moves on
+    if (kbId === 'brand') {
+      renderKBBrandCard(card);
+    }
+    return;
+  }
+
+  // Brand card gets a rich visual renderer
+  if (kbId === 'brand') {
+    renderKBBrandCard(card);
+    return;
+  }
+
+  // ── Generic shimmer / facts for non-brand cards ──
+  const hasFacts = kb.facts.length > 0;
+  const showActions = isActive && state.kb.actionCallback != null;
+  let shimmer = card.querySelector('.kb-shimmer-wrap');
+  let factsList = card.querySelector('.kb-facts-list');
+
+  if (hasFacts) {
+    if (shimmer) { shimmer.remove(); shimmer = null; }
+    if (!factsList) {
+      factsList = el('div', { class: 'kb-facts-list' });
+      card.appendChild(factsList);
+    }
+    kb.facts.forEach(fact => {
+      const factKey = `fact-${kbId}-${fact.label.toLowerCase().replace(/\s+/g, '-')}`;
+      let row = factsList.querySelector(`[data-fkey="${factKey}"]`);
+      if (!row) {
+        const valEl = el('span', { class: 'kb-fact-item__val', contenteditable: 'true', spellcheck: 'false' });
+        valEl.textContent = fact.value;
+        row = el('div', { class: 'kb-fact-item', 'data-fkey': factKey }, [
+          el('span', { class: 'kb-fact-item__lbl' }, fact.label),
+          valEl,
+        ]);
+        factsList.appendChild(row);
+        requestAnimationFrame(() => setTimeout(() => row.classList.add('kb-fact-item--visible'), 20));
+      } else {
+        const valEl = row.querySelector('.kb-fact-item__val');
+        if (valEl && !valEl.matches(':focus') && valEl.textContent !== fact.value) {
+          valEl.textContent = fact.value;
+        }
+      }
+    });
+  } else {
+    if (!shimmer) {
+      shimmer = el('div', { class: 'kb-shimmer-wrap' }, [
+        el('div', { class: 'kb-shimmer-line' }),
+        el('div', { class: 'kb-shimmer-line' }),
+        el('div', { class: 'kb-shimmer-line' }),
+      ]);
+      card.appendChild(shimmer);
+    }
+  }
+
+  let actionFooter = card.querySelector('.kb-card__actions');
+  if (showActions && !actionFooter) {
+    actionFooter = el('div', { class: 'kb-card__actions' }, [
+      el('button', { class: 'kb-card__btn kb-card__btn--ghost', onclick: () => state.kb.actionCallback && state.kb.actionCallback('edit') }, 'Not quite'),
+      el('button', { class: 'kb-card__btn kb-card__btn--primary', onclick: () => state.kb.actionCallback && state.kb.actionCallback('confirm') }, 'Looks right'),
+    ]);
+    card.appendChild(actionFooter);
+  } else if (!showActions && actionFooter) {
+    actionFooter.remove();
+  }
+}
+
+// ── Rich visual brand KB card ─────────────────────────────────────────────
+
+function renderKBBrandCard(card) {
+  const brand = state.brand;
+  if (!brand) return;
+  const reveal = state.kb.kbReveal || new Set();
+  const showActions = state.kb.actionCallback != null;
+  const isBrandActive = (state.kb.activeId || 'brand') === 'brand';
+
+  // Status tag: Building... → Ready to review → Done
+  const statusTag = card.querySelector('.kb-card__status-tag');
+  if (statusTag) {
+    if (showActions && !statusTag.classList.contains('kbs-ready')) {
+      statusTag.classList.add('kbs-ready');
+      statusTag.innerHTML = '✓ Ready to review';
+    } else if (!isBrandActive && !showActions) {
+      statusTag.innerHTML = '✓ Done';
+      statusTag.classList.add('kbs-done');
+      statusTag.classList.remove('kbs-ready');
+    }
+  }
+
+  // Mark card done when no longer the active KB
+  if (!isBrandActive && !card.classList.contains('kb-card--done')) {
+    card.classList.add('kb-card--done');
+  }
+
+  const sections = [
+    { id: 'identity', revealed: reveal.has('identity'),
+      build: () => buildKBIdentitySection(brand) },
+    { id: 'themes',   revealed: reveal.has('themes'),   build: () => buildKBThemesSection(brand) },
+    { id: 'topics',   revealed: reveal.has('topics'),   build: () => buildKBTopicsSection(brand) },
+    { id: 'audience', revealed: reveal.has('audience'), build: () => buildKBAudienceSection(brand) },
+    { id: 'peak',     revealed: reveal.has('peak'),     build: () => buildKBPeakSection(brand) },
+  ];
+
+  sections.forEach(({ id, revealed, build, version }, i) => {
+    const existing = card.querySelector(`[data-kbs="${id}"]`);
+    const footer = card.querySelector('.kb-card__actions');
+    const existingVer = existing?.dataset.kbsVer;
+
+    if (!existing) {
+      const section = revealed ? build() : buildKBShimmerSection(id);
+      section.dataset.kbs = id;
+      if (version) section.dataset.kbsVer = version;
+      if (footer) card.insertBefore(section, footer);
+      else card.appendChild(section);
+      const delay = 60 + i * 90;
+      requestAnimationFrame(() => setTimeout(() => section.classList.add('kbs--visible'), delay));
+    } else if (version && existingVer !== version && revealed) {
+      // Version upgrade (e.g. partial identity → full)
+      const real = build();
+      real.dataset.kbs = id;
+      if (version) real.dataset.kbsVer = version;
+      existing.classList.add('kbs--exiting');
+      setTimeout(() => {
+        existing.replaceWith(real);
+        requestAnimationFrame(() => setTimeout(() => real.classList.add('kbs--visible'), 20));
+      }, 220);
+    } else if (revealed && existing.classList.contains('kbs--shimmer')) {
+      // Shimmer → real section
+      const real = build();
+      real.dataset.kbs = id;
+      if (version) real.dataset.kbsVer = version;
+      existing.classList.add('kbs--exiting');
+      setTimeout(() => {
+        existing.replaceWith(real);
+        requestAnimationFrame(() => setTimeout(() => real.classList.add('kbs--visible'), 20));
+      }, 220);
+    }
+  });
+
+  // Action footer — only when active and actionCallback set
+  let actionFooter = card.querySelector('.kb-card__actions');
+  if (showActions && isBrandActive && !actionFooter) {
+    actionFooter = el('div', { class: 'kb-card__actions' }, [
+      el('button', { class: 'kb-card__btn kb-card__btn--ghost',
+        onclick: () => state.kb.actionCallback && state.kb.actionCallback('edit') }, 'Not quite'),
+      el('button', { class: 'kb-card__btn kb-card__btn--primary',
+        onclick: () => state.kb.actionCallback && state.kb.actionCallback('confirm') }, 'Looks right'),
+    ]);
+    card.appendChild(actionFooter);
+    requestAnimationFrame(() => setTimeout(() => actionFooter.classList.add('kbs--visible'), 20));
+  } else if ((!showActions || !isBrandActive) && actionFooter) {
+    actionFooter.remove();
+  }
+}
+
+function buildKBShimmerSection(id) {
+  const labels = { themes: 'THEMES', topics: 'TOP PERFORMING TOPICS', audience: 'AUDIENCE', peak: 'PEAK ACTIVITY' };
+  const lbl = labels[id];
+  const children = [];
+  if (lbl) children.push(el('div', { class: 'kbs__eyebrow' }, lbl));
+  children.push(el('div', { class: 'kb-shimmer-wrap kb-shimmer-wrap--sm' }, [
+    el('div', { class: 'kb-shimmer-line' }),
+    el('div', { class: 'kb-shimmer-line' }),
+  ]));
+  return el('div', { class: 'kbs kbs--shimmer' }, children);
+}
+
+function buildKBIdentitySection(brand) {
+  const displayName = state.user.name || brand.name;
+  return el('div', { class: 'kbs kbs--identity' }, [
+    el('div', { class: 'kbs__identity-top' }, [
+      el('div', { class: 'kbs__identity-name' }, displayName),
+      brand.location ? el('div', { class: 'kbs__identity-loc' }, brand.location) : null,
+    ].filter(Boolean)),
+    el('div', { class: 'kbs__identity-niche' }, brand.niche),
+    el('div', { class: 'kbs__identity-pos' }, brand.positioning),
+  ]);
+}
+
+function buildKBThemesSection(brand) {
+  if (!brand.themes || !brand.themes.length) return buildKBShimmerSection('themes');
+  const chips = brand.themes.map((t, i) => {
+    const chip = el('span', { class: 'kbs__chip' }, t);
+    setTimeout(() => chip.classList.add('kbs__chip--in'), 100 + i * 70);
+    return chip;
+  });
+  return el('div', { class: 'kbs kbs--themes' }, [
+    el('div', { class: 'kbs__eyebrow' }, 'THEMES'),
+    el('div', { class: 'kbs__chips' }, chips),
+  ]);
+}
+
+function buildKBTopicsSection(brand) {
+  if (!brand.topTopics || !brand.topTopics.length) return buildKBShimmerSection('topics');
+  const rows = brand.topTopics.map((t, i) => {
+    const fill = el('div', { class: 'kbs__bar-fill' });
+    setTimeout(() => { fill.style.width = t.engagement + '%'; }, 280 + i * 100);
+    return el('div', { class: 'kbs__topic-row' }, [
+      el('div', { class: 'kbs__topic-meta' }, [
+        el('span', { class: 'kbs__topic-name' }, t.name),
+        el('span', { class: 'kbs__topic-pct' }, '+' + t.engagement + '%'),
+      ]),
+      el('div', { class: 'kbs__bar' }, [fill]),
+    ]);
+  });
+  return el('div', { class: 'kbs kbs--topics' }, [
+    el('div', { class: 'kbs__eyebrow' }, 'TOP PERFORMING TOPICS'),
+    el('div', { class: 'kbs__topics-list' }, rows),
+  ]);
+}
+
+function buildKBAudienceSection(brand) {
+  const text = brand.audienceDefault || brand.primaryAudience || '';
+  const secondary = brand.secondaryAudience || '';
+  const photos = [
+    'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&fit=crop',
+    'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&fit=crop',
+    'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&fit=crop',
+  ];
+  const avatars = photos.map((src, i) => {
+    const img = el('img', { class: 'kbs__avatar-img', src, alt: '', loading: 'lazy' });
+    return el('div', { class: 'kbs__avatar', style: `z-index:${3-i}` }, [img]);
+  });
+  return el('div', { class: 'kbs kbs--audience' }, [
+    el('div', { class: 'kbs__eyebrow' }, 'AUDIENCE'),
+    el('div', { class: 'kbs__audience-row' }, [
+      el('div', { class: 'kbs__avatars' }, avatars),
+      el('div', { class: 'kbs__audience-text' }, [
+        el('div', { class: 'kbs__audience-primary' }, text),
+        secondary ? el('div', { class: 'kbs__audience-secondary' }, secondary) : null,
+      ].filter(Boolean)),
+    ]),
+  ]);
+}
+
+function buildKBPeakSection(brand) {
+  const peakText = (brand.peakActivity || '').toLowerCase();
+  let left = 52, width = 15;
+  if (peakText.includes('morning') || peakText.includes('9') || peakText.includes('10am') || peakText.includes('11am')) {
+    left = 28; width = 15;
+  } else if (peakText.includes('2') || peakText.includes('3pm') || peakText.includes('4pm') || peakText.includes('afternoon')) {
+    left = 52; width = 16;
+  } else if (peakText.includes('evening') || peakText.includes('8pm') || peakText.includes('9pm')) {
+    left = 70; width = 14;
+  }
+  const pill = el('div', { class: 'kbs__peak-pill', style: `left:${left}%;width:${width}%` });
+  return el('div', { class: 'kbs kbs--peak' }, [
+    el('div', { class: 'kbs__eyebrow' }, 'PEAK ACTIVITY'),
+    el('div', { class: 'kbs__peak-wrap' }, [
+      el('div', { class: 'kbs__peak-track' }, [pill]),
+      el('div', { class: 'kbs__peak-labels' }, ['12a','6a','12p','6p','12a'].map(t => el('span', {}, t))),
+    ]),
+  ]);
+}
+
+/* ── End new KB renderer ──────────────────────────────────────────────── */
+
 function renderKB() {
   const panel = document.getElementById('kb-panel');
   if (!panel) return;
+
+  // New split-panel mode: delegate to incremental renderer
+  if (document.body.classList.contains('mode-kb-open')) {
+    renderKBNew(panel);
+    return;
+  }
+
   panel.innerHTML = '';
 
   const anyExpanded = ['brand', 'trending', 'algorithm'].some(k => state.kb[k].expanded);
@@ -1423,7 +1844,6 @@ function renderKB() {
   panel.appendChild(grid);
 }
 
-
 function addKBFact(kbId, label, value) {
   const kb = state.kb[kbId];
   if (!kb) return;
@@ -1436,12 +1856,14 @@ function addKBFact(kbId, label, value) {
 }
 
 
-function renderDashboard() {
-  const dash = $('#dash');
-  dash.innerHTML = '';
+function renderHome() {
+  const home = $('#view-home');
+  home.innerHTML = '';
 
   const isBrand = state.accountType === 'brand';
   const firstName = (state.user.name || 'there').split(/\s+/)[0];
+
+  const wrap = el('div', { class: 'dash' });
 
   // ───── Welcome strip ──────────────────────────────────────────────────
   const heroTitle = state.publishedPost
@@ -1450,19 +1872,22 @@ function renderDashboard() {
   const heroSub = isBrand
     ? "Scout's tracking 3 trends and a peak window in your niche right now. Pick what's next."
     : "Scout's tracked 3 conversations and your peak window today. Pick what's next.";
-  dash.appendChild(el('div', { class: 'dash__welcome' }, [
+  wrap.appendChild(el('div', { class: 'dash__welcome' }, [
     el('h1', { class: 'dash__welcome-title' }, heroTitle),
     el('p',  { class: 'dash__welcome-sub' }, heroSub),
   ]));
 
+  // ───── Account snapshot (top) ─────────────────────────────────────────
+  wrap.appendChild(buildSnapshot(isBrand));
+
   // ───── Two Scout-powered CTAs ─────────────────────────────────────────
-  dash.appendChild(el('div', { class: 'dash__ctas' }, [
+  wrap.appendChild(el('div', { class: 'dash__ctas' }, [
     buildPostCTA(isBrand),
     buildCampaignCTA(isBrand),
   ]));
 
   // ───── Scout's pulse ──────────────────────────────────────────────────
-  dash.appendChild(el('div', { class: 'dash__pulse' }, [
+  wrap.appendChild(el('div', { class: 'dash__pulse' }, [
     el('div', { class: 'dash__pulse-head' }, [
       el('span', { class: 'dash__pulse-mark', html: icon('i-logo') }),
       el('h3', { class: 'dash__pulse-title' }, "Scout's pulse"),
@@ -1474,9 +1899,143 @@ function renderDashboard() {
     el('div', { class: 'dash__pulse-grid' }, [
       buildPulseTrend(isBrand),
       buildPulseWindow(isBrand),
-      buildPulseSetup(),
+      buildPulseSuggestion(isBrand),
     ]),
   ]));
+
+  // ───── Recent activity ────────────────────────────────────────────────
+  wrap.appendChild(buildRecentActivity(isBrand));
+
+  home.appendChild(wrap);
+}
+
+function goAnalytics() {
+  renderDashboard();
+  showView('view-dash');
+  setCrumbs(['Dashboard']);
+}
+
+function buildSnapshot(isBrand) {
+  const stats = isBrand ? [
+    { label: 'Followers',   value: '12.4k', delta: '+2.1%',  dir: 'up' },
+    { label: 'Reach · 7d',  value: '58.2k', delta: '+9.7%',  dir: 'up' },
+    { label: 'Engagement',  value: '4.6%',  delta: '+0.4pt', dir: 'up' },
+    { label: 'Posts live',  value: '34',    delta: null },
+  ] : [
+    { label: 'Followers',   value: '8,240', delta: '+1.2%',  dir: 'up' },
+    { label: 'Reach · 7d',  value: '42.1k', delta: '+8.4%',  dir: 'up' },
+    { label: 'Engagement',  value: '3.8%',  delta: '−0.2pt', dir: 'down' },
+    { label: 'Posts live',  value: '27',    delta: null },
+  ];
+
+  return el('div', { class: 'dash__snapshot' }, [
+    el('div', { class: 'dash__snapshot-head' }, [
+      el('span', { class: 'dash__snapshot-label' }, [
+        el('span', { class: 'dash__snapshot-mark', html: icon('i-x-logo') }),
+        document.createTextNode('Your account · last 7 days'),
+      ]),
+      el('button', { class: 'dash__snapshot-link', type: 'button', onclick: goAnalytics }, [
+        document.createTextNode('View analytics'),
+        el('span', { class: 'dash__snapshot-arrow', html: icon('i-arrow-right') }),
+      ]),
+    ]),
+    el('div', { class: 'dash__snapshot-grid' },
+      stats.map(s => el('button', { class: 'snap-tile', type: 'button', onclick: goAnalytics }, [
+        el('span', { class: 'snap-tile__label' }, s.label),
+        el('span', { class: 'snap-tile__value' }, s.value),
+        s.delta
+          ? el('span', { class: `snap-tile__delta snap-tile__delta--${s.dir}` }, s.delta)
+          : el('span', { class: 'snap-tile__delta snap-tile__delta--flat' }, 'No change'),
+      ])),
+    ),
+  ]);
+}
+
+function buildPulseSuggestion(isBrand) {
+  const data = isBrand
+    ? { text: 'Heritage Week peaks in ~3 hrs. Want a thread ready to ship?' }
+    : { text: 'Your peak window opens in ~3 hrs. Want a draft on AI tooling ready?' };
+  return el('button', { class: 'pulse pulse--suggest', type: 'button' }, [
+    el('div', { class: 'pulse__label' }, 'Scout suggests'),
+    el('div', { class: 'pulse__suggest-text' }, data.text),
+    el('span', { class: 'pulse__suggest-cta' }, [
+      document.createTextNode('Draft it'),
+      el('span', { class: 'pulse__suggest-arrow', html: icon('i-arrow-right') }),
+    ]),
+  ]);
+}
+
+function buildRecentActivity(isBrand) {
+  const preset = isBrand
+    ? { name: 'rasa', handle: '@rasa', verified: true,  avatar: '/ProfileBrand.jpeg' }
+    : { name: 'Abdullah Qamar', handle: '@aqamar', verified: false, avatar: '/ProfileIndividual.png' };
+
+  const brand    = state.brand || {};
+  const name     = brand.displayName || brand.name || preset.name;
+  const handle   = brand.handle || preset.handle;
+  const verified = brand.verified != null ? brand.verified : preset.verified;
+  const avatar   = preset.avatar;
+
+  const post = state.publishedPost || {
+    body: isBrand
+      ? "Heritage isn't an aesthetic. It's a postcode and a person who can name the stitch."
+      : "Most design-system posts skip the part that matters: adoption. Token tables are easy.",
+    postedAt: Date.now() - 1000 * 60 * 60 * 26,
+  };
+
+  const ms = Date.now() - (post.postedAt || Date.now());
+  const mins = Math.round(ms / 60000);
+  const rel = mins < 1 ? 'Just now'
+    : mins < 60 ? `${mins}m ago`
+    : mins < 1440 ? `${Math.round(mins / 60)}h ago`
+    : `${Math.round(mins / 1440)}d ago`;
+
+  const metrics = isBrand
+    ? [['i-reply', '41'], ['i-repost', '74'], ['i-heart', '312'], ['i-bar-chart', '5,210']]
+    : [['i-reply', '28'], ['i-repost', '42'], ['i-heart', '186'], ['i-bar-chart', '3,420']];
+
+  const goPosts = () => { showView('view-conv'); setCrumbs(['Posts']); };
+
+  const tweet = el('div', {
+    class: 'success-post success-post--recent',
+    role: 'button',
+    tabindex: '0',
+    onclick: goPosts,
+    onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goPosts(); } },
+  }, [
+    el('div', { class: 'success-post__head' }, [
+      el('div', { class: 'success-post__avatar', style: `background-image: url('${avatar}');` }),
+      el('div', { class: 'success-post__id' }, [
+        el('div', { class: 'success-post__name-row' }, [
+          el('span', { class: 'success-post__name' }, name),
+          verified ? el('span', { class: 'success-post__verified', html: icon('i-check') }) : null,
+          el('span', { class: 'success-post__handle' }, `${handle} · ${rel}`),
+        ]),
+      ]),
+      el('span', { class: 'success-post__badge success-post__badge--live' }, [
+        el('span', { class: 'success-post__badge-icon', html: icon('i-check') }),
+        document.createTextNode('Published'),
+      ]),
+    ]),
+    el('div', { class: 'success-post__body' }, post.body),
+    el('div', { class: 'success-post__metrics' },
+      metrics.map(([ic, value]) => el('div', { class: 'success-post__metric' }, [
+        el('span', { class: 'success-post__metric-icon', html: icon(ic) }),
+        el('span', { class: 'success-post__metric-value' }, value),
+      ])),
+    ),
+  ]);
+
+  return el('div', { class: 'dash__recent' }, [
+    el('div', { class: 'dash__recent-head' }, [
+      el('h3', { class: 'dash__recent-title' }, 'Recent activity'),
+      el('button', { class: 'dash__recent-link', type: 'button', onclick: goPosts }, [
+        document.createTextNode('All posts'),
+        el('span', { class: 'dash__recent-arrow', html: icon('i-arrow-right') }),
+      ]),
+    ]),
+    tweet,
+  ]);
 }
 
 function buildPostCTA(isBrand) {
@@ -1503,16 +2062,14 @@ function buildPostCTA(isBrand) {
   return el('button', {
     class: 'cta-card cta-card--post',
     type: 'button',
-    onclick: () => { /* hook for post-creation flow */ },
+    onclick: () => {},
   }, [
     el('div', { class: 'cta-card__pill' }, [
       el('span', { class: 'cta-card__pill-mark', html: icon('i-logo') }),
       document.createTextNode('Scout · drafts in your voice'),
     ]),
     el('h2', { class: 'cta-card__title' }, 'Craft your next post'),
-    el('p', { class: 'cta-card__sub' },
-      'Scout writes in your tone, on the trends that matter. You edit, you ship.',
-    ),
+    el('p', { class: 'cta-card__sub' }, 'Scout writes in your tone, on the trends that matter. You edit, you ship.'),
     stack,
     el('span', { class: 'cta-card__action' }, [
       document.createTextNode('Create post'),
@@ -1523,15 +2080,15 @@ function buildPostCTA(isBrand) {
 
 function buildCampaignCTA(isBrand) {
   const rows = isBrand ? [
-    { icon: 'i-trend',  label: 'Goals',     value: 'Audience growth · Sales' },
-    { icon: 'i-people', label: 'Audience',  value: 'Women 22–34 · Pakistan' },
-    { icon: 'i-cal',    label: 'Duration',  value: '12 days · Heritage Week' },
-    { icon: 'i-chat',   label: 'Posts',     value: '9 scheduled · 3 angles' },
+    { icon: 'i-trend',  label: 'Goals',    value: 'Audience growth · Sales' },
+    { icon: 'i-people', label: 'Audience', value: 'Women 22–34 · Pakistan' },
+    { icon: 'i-cal',    label: 'Duration', value: '12 days · Heritage Week' },
+    { icon: 'i-chat',   label: 'Posts',    value: '9 scheduled · 3 angles' },
   ] : [
-    { icon: 'i-trend',  label: 'Goals',     value: 'Thought leadership · Leads' },
-    { icon: 'i-people', label: 'Audience',  value: 'Designers & PMs · 25–40' },
-    { icon: 'i-cal',    label: 'Duration',  value: '14 days · Office hours' },
-    { icon: 'i-chat',   label: 'Posts',     value: '6 scheduled · 2 angles' },
+    { icon: 'i-trend',  label: 'Goals',    value: 'Thought leadership · Leads' },
+    { icon: 'i-people', label: 'Audience', value: 'Designers & PMs · 25–40' },
+    { icon: 'i-cal',    label: 'Duration', value: '14 days · Office hours' },
+    { icon: 'i-chat',   label: 'Posts',    value: '6 scheduled · 2 angles' },
   ];
 
   const brief = el('div', { class: 'cta-card__brief' }, [
@@ -1552,9 +2109,7 @@ function buildCampaignCTA(isBrand) {
       document.createTextNode('Scout · multi-post planning'),
     ]),
     el('h2', { class: 'cta-card__title' }, 'Run a campaign'),
-    el('p', { class: 'cta-card__sub' },
-      'Goals, audience, schedule, posts. Scout assembles the brief, you approve.',
-    ),
+    el('p', { class: 'cta-card__sub' }, 'Goals, audience, schedule, posts. Scout assembles the brief, you approve.'),
     brief,
     el('span', { class: 'cta-card__action' }, [
       document.createTextNode('Start campaign'),
@@ -1588,22 +2143,397 @@ function buildPulseWindow(isBrand) {
   ]);
 }
 
-function buildPulseSetup() {
-  // Total setup tasks. The demo path completes all of them; skips lower this.
-  const total = state.accountType === 'brand' ? 4 : 3;
+function renderDashboard() {
+  const dash = $('#dash');
+  dash.innerHTML = '';
+
+  const isBrand = state.accountType === 'brand';
+  const firstName = (state.user.name || 'there').split(/\s+/)[0];
+
+  // ── Header ────────────────────────────────────────────────────────────
+  dash.appendChild(el('div', { class: 'dash__header' }, [
+    el('div', { class: 'dash__header-left' }, [
+      el('h1', { class: 'dash__title' }, `Good to have you, ${firstName}.`),
+      el('div', { class: 'dash__header-meta' }, [
+        el('div', { class: 'dash__date-range' }, [
+          el('span', { html: icon('i-cal') }),
+          document.createTextNode('17 Jun – 17 Jul, 2026'),
+        ]),
+        el('span', { class: 'dash__meta-sep' }, '·'),
+        el('span', { class: 'dash__updated' }, 'Updated just now'),
+      ]),
+    ]),
+    el('button', { class: 'dash__new-post-btn', type: 'button' }, [
+      el('span', { html: icon('i-pencil') }),
+      document.createTextNode('New post'),
+    ]),
+  ]));
+
+  // ── KPI strip ─────────────────────────────────────────────────────────
+  const kpis = isBrand ? [
+    { label: 'Impressions',  value: '18,420', delta: '+22%',  up: true  },
+    { label: 'Likes',        value: '1,284',  delta: '+14%',  up: true  },
+    { label: 'Replies',      value: '97',     delta: '-3%',   up: false },
+    { label: 'Bookmarks',    value: '341',    delta: '+38%',  up: true  },
+    { label: 'Reposts',      value: '156',    delta: '+9%',   up: true  },
+  ] : [
+    { label: 'Impressions',  value: '14,200', delta: '+18%',  up: true  },
+    { label: 'Likes',        value: '487',    delta: '+12%',  up: true  },
+    { label: 'Replies',      value: '64',     delta: '-3%',   up: false },
+    { label: 'Bookmarks',    value: '189',    delta: '+34%',  up: true  },
+    { label: 'Reposts',      value: '23',     delta: '-8%',   up: false },
+  ];
+
+  dash.appendChild(el('div', { class: 'dash__kpi-strip' },
+    kpis.map(k => el('div', { class: 'dash__kpi-card' }, [
+      el('div', { class: 'dash__kpi-label' }, k.label),
+      el('div', { class: 'dash__kpi-value' }, k.value),
+      el('div', { class: 'dash__kpi-delta' + (k.up ? ' dash__kpi-delta--up' : ' dash__kpi-delta--down') }, [
+        el('span', { class: 'dash__kpi-arrow' }, k.up ? '↑' : '↓'),
+        document.createTextNode(k.delta),
+      ]),
+    ]))
+  ));
+
+  // ── Charts row (2-col: reach chart + age breakdown) ───────────────────
+  dash.appendChild(el('div', { class: 'dash__charts-row' }, [
+    buildReachChart(isBrand),
+    buildAgeChart(isBrand),
+  ]));
+
+  // ── Bottom row (3-col: heatmap + top post + audience) ─────────────────
+  dash.appendChild(el('div', { class: 'dash__analytics-row' }, [
+    buildHeatmap(),
+    buildTopPost(isBrand),
+    buildAudienceList(isBrand),
+  ]));
+}
+
+function buildLivePostCard(isBrand) {
+  const post = state.publishedPost;
+  const handle   = isBrand ? '@rasa'   : '@aqamar';
+  const name     = isBrand ? 'Rasa'    : 'Abdullah Qamar';
+  const avatarSrc = isBrand ? '/ProfileBrand.jpeg' : '/ProfileIndividual.png';
+  const timeAgo  = '2h ago';
+
+  const stats = [
+    { label: 'Impressions', value: '1.4K' },
+    { label: 'Likes',       value: '87'   },
+    { label: 'Replies',     value: '12'   },
+    { label: 'Bookmarks',   value: '34'   },
+  ];
+
+  // mini sparkline path
+  const sparkPath = 'M0,20 L10,18 L20,15 L30,12 L40,10 L50,7 L60,5 L70,3 L80,1';
+
+  return el('div', { class: 'dash__live-card' }, [
+    el('div', { class: 'dash__live-card-head' }, [
+      el('div', { class: 'dash__live-badge' }, [
+        el('span', { class: 'dash__live-dot' }),
+        document.createTextNode('Live · ' + timeAgo),
+      ]),
+      el('div', { class: 'dash__live-author' }, [
+        el('div', { class: 'dash__live-avatar', style: `background-image: url('${avatarSrc}')` }),
+        el('div', { class: 'dash__live-id' }, [
+          el('span', { class: 'dash__live-name' }, name),
+          el('span', { class: 'dash__live-handle' }, handle),
+        ]),
+      ]),
+    ]),
+    el('p', { class: 'dash__live-body' }, post.body),
+    el('div', { class: 'dash__live-stats' }, [
+      ...stats.map(s => el('div', { class: 'dash__live-stat' }, [
+        el('span', { class: 'dash__live-stat-val' }, s.value),
+        el('span', { class: 'dash__live-stat-lbl' }, s.label),
+      ])),
+      el('div', { class: 'dash__live-sparkline', html: `<svg viewBox="0 0 80 22" preserveAspectRatio="none" style="width:100%;height:100%"><path d="${sparkPath}" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/></svg>` }),
+    ]),
+  ]);
+}
+
+function buildIntelTrend(isBrand) {
+  const data = isBrand
+    ? { label: 'Top trend', value: '#SouthAsianHeritageWeek', delta: '+4.2×', detail: 'matches your themes' }
+    : { label: 'Top trend', value: 'AI tooling debate',       delta: '+5.6×', detail: 'on nuanced takes' };
+  return el('div', { class: 'intel-tile' }, [
+    el('div', { class: 'intel-tile__label' }, data.label),
+    el('div', { class: 'intel-tile__value' }, data.value),
+    el('div', { class: 'intel-tile__detail' }, [
+      el('span', { class: 'intel-tile__delta' }, data.delta),
+      document.createTextNode(' · ' + data.detail),
+    ]),
+  ]);
+}
+
+function buildIntelWindow(isBrand) {
+  const data = isBrand
+    ? { label: 'Peak window', value: '2–4 pm PKT', detail: 'In 3 hours · weekday peak' }
+    : { label: 'Peak window', value: '9–11 am PKT', detail: 'Tomorrow · global window' };
+  return el('div', { class: 'intel-tile' }, [
+    el('div', { class: 'intel-tile__label' }, data.label),
+    el('div', { class: 'intel-tile__value' }, data.value),
+    el('div', { class: 'intel-tile__detail' }, data.detail),
+  ]);
+}
+
+function buildIntelAudience(isBrand) {
+  const data = isBrand
+    ? { label: 'Audience', value: 'Women 22–34', detail: 'Pakistan · design-curious' }
+    : { label: 'Audience', value: 'Designers & PMs', detail: 'Age 25–40 · mobile-first' };
+  return el('div', { class: 'intel-tile' }, [
+    el('div', { class: 'intel-tile__label' }, data.label),
+    el('div', { class: 'intel-tile__value' }, data.value),
+    el('div', { class: 'intel-tile__detail' }, data.detail),
+  ]);
+}
+
+function buildIntelSetup() {
+  const total   = state.accountType === 'brand' ? 4 : 3;
   const skipped = state.skipped.size;
-  const done = Math.max(0, total - skipped);
-  const pct = Math.round((done / total) * 100);
+  const done    = Math.max(0, total - skipped);
+  const pct     = Math.round((done / total) * 100);
   const allDone = done === total;
 
-  return el('div', { class: 'pulse pulse--setup' + (allDone ? ' pulse--setup-complete' : '') }, [
-    el('div', { class: 'pulse__label' }, 'Setup'),
-    el('div', { class: 'pulse__value' }, allDone ? 'Complete' : `${done} of ${total} done`),
-    el('div', { class: 'pulse__bar', 'aria-valuenow': String(pct), role: 'progressbar' }, [
-      el('div', { class: 'pulse__bar-fill', style: `width: ${pct}%` }),
+  return el('div', { class: 'intel-tile intel-tile--setup' + (allDone ? ' intel-tile--done' : '') }, [
+    el('div', { class: 'intel-tile__label' }, 'Setup'),
+    el('div', { class: 'intel-tile__value' }, allDone ? 'Complete' : `${done} / ${total}`),
+    el('div', { class: 'intel-tile__bar' }, [
+      el('div', { class: 'intel-tile__bar-fill', style: `width: ${pct}%` }),
     ]),
-    el('div', { class: 'pulse__detail' },
-      allDone ? 'Knowledge, voice, and tracking locked in.' : 'Finish to sharpen Scout.',
+    el('div', { class: 'intel-tile__detail' },
+      allDone ? 'Knowledge, voice, and tracking locked in.' : 'Finish setup to sharpen Scout.',
+    ),
+  ]);
+}
+
+function buildDraftCard(isBrand, index) {
+  const drafts = isBrand ? [
+    { angle: 'Confessional, specific', tone: 'Reflective', body: "Workshop reels outperform studio reels 1.8× for us. Half the engagement comes from the mistakes we leave in." },
+    { angle: 'Sharp, contrarian',      tone: 'Direct',     body: "Heritage isn't an aesthetic — it's a postcode and a grandmother who can name every stitch without looking." },
+  ] : [
+    { angle: 'Sharp, contrarian',      tone: 'Direct',     body: "'AI replaces designers' is a take from people who don't ship. The real question is which 30% of the job goes first, and whether you're spending 30% of your time there." },
+    { angle: 'Confessional, specific', tone: 'Honest',     body: "First time I shipped a design system, I optimized the wrong thing for six months. I made the buttons perfect. Nobody used the buttons." },
+  ];
+  const d = drafts[index] || drafts[0];
+
+  return el('div', { class: 'dash__draft-card' }, [
+    el('div', { class: 'dash__draft-chips' }, [
+      el('span', { class: 'dash__draft-chip' }, d.angle),
+      el('span', { class: 'dash__draft-chip' }, d.tone),
+    ]),
+    el('p', { class: 'dash__draft-body' }, d.body),
+    el('button', { class: 'dash__draft-btn', type: 'button' }, [
+      document.createTextNode('Edit & publish'),
+      el('span', { html: icon('i-arrow-right') }),
+    ]),
+  ]);
+}
+
+function buildNextPostCTA(isBrand) {
+  const hint = isBrand
+    ? 'Based on your niche, audience, and trending signals.'
+    : "Based on your voice, audience, and what\u2019s performing in your space.";
+  return el('button', { class: 'dash__create-cta', type: 'button' }, [
+    el('div', { class: 'dash__create-cta-left' }, [
+      el('div', { class: 'dash__create-pill' }, [
+        el('span', { html: icon('i-logo') }),
+        document.createTextNode('Scout'),
+      ]),
+      el('div', { class: 'dash__create-title' }, 'Craft your next post'),
+      el('div', { class: 'dash__create-sub' }, hint),
+    ]),
+    el('span', { class: 'dash__create-arrow', html: icon('i-arrow-right') }),
+  ]);
+}
+
+function buildReachChart(isBrand) {
+  const follower = [110,118,125,130,122,138,145,152,148,160,168,175,170,182,190,185,195,208,200,215,222,218,230,240,235,248,255,250,265,272];
+  const other    = [75, 80, 78, 85, 82, 90, 97, 102,100,108,114,120,117,125,132,128,136,144,140,150,155,152,161,168,164,172,178,175,184,190];
+
+  const W = 560, H = 200;
+  const pad = { t: 20, r: 16, b: 30, l: 44 };
+  const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+  const n = follower.length;
+  const allV = [...follower, ...other];
+  const minV = Math.min(...allV), maxV = Math.max(...allV);
+  const xs = i => pad.l + (i / (n - 1)) * pw;
+  const ys = v => pad.t + ph - ((v - minV) / (maxV - minV)) * ph;
+  const pts = d => d.map((v, i) => `${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join(' ');
+
+  const fPts = pts(follower), oPts = pts(other);
+  const fArea = `${fPts} ${(pad.l + pw).toFixed(1)},${(pad.t + ph).toFixed(1)} ${pad.l},${(pad.t + ph).toFixed(1)}`;
+  const oArea = `${oPts} ${(pad.l + pw).toFixed(1)},${(pad.t + ph).toFixed(1)} ${pad.l},${(pad.t + ph).toFixed(1)}`;
+
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(t => {
+    const y = (pad.t + t * ph).toFixed(1);
+    const val = Math.round(maxV - t * (maxV - minV));
+    return `<line x1="${pad.l}" y1="${y}" x2="${W - pad.r}" y2="${y}" stroke="#f0f0f2" stroke-width="1"/>
+            <text x="${pad.l - 8}" y="${parseFloat(y) + 4}" fill="#a0a0ab" font-size="10" text-anchor="end">${val}</text>`;
+  }).join('');
+
+  const xLabels = [0, 5, 10, 15, 20, 25, 29].map(i =>
+    `<text x="${xs(i).toFixed(1)}" y="${H - 6}" fill="#a0a0ab" font-size="10" text-anchor="middle">${i + 1}</text>`
+  ).join('');
+
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:200px">
+    ${gridLines}${xLabels}
+    <polygon points="${fArea}" fill="rgba(91,91,245,0.07)"/>
+    <polyline points="${fPts}" fill="none" stroke="#5B5BF5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <polygon points="${oArea}" fill="rgba(52,211,153,0.07)"/>
+    <polyline points="${oPts}" fill="none" stroke="#34D399" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`;
+
+  return el('div', { class: 'dash__chart-card' }, [
+    el('div', { class: 'dash__chart-head' }, [
+      el('span', { class: 'dash__chart-title' }, 'Profile reach growth'),
+      el('div', { class: 'dash__chart-legend' }, [
+        el('span', { class: 'dash__chart-legend-item' }, [
+          el('span', { class: 'dash__chart-legend-dot', style: 'background:#5B5BF5' }),
+          document.createTextNode('Follower'),
+        ]),
+        el('span', { class: 'dash__chart-legend-item' }, [
+          el('span', { class: 'dash__chart-legend-dot', style: 'background:#34D399' }),
+          document.createTextNode('Other'),
+        ]),
+      ]),
+    ]),
+    el('div', { class: 'dash__chart-body', html: svg }),
+  ]);
+}
+
+function buildAgeChart(isBrand) {
+  const segments = isBrand ? [
+    { range: '18–24', pct: 32, color: '#5B5BF5' },
+    { range: '25–34', pct: 41, color: '#7C7CF8' },
+    { range: '35–44', pct: 18, color: '#A5A5FB' },
+    { range: '45+',   pct:  9, color: '#D0D0FD' },
+  ] : [
+    { range: '18–24', pct: 28, color: '#5B5BF5' },
+    { range: '25–34', pct: 45, color: '#7C7CF8' },
+    { range: '35–44', pct: 18, color: '#A5A5FB' },
+    { range: '45+',   pct:  9, color: '#D0D0FD' },
+  ];
+
+  const maxPct = Math.max(...segments.map(s => s.pct));
+  const W = 260, H = 180;
+  const pad = { t: 20, r: 36, b: 28, l: 44 };
+  const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+  const barH = Math.floor(ph / segments.length) - 6;
+
+  const bars = segments.map((s, i) => {
+    const barW = (s.pct / maxPct) * pw;
+    const y = pad.t + i * (barH + 6);
+    return `<text x="${pad.l - 8}" y="${y + barH / 2 + 4}" fill="#71717a" font-size="11" text-anchor="end">${s.range}</text>
+            <rect x="${pad.l}" y="${y}" width="${barW.toFixed(1)}" height="${barH}" rx="3" fill="${s.color}"/>
+            <text x="${pad.l + barW + 6}" y="${y + barH / 2 + 4}" fill="#3f3f46" font-size="11" font-weight="600">${s.pct}%</text>`;
+  }).join('');
+
+  const svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">
+    ${bars}
+  </svg>`;
+
+  return el('div', { class: 'dash__chart-card dash__chart-card--narrow' }, [
+    el('div', { class: 'dash__chart-head' }, [
+      el('span', { class: 'dash__chart-title' }, 'Audience by age'),
+    ]),
+    el('div', { class: 'dash__chart-body', html: svg }),
+  ]);
+}
+
+function buildHeatmap() {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+  // intensity 0–4
+  const data = [
+    [0, 2, 1, 3, 2, 0, 0],
+    [1, 3, 4, 2, 3, 1, 0],
+    [0, 2, 3, 4, 2, 0, 0],
+    [1, 1, 2, 3, 1, 0, 0],
+  ];
+  const colors = ['#f4f4f6', '#c7c7fb', '#9999f8', '#6b6bf5', '#3d3dc8'];
+
+  const cells = weeks.map((w, wi) =>
+    el('div', { class: 'dash__heatmap-row' }, [
+      el('span', { class: 'dash__heatmap-week' }, w),
+      ...days.map((d, di) =>
+        el('div', {
+          class: 'dash__heatmap-cell',
+          style: `background:${colors[data[wi][di]]}`,
+          title: `${w} ${d}: intensity ${data[wi][di]}`,
+        })
+      ),
+    ])
+  );
+
+  return el('div', { class: 'dash__analytics-card' }, [
+    el('div', { class: 'dash__chart-head' }, [
+      el('span', { class: 'dash__chart-title' }, 'Post timing heatmap'),
+    ]),
+    el('div', { class: 'dash__heatmap' }, [
+      el('div', { class: 'dash__heatmap-header' }, [
+        el('span', { class: 'dash__heatmap-week' }),
+        ...days.map(d => el('span', { class: 'dash__heatmap-day' }, d)),
+      ]),
+      ...cells,
+    ]),
+  ]);
+}
+
+function buildTopPost(isBrand) {
+  const post = state.publishedPost || {
+    body: isBrand
+      ? "My nani's dupatta has stitches I can't name. This week I'm trying to learn them, properly."
+      : "'AI replaces designers' is a take from people who don't ship. The real question is which 30% of the job goes first.",
+  };
+  const stats = [
+    { label: 'Rank',      value: '#1'   },
+    { label: 'ER',        value: '85%'  },
+    { label: 'Reach',     value: '1.4K' },
+    { label: 'Bookmarks', value: '34'   },
+  ];
+
+  return el('div', { class: 'dash__analytics-card' }, [
+    el('div', { class: 'dash__chart-head' }, [
+      el('span', { class: 'dash__chart-title' }, 'Top performing post'),
+      el('span', { class: 'dash__chart-more' }, '···'),
+    ]),
+    el('div', { class: 'dash__top-post' }, [
+      el('p', { class: 'dash__top-post-body' }, post.body.slice(0, 120) + (post.body.length > 120 ? '…' : '')),
+      el('div', { class: 'dash__top-post-stats' },
+        stats.map(s => el('div', { class: 'dash__top-post-stat' }, [
+          el('span', { class: 'dash__top-post-stat-label' }, s.label),
+          el('span', { class: 'dash__top-post-stat-value' }, s.value),
+        ]))
+      ),
+    ]),
+  ]);
+}
+
+function buildAudienceList(isBrand) {
+  const items = isBrand ? [
+    { country: 'Pakistan',      count: '2,840' },
+    { country: 'UAE',           count: '1,120' },
+    { country: 'United Kingdom', count: '634'  },
+    { country: 'United States', count: '487'  },
+    { country: 'Canada',        count: '213'  },
+  ] : [
+    { country: 'United States', count: '1,267' },
+    { country: 'Pakistan',      count: '874'   },
+    { country: 'India',         count: '541'   },
+    { country: 'United Kingdom', count: '398'  },
+    { country: 'Canada',        count: '213'   },
+  ];
+
+  return el('div', { class: 'dash__analytics-card' }, [
+    el('div', { class: 'dash__chart-head' }, [
+      el('span', { class: 'dash__chart-title' }, 'Audience location'),
+      el('span', { class: 'dash__chart-more' }, '···'),
+    ]),
+    el('div', { class: 'dash__audience-list' },
+      items.map(item => el('div', { class: 'dash__audience-row' }, [
+        el('span', { class: 'dash__audience-country' }, item.country),
+        el('span', { class: 'dash__audience-count' }, item.count),
+      ]))
     ),
   ]);
 }
@@ -1621,12 +2551,15 @@ async function step1_opening() {
 
   const persona = state.accountType === 'brand' ? DEMO_BRAND : DEMO_INDIVIDUAL;
   state.brand = { ...persona };
+  state.kb.kbReveal = new Set(); // identity reveals only after X connect or website scan
   state.audience = persona.audienceDefault;
   state.tone = persona.tone;
   state.competitors = persona.competitorsDefault;
 
   // KB depends on accountType (brands track product/niche, individuals track
   // topics/expertise). Render only now that the persona is known.
+  // Keep KB hidden until after the connect-X step completes.
+  document.body.classList.add('mode-connecting');
   renderKB();
 
   // Scout greets the user warmly — the conversation begins immediately after
@@ -1765,6 +2698,25 @@ function renderKpiCard(goals, kpiMap) {
   append(card);
 }
 
+async function openKBPanel() {
+  // Freeze stream width at its current pixel size so text can't reflow during the split
+  const streamEl = document.querySelector('#stream');
+  if (streamEl) streamEl.style.width = streamEl.offsetWidth + 'px';
+
+  document.body.classList.remove('mode-connecting');
+  document.body.classList.add('mode-kb-open');
+  document.body.classList.add('mode-kb-transitioning');
+  renderKB();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.body.classList.add('mode-kb-visible');
+    setTimeout(() => {
+      document.body.classList.remove('mode-kb-transitioning');
+      // Release the frozen width now that the fade-in is done
+      if (streamEl) streamEl.style.width = '';
+    }, 400);
+  }));
+}
+
 async function step5_x_connect() {
   await scoutMsg(
     "First step, connect the account where you publish. I'll read what's working and build from there.",
@@ -1781,22 +2733,48 @@ async function step5_x_connect() {
     return 'skipped-entirely';
   }
 
-  // OAuth simulation. The connect card stays visible behind the modal so the
-  // user keeps context. The X row marks as "Connecting…" while modal is open,
-  // then flips to "Connected" after authorization.
+  // Show OAuth modal. If cancelled, reset the X row and wait for the user to
+  // click Connect again on the same card — repeat until authorized.
   if (card) markConnectXState(card, 'connecting');
-  await fakeOAuthModal();
+  while (true) {
+    const oauthResult = await fakeOAuthModal();
+    if (oauthResult !== 'cancelled') break; // authorized → exit loop
+
+    // Cancel: just reset the button, keep the card, wait for another click.
+    if (card) markConnectXState(card, null);
+    await new Promise((resolve) => {
+      const xBtn = card?.querySelector('.platform--x');
+      if (!xBtn) { resolve(); return; }
+      const handler = () => { xBtn.removeEventListener('click', handler); resolve(); };
+      xBtn.addEventListener('click', handler);
+    });
+    if (card) markConnectXState(card, 'connecting');
+  }
   if (card) markConnectXState(card, 'connected');
+
+  // Now that the user has authorized, open the KB panel
+  openKBPanel();
+
+  // Update the brand profile to reflect the logged-in user.
+  // Derive a plausible handle from their name (lowercase, no spaces).
+  const loggedInName = state.user.name || state.brand.name;
+  const nameParts = loggedInName.trim().split(/\s+/);
+  const firstInitial = nameParts[0]?.[0]?.toLowerCase() || '';
+  const lastName = (nameParts[nameParts.length - 1] || '').toLowerCase();
+  const loggedInHandle = '@' + firstInitial + lastName;
+  state.brand.name        = loggedInName;
+  state.brand.displayName = loggedInName;
+  state.brand.handle      = loggedInHandle;
+
   userMsg('Authorized X');
 
   await scoutMsg(
     "Connected. Thanks. Let me read what's there.",
     { typingFor: 700, beat: 400 }
   );
-  // After Scout's ack, retire the widget gracefully.
+  // Card stays in the chat — just mark it as past/inert so it looks settled.
   if (card) {
-    card.classList.add('connect--retiring');
-    setTimeout(() => card.remove(), 400);
+    card.closest('.msg')?.classList.add('msg--past');
   }
   return 'connected-scan';
 }
@@ -1815,6 +2793,10 @@ function markConnectXState(card, stateName) {
     xRow.classList.remove('platform--connecting');
     xRow.classList.add('platform--connected');
     cta.textContent = 'Connected';
+  } else {
+    // reset — cancelled
+    xRow.classList.remove('platform--connecting', 'platform--connected');
+    cta.textContent = 'Connect';
   }
 }
 
@@ -1848,7 +2830,13 @@ function fakeOAuthModal() {
       backdrop.classList.add('oauth-backdrop--exiting');
       await sleep(220);
       backdrop.remove();
-      resolve();
+      resolve('authorized');
+    });
+    dialog.querySelector('.btn-ghost').addEventListener('click', async () => {
+      backdrop.classList.add('oauth-backdrop--exiting');
+      await sleep(220);
+      backdrop.remove();
+      resolve('cancelled');
     });
   });
 }
@@ -1898,7 +2886,17 @@ async function step6_profile_scan() {
     addKBFact('brand', 'Peak activity', state.accountType === 'brand' ? '2–4pm PKT' : '9–11am PKT');
   }
   scrollDown();
-  await sleep(1200);
+  await sleep(800);
+  // Reveal KB sections sequentially so the user sees them fill in one by one
+  state.kb.kbReveal.add('identity'); renderKB();
+  await sleep(500);
+  state.kb.kbReveal.add('themes'); renderKB();
+  await sleep(400);
+  state.kb.kbReveal.add('topics'); renderKB();
+  await sleep(400);
+  state.kb.kbReveal.add('audience'); renderKB();
+  await sleep(300);
+  state.kb.kbReveal.add('peak'); renderKB();
 }
 
 function buildProfileSummary() {
@@ -1937,17 +2935,44 @@ async function step_brand_review_first() {
       : "Here's what I've pulled together about you. Take a look on the right and accept when it reads right.",
     { typingFor: 1300, beat: 400 }
   );
-  openBrandDrawer();
-  await refreshBrandDrawer();
 
   addKBFact('brand', 'Niche', state.brand.niche);
   addKBFact('brand', 'Themes', state.brand.themes.join(', '));
   if (isBrand) addKBFact('brand', 'Products', state.brand.products.join(', '));
 
-  revealBrandDrawerAccept();
-  await new Promise((resolve) => { drawerState.acceptResolver = resolve; });
-  userMsg('Accept');
-  closeBrandDrawer();
+  // Show action buttons inside the KB card. Loop until user confirms.
+  while (true) {
+    const action = await new Promise((resolve) => {
+      state.kb.actionCallback = (a) => {
+        state.kb.actionCallback = null;
+        renderKB();
+        resolve(a);
+      };
+      renderKB();
+    });
+
+    if (action === 'confirm') {
+      userMsg('Looks right');
+      break;
+    }
+
+    // "Not quite" — ask what's off, enable the composer, wait for their correction.
+    userMsg('Not quite');
+    await scoutMsg(
+      "What needs adjusting? Tell me what's off and I'll update it.",
+      { typingFor: 700, beat: 400 }
+    );
+    await awaitComposer({ placeholder: 'What should I change?' });
+    await scoutMsg(
+      "Got it, updated. Take another look and let me know if that reads right.",
+      { typingFor: 800, beat: 400 }
+    );
+    // Loop back to show the action buttons again
+  }
+
+  // About You is accepted — activate Trending KB
+  state.kb.activeId = 'trending';
+  renderKB();
 }
 
 // ------------------------ Brand / About-you drawer ------------------------
@@ -2349,11 +3374,24 @@ async function step_audience_infer() {
   );
 
   if (verdict.startsWith('Adjust') || verdict.startsWith('Different')) {
-    const next = await inlineTextInput({
-      placeholder: 'Who are you actually targeting?',
-      submitLabel: 'Use this',
-      initial: verdict.startsWith('Adjust') ? proposal : '',
-    });
+    // Loop until the user gives a real audience description, nudging if off-topic.
+    let next = '';
+    while (true) {
+      next = await inlineTextInput({
+        placeholder: 'Who are you actually targeting?',
+        submitLabel: 'Use this',
+        initial: verdict.startsWith('Adjust') ? proposal : '',
+      });
+      // Off-topic guard: audience description should be specific enough (> 15 chars)
+      // and shouldn't look like a non-answer.
+      const trimmed = (next || '').trim();
+      const looksLikeAudience = trimmed.length >= 15;
+      if (looksLikeAudience) break;
+      await scoutMsg(
+        "Let's keep this focused — who specifically are you writing for? Think about their role, what they care about, and why they'd follow you.",
+        { typingFor: 900, beat: 400 }
+      );
+    }
     state.audience = next || proposal;
     await scoutMsg("Updated. I'll work with that.", { typingFor: 600, beat: 300 });
   } else {
@@ -2361,6 +3399,8 @@ async function step_audience_infer() {
     await scoutMsg("Good. That's the lens I'll write into.", { typingFor: 700, beat: 300 });
   }
   addKBFact('brand', 'Audience', state.audience);
+  state.kb.kbReveal.add('audience');
+  renderKB();
   refreshBrandDrawer();
 }
 
@@ -2372,12 +3412,34 @@ async function step_brand_review_final() {
     "Here's the complete picture on your right. Take a look, and accept when it reads right.",
     { typingFor: 1200, beat: 400 }
   );
-  openBrandDrawer();
-  await refreshBrandDrawer();
-  revealBrandDrawerAccept();
-  await new Promise((resolve) => { drawerState.acceptResolver = resolve; });
-  userMsg('Accept');
-  closeBrandDrawer();
+
+  // Show action buttons inside the KB card. Loop until user confirms.
+  while (true) {
+    const action = await new Promise((resolve) => {
+      state.kb.actionCallback = (a) => {
+        state.kb.actionCallback = null;
+        renderKB();
+        resolve(a);
+      };
+      renderKB();
+    });
+
+    if (action === 'confirm') {
+      userMsg('Looks right');
+      break;
+    }
+
+    userMsg('Not quite');
+    await scoutMsg(
+      "What needs adjusting? Tell me what's off and I'll update it.",
+      { typingFor: 700, beat: 400 }
+    );
+    await awaitComposer({ placeholder: 'What should I change?' });
+    await scoutMsg(
+      "Got it, updated. Take another look and let me know if that reads right.",
+      { typingFor: 800, beat: 400 }
+    );
+  }
 }
 
 // Tone/voice as its own beat: 3 editable cards, each a sample post in a
@@ -2388,10 +3450,17 @@ async function step_tone_voice() {
   const directions = state.brand.toneDirections || [];
   if (!directions.length) return;
 
+  const recommended = directions.find(d => d.recommended);
   const lead = state.accountType === 'brand'
     ? "Based on your brand and the trends I'm tracking, here are three tones that stood out — which one would you prefer?"
     : "Based on you and the trends I'm tracking, here are three tones that stood out — which one would you prefer?";
   await scoutMsg(lead, { typingFor: 1100, beat: 400 });
+  if (recommended) {
+    await scoutMsg(
+      `I'd go with **${recommended.label}** — ${recommended.recommendedReason} The other two are solid if you want a different feel.`,
+      { typingFor: 1000, beat: 300 }
+    );
+  }
 
   await new Promise((resolve) => {
     const list = el('div', { class: 'tone-list' });
@@ -2413,7 +3482,8 @@ async function step_tone_voice() {
     };
 
     directions.forEach((d) => {
-      const card = el('button', { class: 'tone-card', type: 'button' }, [
+      const card = el('button', { class: 'tone-card' + (d.recommended ? ' tone-card--recommended' : ''), type: 'button' }, [
+        d.recommended ? el('div', { class: 'tone-card__rec-banner' }, 'Recommended') : null,
         el('div', { class: 'tone-card__head' }, [
           el('span', { class: 'tone-card__pill' }, [
             el('span', { class: 'tone-card__pill-icon', html: icon(d.icon || 'i-sparkle') }),
@@ -2454,34 +3524,91 @@ async function step_tone_voice() {
 // product lines. Multi-select with custom add — same shape as goals.
 async function step_topics_individual() {
   await scoutMsg(
-    "Which topics do you actually want to talk about? Pick the ones you want me to track and draft for.",
+    "Which topics do you actually want to talk about? Pick 3 — keep them tight and related so your content has a clear through-line.",
     { typingFor: 900, beat: 300 }
   );
   const pool = (state.brand.topics && state.brand.topics.length)
     ? state.brand.topics
     : (DEMO_INDIVIDUAL.topics || []);
-  state.topics = await selectionChips(pool, { allowCustom: true, customLabel: 'Add your own' });
+  state.topics = await selectionChips(pool, { allowCustom: true, customLabel: 'Add your own', maxSelections: 3 });
   refreshBrandDrawer();
   await scoutMsg("Got it. I'll keep an eye on those.", { typingFor: 600, beat: 300 });
   addKBFact('brand', 'Topics', state.topics.join(', '));
 }
 
-// New: replaces the old action-tile picker. The composer is the universal
-// text input. User can paste website link, upload docs, or describe in their
-// own words. For the demo we auto-stage one URL paste so the presenter
-// doesn't have to type for every prompt.
+// stepMaterials — asks for optional extra context after X connect, or required
+// context when X was skipped. No auto-submission; the user decides what to share.
 async function stepMaterials() {
   const xConnected = !state.skipped.has('x-connect');
 
-  await scoutMsg(
-    xConnected
-      ? "Want to deepen this? Drop your website link or upload any brand docs in the chat. Or describe in your own words. Whatever you share, I'll learn from."
-      : "To get me up to speed, share what you've got. Drop your website link, upload brand docs, or describe in your own words. Anything works.",
-    { typingFor: 1300, beat: 500 }
-  );
+  // Returns a promise that resolves with either the typed text or 'skip'
+  // whichever happens first — composer input or the skip quick-reply button.
+  function awaitInputOrSkip(skipLabel) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const settle = (value) => {
+        if (settled) return;
+        settled = true;
+        // Clean up composer state
+        pendingComposerResolver = null;
+        setComposerEnabled(false);
+        $('#composer-input').placeholder = 'Message Scout…';
+        resolve(value);
+      };
 
-  // Demo: auto-stage a URL paste in the chat
-  await sleep(900);
+      // Enable the composer input
+      const input = $('#composer-input');
+      input.placeholder = 'Paste a link or describe yourself…';
+      pendingComposerResolver = (v) => settle(v);
+      setComposerEnabled(true);
+      requestAnimationFrame(() => input.focus());
+
+      // Also show a skip button
+      const wrap = el('div', { class: 'qreplies' });
+      const btn = el('button', { class: 'qreply' }, skipLabel);
+      btn.addEventListener('click', () => {
+        wrap.classList.add('qreplies--chosen');
+        btn.disabled = true;
+        userMsg(skipLabel);
+        settle('skip');
+      });
+      wrap.appendChild(btn);
+      append(wrap);
+      scrollDown();
+    });
+  }
+
+  if (xConnected) {
+    // X gave us a solid foundation — extra context is optional.
+    await scoutMsg(
+      "I've got a good read from your X profile. If you have a website, a portfolio link, or anything else you'd like me to factor in, drop it here — I'll pull from it. Or tap Skip to move on.",
+      { typingFor: 1300, beat: 500 }
+    );
+    const reply = await awaitInputOrSkip('Skip');
+    if (reply === 'skip') {
+      return;
+    }
+  } else {
+    // X was skipped — we have almost nothing. Make the ask clear but not pressuring.
+    await scoutMsg(
+      "Without your account data, I'm starting from scratch — which means the content I generate will be generic until I know more about you.",
+      { typingFor: 1100, beat: 600 }
+    );
+    await scoutMsg(
+      "Share anything that helps: a website, a portfolio, a short description of what you do and who you write for. Even a few sentences goes a long way. Or if you'd rather skip this too, tap below and we'll keep things general for now.",
+      { typingFor: 1500, beat: 500 }
+    );
+    const reply = await awaitInputOrSkip('Skip for now');
+    if (reply === 'skip') {
+      await scoutMsg(
+        "Got it. You can always drop more context in the chat later — the more I know, the better the output gets.",
+        { typingFor: 900, beat: 400 }
+      );
+      return;
+    }
+  }
+
+  // User provided something — simulate a website scan with the demo URL.
   userMsg(state.brand.websiteUrl);
 
   const lines = state.accountType === 'brand' ? [
@@ -2493,17 +3620,23 @@ async function stepMaterials() {
   ] : [
     { icon: 'i-globe',   text: `Loading ${state.brand.websiteUrl}` },
     { icon: 'i-quote',   text: 'Short bio plus an essays index. Most essays are about design systems and product craft.' },
-    { icon: 'i-sparkle', text: 'Voice in the writing reads as direct, specific, non academic.' },
-    { icon: 'i-link',    text: "I see an 'office hours' page. That is a strong CTA you could surface more." },
+    { icon: 'i-sparkle', text: 'Voice in the writing reads as direct, specific, non-academic.' },
+    { icon: 'i-link',    text: "I see an 'office hours' page. That's a strong CTA you could surface more." },
     { icon: 'i-palette', text: 'Pulling tone of voice signals from the essay openings.' },
   ];
 
   await narratedProcess('Scanning your site', lines);
 
-  await scoutMsg("Anything else, or are we good with this?", { typingFor: 700, beat: 400 });
+  // Reveal KB sections not already unlocked by X scan
+  if (!state.kb.kbReveal.has('identity'))  { state.kb.kbReveal.add('identity');  renderKB(); await sleep(500); }
+  if (!state.kb.kbReveal.has('themes'))    { state.kb.kbReveal.add('themes');    renderKB(); await sleep(400); }
+  if (!state.kb.kbReveal.has('topics'))    { state.kb.kbReveal.add('topics');    renderKB(); await sleep(400); }
+  if (!state.kb.kbReveal.has('audience'))  { state.kb.kbReveal.add('audience');  renderKB(); await sleep(300); }
+  if (!state.kb.kbReveal.has('peak'))      { state.kb.kbReveal.add('peak');      renderKB(); }
+
+  await scoutMsg("Anything else, or are we good?", { typingFor: 700, beat: 400 });
   await quickReplies(["That's everything", 'Add more later'], { primaryIndex: 0 });
 
-  // Populate Main KB from the scan
   addKBFact('brand', 'Brand',       state.brand.name);
   addKBFact('brand', 'Positioning', state.brand.positioning);
   addKBFact('brand', 'Themes',      state.brand.themes.join(', '));
@@ -2566,6 +3699,10 @@ async function step_post_directions() {
     "I've drafted three directions for your first post. Each rides a different angle and bundles a tone, a format, and a visual. Pick the one that sounds like you.",
     { typingFor: 1300, beat: 400 }
   );
+  await scoutMsg(
+    "I'd lead with Direction 1 — it matches the trend window and fits your voice best. The other two are solid alternatives.",
+    { typingFor: 900, beat: 300 }
+  );
 
   // Cinematic narration — Scout drafts the post in the open.
   await narratedProcess('Drafting your first post', [
@@ -2584,48 +3721,34 @@ async function step_post_directions() {
   });
 
   return new Promise((resolve) => {
-    const list = el('div', { class: 'directions-list' });
-    let activeCard = null;
+    let currentIndex = 0;
     let bubble = null;
     let commitTimer = null;
-
-    const commit = (d) => {
-      state.selectedTrendGroupId = d.group.id;
-      state.selectedIterationId = d.iterationId;
-      state.draftPost = d.body;
-      addKBFact('trending', 'Selected angle', d.group.theme);
-      Array.from(list.children).forEach(c => { c.style.pointerEvents = 'none'; });
-      list.classList.add('directions-list--chosen');
-      laterRow.remove();
-      resolve(d.iterationId);
-    };
+    let settled = false;
 
     const displayName = state.brand.displayName || state.brand.name || 'You';
     const handle      = state.brand.handle      || '@you';
     const isBrand     = state.accountType === 'brand';
-    const avatarSrc   = isBrand ? '/ProfileBrand.jpeg' : '/Profile.png';
+    const avatarSrc   = isBrand ? '/ProfileBrand.jpeg' : '/ProfileIndividual.png';
 
-    directions.forEach((d, i) => {
-      const card = el('div', {
-        class: 'direction-card',
-        onclick: () => {
-          if (activeCard === card) return;
-          activeCard = card;
-          Array.from(list.children).forEach((c) => {
-            c.classList.toggle('direction-card--active', c === card);
-            c.classList.toggle('direction-card--dim', c !== card);
-          });
-          const label = `Picked: ${d.group.theme}`;
-          if (!bubble) bubble = userMsg(label);
-          else {
-            const t = bubble.querySelector('.msg__bubble');
-            if (t) t.textContent = label;
-          }
-          if (commitTimer) clearTimeout(commitTimer);
-          commitTimer = setTimeout(() => commit(d), 1500);
-        },
-      }, [
-        // Author row — avatar + name + verified + handle + dot + time.
+    const commit = (d) => {
+      if (settled) return;
+      settled = true;
+      state.selectedTrendGroupId = d.group.id;
+      state.selectedIterationId = d.iterationId;
+      state.draftPost = d.body;
+      addKBFact('trending', 'Selected angle', d.group.theme);
+      carousel.style.pointerEvents = 'none';
+      wrapper.classList.add('directions-list--chosen');
+      laterRow.remove();
+      resolve(d.iterationId);
+    };
+
+    // Build cards
+    const cards = directions.map((d, i) => {
+      const isRec = i === 1;
+      const card = el('div', { class: 'direction-card' + (isRec ? ' direction-card--rec' : '') }, [
+        isRec ? el('div', { class: 'direction-card__rec-banner' }, 'Recommended') : null,
         el('div', { class: 'direction-card__author' }, [
           el('span', { class: 'direction-card__avatar', style: `background-image: url('${avatarSrc}');` }),
           el('div', { class: 'direction-card__id' }, [
@@ -2638,47 +3761,78 @@ async function step_post_directions() {
             ]),
           ]),
         ]),
-        // Body text.
         el('div', { class: 'direction-card__body' }, d.body),
-        // Generated image preview.
         directionImage(d, i),
-        // Tone/format chips.
         el('div', { class: 'direction-card__chips' }, [
           el('span', { class: 'direction-card__chip' }, d.group.tone),
           el('span', { class: 'direction-card__chip' }, d.group.format),
         ]),
-        // X-style action row — reply, repost, like, views, bookmark, share.
         el('div', { class: 'direction-card__actions' }, [
-          el('span', { class: 'direction-card__action' }, [
-            el('span', { html: icon('i-reply') }),
-            el('span', { class: 'direction-card__action-n' }, '12'),
-          ]),
-          el('span', { class: 'direction-card__action' }, [
-            el('span', { html: icon('i-repost') }),
-            el('span', { class: 'direction-card__action-n' }, '4'),
-          ]),
-          el('span', { class: 'direction-card__action' }, [
-            el('span', { html: icon('i-heart') }),
-            el('span', { class: 'direction-card__action-n' }, '87'),
-          ]),
-          el('span', { class: 'direction-card__action' }, [
-            el('span', { html: icon('i-trend') }),
-            el('span', { class: 'direction-card__action-n' }, '1.2K'),
-          ]),
-          el('span', { class: 'direction-card__action' }, [
-            el('span', { html: icon('i-bookmark') }),
-          ]),
-          el('span', { class: 'direction-card__action' }, [
-            el('span', { html: icon('i-share') }),
-          ]),
+          el('span', { class: 'direction-card__action' }, [el('span', { html: icon('i-reply') }), el('span', { class: 'direction-card__action-n' }, '12')]),
+          el('span', { class: 'direction-card__action' }, [el('span', { html: icon('i-repost') }), el('span', { class: 'direction-card__action-n' }, '4')]),
+          el('span', { class: 'direction-card__action' }, [el('span', { html: icon('i-heart') }), el('span', { class: 'direction-card__action-n' }, '87')]),
+          el('span', { class: 'direction-card__action' }, [el('span', { html: icon('i-trend') }), el('span', { class: 'direction-card__action-n' }, '1.2K')]),
+          el('span', { class: 'direction-card__action' }, [el('span', { html: icon('i-bookmark') })]),
+          el('span', { class: 'direction-card__action' }, [el('span', { html: icon('i-share') })]),
         ]),
-        el('span', { class: 'direction-card__pick' }, [
+        el('button', { class: 'direction-card__pick', type: 'button', onclick: () => {
+          const label = `Picked: ${d.group.theme}`;
+          if (!bubble) bubble = userMsg(label);
+          else { const t = bubble.querySelector('.msg__bubble'); if (t) t.textContent = label; }
+          if (commitTimer) clearTimeout(commitTimer);
+          commitTimer = setTimeout(() => commit(d), 800);
+        }}, [
           document.createTextNode('Use this direction'),
-          el('span', {}, '→'),
+          el('span', {}, ' →'),
         ]),
       ]);
-      list.appendChild(card);
+      return card;
     });
+
+    // Coverflow carousel track
+    const track = el('div', { class: 'directions-track' });
+    cards.forEach(c => track.appendChild(c));
+
+    // Dots
+    const dots = directions.map((_, i) => {
+      const dot = el('button', { class: 'dir-dot' + (i === 1 ? ' dir-dot--active' : ''), type: 'button', 'aria-label': `Direction ${i+1}` });
+      dot.addEventListener('click', () => goTo(i));
+      return dot;
+    });
+    const dotsRow = el('div', { class: 'dir-dots' }, dots);
+
+    // Nav arrows
+    const prevBtn = el('button', { class: 'dir-nav dir-nav--prev', type: 'button', 'aria-label': 'Previous' }, '←');
+    const nextBtn = el('button', { class: 'dir-nav dir-nav--next', type: 'button', 'aria-label': 'Next' }, '→');
+
+    const goTo = (idx) => {
+      currentIndex = Math.max(0, Math.min(directions.length - 1, idx));
+      cards.forEach((card, i) => {
+        const offset = i - currentIndex;
+        card.classList.remove('dir-card--center', 'dir-card--left', 'dir-card--right', 'dir-card--hidden');
+        if (offset === 0) card.classList.add('dir-card--center');
+        else if (offset === -1) card.classList.add('dir-card--left');
+        else if (offset === 1) card.classList.add('dir-card--right');
+        else card.classList.add('dir-card--hidden');
+      });
+      dots.forEach((d, i) => d.classList.toggle('dir-dot--active', i === currentIndex));
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === directions.length - 1;
+      // Sync track height to center card so nothing gets clipped top/bottom
+      requestAnimationFrame(() => {
+        const centerCard = track.querySelector('.dir-card--center');
+        if (centerCard) track.style.minHeight = centerCard.offsetHeight + 'px';
+      });
+    };
+
+    prevBtn.addEventListener('click', () => goTo(currentIndex - 1));
+    nextBtn.addEventListener('click', () => goTo(currentIndex + 1));
+    prevBtn.disabled = true;
+
+    const carousel = el('div', { class: 'directions-carousel' }, [prevBtn, track, nextBtn]);
+    const wrapper = el('div', { class: 'directions-list' }, [carousel, dotsRow]);
+
+    goTo(1);
 
     const laterRow = el('div', { class: 'qreplies iteration-list__later' }, [
       el('button', {
@@ -2687,14 +3841,14 @@ async function step_post_directions() {
           if (commitTimer) clearTimeout(commitTimer);
           state.skipped.add('first-post');
           userMsg('Save these and decide later');
-          Array.from(list.children).forEach(c => { c.style.pointerEvents = 'none'; c.classList.add('direction-card--dim'); });
+          wrapper.style.pointerEvents = 'none';
           laterRow.remove();
           resolve('later');
         },
       }, 'Save these and decide later'),
     ]);
 
-    append(list);
+    append(wrapper);
     append(laterRow);
   });
 }
@@ -2789,7 +3943,7 @@ async function step_edit_publish() {
 
 function renderPublishedPost(body) {
   const isBrand = state.accountType === 'brand';
-  const avatarSrc = isBrand ? '/ProfileBrand.jpeg' : '/Profile.png';
+  const avatarSrc = isBrand ? '/ProfileBrand.jpeg' : '/ProfileIndividual.png';
   const card = el('div', { class: 'success-post success-post--published' }, [
     el('div', { class: 'success-post__head' }, [
       el('div', { class: 'success-post__avatar', style: `background-image: url('${avatarSrc}');` }),
@@ -2915,11 +4069,41 @@ async function step_infrastructure_build() {
 }
 
 async function step13_handoff() {
-  const lead = state.publishedPost
-    ? `Everything's ready, ${state.user.name}. Your first post is live. The dashboard tracks it from here, alongside drafts, trends, and what's working.`
-    : `Everything's ready, ${state.user.name}. The dashboard is where you'll work from here. Take your time, look around, or jump straight in.`;
-  await scoutMsg(lead, { typingFor: 1200, beat: 700 });
-  await sleep(1100);
+  if (state.publishedPost) {
+    // Ask how they feel about the post going live
+    await scoutMsg("How are you feeling about it?", { typingFor: 900, beat: 400 });
+    const feel = await quickReplies(
+      ["Excited to see how it does", "A bit nervous", "Ready to post more"]
+    );
+
+    const responseMap = {
+      "Excited to see how it does": "Good. That energy shows in posts. Scout will keep an eye on it and flag when something picks up.",
+      "A bit nervous": "That's normal for a first one. The data takes the guesswork out — you'll see exactly what resonated.",
+      "Ready to post more": "That's the move. Consistency compounds. I've already lined up the next angles for you.",
+    };
+    await scoutMsg(responseMap[feel] || "Got it.", { typingFor: 900, beat: 400 });
+    await sleep(400);
+    await scoutMsg(`Your post is live, ${state.user.name.split(' ')[0]}. I'll track performance and surface what's working.`, { typingFor: 1000, beat: 500 });
+  } else {
+    await scoutMsg(`Everything's set up, ${state.user.name.split(' ')[0]}. Your drafts and trends are waiting whenever you're ready.`, { typingFor: 1000, beat: 500 });
+  }
+
+  await sleep(400);
+
+  // In-chat dashboard CTA
+  await new Promise((resolve) => {
+    const btn = el('button', {
+      class: 'qreply',
+      onclick: () => {
+        userMsg('Go to Dashboard');
+        btn.parentElement && btn.parentElement.remove();
+        resolve();
+      },
+    }, 'Go to Dashboard →');
+    const row = el('div', { class: 'qreplies' }, [btn]);
+    append(row);
+  });
+
   enterApp();
 }
 
@@ -2932,8 +4116,11 @@ function enterApp() {
   const chipName = $('.profile-chip__name');
   if (chipName) chipName.textContent = state.user.name || 'Guest';
 
-  renderDashboard();
-  showView('view-dash');
+  // Update session to record the user reached the dashboard
+  try { sessionStorage.setItem('fs_session', JSON.stringify({ name: state.user.name || 'Guest', accountType: state.accountType || 'individual', view: 'dash' })); } catch (e) {}
+
+  renderHome();
+  showView('view-home');
 }
 
 /* =========================================================================
@@ -2943,32 +4130,35 @@ async function runConversation() {
   if (stream.dataset.started === '1') return;
   stream.dataset.started = '1';
 
-  // Act 1 — Greet and connect.
-  await step1_opening();                                      // hero + strategist intro
+  const skip = (n) => _resumeFrom >= n; // true = this step is already done
 
-  const xPath = await step5_x_connect();                      // connect → OAuth (or skip)
-  if (xPath === 'connected-scan') {
-    await step6_profile_scan();                               // narrate scan + show preview
+  // Act 1 — Greet and connect.
+  if (!skip(0)) { await step1_opening(); saveCheckpoint(0); }
+
+  if (!skip(1)) {
+    const xPath = await step5_x_connect();
+    if (xPath === 'connected-scan') await step6_profile_scan();
+    saveCheckpoint(1);
   }
 
   // Act 2 — Materials, then the first drawer review (Scout's read of the brand).
-  await stepMaterials();                                      // website / docs / verbal
-  await step_brand_review_first();                            // drawer opens → fills → accept → closes
+  if (!skip(2)) { await stepMaterials(); saveCheckpoint(2); }
+  if (!skip(3)) { await step_brand_review_first(); saveCheckpoint(3); }
 
   // Act 3 — Topics/products + goals.
-  if (state.accountType === 'brand') await step3_product_lines_brand_only();
-  else                               await step_topics_individual();
-  await step4_goals();                                        // goals → KPI translation
+  if (!skip(4)) {
+    if (state.accountType === 'brand') await step3_product_lines_brand_only();
+    else                               await step_topics_individual();
+    saveCheckpoint(4);
+  }
+  if (!skip(5)) { await step4_goals(); saveCheckpoint(5); }
 
-  // Act 4 — Market scan, audience inference, final drawer review before trends.
-  await step7_intel_scan();
-  await step_audience_infer();                                // Scout proposes, user validates
-  await step_brand_review_final();                            // drawer reopens with new sections → accept → closes
+  // Act 4 — Market scan, audience inference.
+  if (!skip(6)) { await step7_intel_scan(); saveCheckpoint(6); }
+  if (!skip(7)) { await step_audience_infer(); saveCheckpoint(7); }
 
-  // Tone surfaces only AFTER the trending knowledge has been filled and the
-  // user has accepted it — so the voice picker reads as "given everything
-  // we now know, here are the directions that fit."
-  await step_tone_voice();                                    // tone-direction card pick
+  // Tone
+  if (!skip(8)) { await step_tone_voice(); saveCheckpoint(8); }
 
   // Act 5 — Merged directions → drafts → publish (or save for later).
   const iterChoice = await step_post_directions();
@@ -2981,8 +4171,7 @@ async function runConversation() {
     await step_edit_publish();
   }
 
-  // Act 6 — Profile score (return loop) → infrastructure build → handoff.
-  await step_profile_score();
+  // Act 6 — Infrastructure build → handoff.
   await step_infrastructure_build();
   await step13_handoff();
 }
@@ -2991,7 +4180,41 @@ async function runConversation() {
    17. DEMO CONTROLS
    ========================================================================= */
 function bindDemoControls() {
-  $('#ctl-restart').addEventListener('click', () => location.reload());
+  $('#ctl-restart').addEventListener('click', () => {
+    const active = document.querySelector('.view--active');
+    const id = active ? active.id : '';
+    if (id === 'view-dash') {
+      showView('view-conv');
+    } else if (id === 'view-conv') {
+      showView('view-auth');
+    } else if (id === 'view-auth') {
+      showView('view-splash');
+    }
+  });
+
+  // Restart conversation — clears checkpoint but keeps user logged in
+  const btnRestart = $('#btn-restart-conv');
+  if (btnRestart) {
+    btnRestart.addEventListener('click', () => {
+      try { sessionStorage.removeItem(CHECKPOINT_KEY); } catch (e) {}
+      try {
+        const s = JSON.parse(sessionStorage.getItem('fs_session') || '{}');
+        delete s.accountType;
+        sessionStorage.setItem('fs_session', JSON.stringify(s));
+      } catch (e) {}
+      location.reload();
+    });
+  }
+
+  // Logout — clears all session data and goes back to auth
+  const btnLogout = $('#btn-logout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      try { sessionStorage.removeItem('fs_session'); } catch (e) {}
+      try { sessionStorage.removeItem(CHECKPOINT_KEY); } catch (e) {}
+      location.reload();
+    });
+  }
   $('#ctl-skip').addEventListener('click', () => {
     stream.dataset.started = '1';
     enterApp();
@@ -3022,6 +4245,25 @@ function bindDemoControls() {
       console.log('X account maturity →', state.xAccountMaturity);
     }
   });
+
+  // Analytics sidebar button
+  const analyticsBtn = document.querySelector('.sidebar__btn[data-nav="analytics"]');
+  if (analyticsBtn) {
+    analyticsBtn.addEventListener('click', () => {
+      renderDashboard();
+      showView('view-dash');
+      setCrumbs(['Dashboard']);
+    });
+  }
+  // Home sidebar button
+  const homeNavBtn = document.querySelector('.sidebar__btn[data-nav="home"]');
+  if (homeNavBtn) {
+    homeNavBtn.addEventListener('click', () => {
+      renderHome();
+      showView('view-home');
+      setCrumbs(['Home']);
+    });
+  }
 }
 
 /* =========================================================================
@@ -3029,7 +4271,37 @@ function bindDemoControls() {
    Names the pain → shows the knowledge → shows the outcome.
    ========================================================================= */
 const SPLASH_FLAG_KEY = 'flagstaff_seen_splash';
+const CHECKPOINT_KEY  = 'fs_checkpoint';
 const splashState = { index: 0, dismissed: false };
+
+// Index of the last completed step; -1 means fresh start.
+// Set by boot() when restoring a checkpoint.
+let _resumeFrom = -1;
+
+function saveCheckpoint(step) {
+  try {
+    const streamEl = document.querySelector('#stream');
+    const body = streamEl?.closest('.conv') || streamEl?.parentElement;
+    sessionStorage.setItem(CHECKPOINT_KEY, JSON.stringify({
+      step,
+      html: streamEl ? streamEl.innerHTML : '',
+      scrollTop: body ? body.scrollTop : 0,
+      bodyClasses: [...document.body.classList],
+      state: {
+        accountType: state.accountType,
+        user: { name: state.user?.name },
+        topics: state.topics,
+        goals: state.goals,
+        audience: state.audience,
+        tone: state.tone,
+        kb: {
+          activeId: state.kb?.activeId,
+          kbReveal: state.kb?.kbReveal ? [...state.kb.kbReveal] : [],
+        },
+      },
+    }));
+  } catch (e) {}
+}
 
 async function runSplash() {
   const leftStage  = $('#splash-left-stage');
@@ -3088,38 +4360,238 @@ async function runSplash() {
     if (splashState.index > 0) mount(splashState.index - 1);
   };
 
-  if (skipBtn) skipBtn.addEventListener('click', endSplash);
+  if (skipBtn) skipBtn.addEventListener('click', showAuth);
   if (ctaBtn)  ctaBtn.addEventListener('click', advance);
   if (backBtn) backBtn.addEventListener('click', back);
 
   mount(0);
 }
 
-function endSplash() {
+function showAuth() {
   splashState.dismissed = true;
   try { localStorage.setItem(SPLASH_FLAG_KEY, '1'); } catch (e) {}
-  // Smooth handoff: pull the splash up slightly while fading it out, then
-  // reveal the conversation view (which contains the greeting hero). The
-  // hero's own beats then take over.
+  // Hide profile chip in header until auth completes
+  const profileChip = document.querySelector('.profile-chip');
+  if (profileChip) profileChip.style.visibility = 'hidden';
   const view = $('#view-splash');
   if (view) {
     view.classList.add('view--exiting');
     setTimeout(() => {
-      showView('view-conv');
-      // Let the chat view fade up softly. The hero plays its own intro.
-      const convView = $('#view-conv');
-      if (convView) {
-        convView.classList.add('view--entering');
-        requestAnimationFrame(() => {
-          convView.classList.add('view--entered');
-        });
+      showView('view-auth');
+      const authView = $('#view-auth');
+      if (authView) {
+        authView.classList.add('view--entering');
+        requestAnimationFrame(() => authView.classList.add('view--entered'));
       }
-      runConversation();
+      initAuth();
     }, 460);
   } else {
-    showView('view-conv');
-    runConversation();
+    showView('view-auth');
+    initAuth();
   }
+}
+
+function endSplash() {
+  showAuth();
+}
+
+function initAuth() {
+  let isLogin = true;
+
+  const titleEl       = $('#auth-title');
+  const subEl         = $('#auth-sub');
+  const submitLbl     = $('#auth-submit-label');
+  const toggleBtn     = $('#auth-toggle');
+  const toggleTxt     = $('#auth-toggle-text');
+  const submitBtn     = $('#auth-submit');
+  const emailInput    = $('#auth-email');
+  const passInput     = $('#auth-password');
+  const emailWrap     = $('#auth-email-wrap');
+  const passWrap      = $('#auth-password-wrap');
+  const emailErr      = $('#auth-email-error');
+  const passErr       = $('#auth-password-error');
+  const eyeBtn        = $('#auth-eye');
+  const eyeIcon       = $('#auth-eye-icon');
+  const forgotBtn     = $('#auth-forgot');
+  const termsEl       = $('#auth-terms');
+  const nameRow       = $('#auth-name-row');
+  const firstInput    = $('#auth-firstname');
+  const lastInput     = $('#auth-lastname');
+  const firstWrap     = $('#auth-firstname-wrap');
+  const lastWrap      = $('#auth-lastname-wrap');
+  const firstErr      = $('#auth-firstname-error');
+  const lastErr       = $('#auth-lastname-error');
+
+  function updateMode() {
+    const hintEl = $('#auth-password-hint');
+    if (isLogin) {
+      titleEl.textContent        = 'Welcome back';
+      if (subEl) subEl.textContent = 'Log in to continue with Scout.';
+      submitLbl.textContent      = 'Log in';
+      toggleTxt.textContent      = "Don't have an account?";
+      toggleBtn.textContent      = 'Sign up';
+      passInput.placeholder      = '••••••••';
+      if (forgotBtn) forgotBtn.style.display = 'inline';
+      if (termsEl)   termsEl.style.display   = 'none';
+      if (nameRow)   nameRow.style.display   = 'none';
+      if (hintEl)    hintEl.style.display    = 'none';
+    } else {
+      titleEl.textContent        = 'Create your account';
+      if (subEl) subEl.textContent = 'Start building content that sounds like you.';
+      submitLbl.textContent      = 'Continue';
+      toggleTxt.textContent      = 'Already have an account?';
+      toggleBtn.textContent      = 'Log in';
+      passInput.placeholder      = '••••••••';
+      if (forgotBtn) forgotBtn.style.display = 'none';
+      if (termsEl)   termsEl.style.display   = '';
+      if (nameRow)   nameRow.style.display   = '';
+      if (hintEl)    hintEl.style.display    = 'none';
+    }
+    clearErrors();
+  }
+
+  function clearErrors() {
+    [emailWrap, passWrap, firstWrap, lastWrap].forEach(w => w?.classList.remove('auth-field__wrap--error'));
+    [emailErr, passErr, firstErr, lastErr].forEach(e => { if (e) e.textContent = ''; });
+  }
+
+  function showError(wrap, errEl, msg) {
+    wrap?.classList.add('auth-field__wrap--error');
+    wrap?.classList.add('auth-field__wrap--shake');
+    setTimeout(() => wrap?.classList.remove('auth-field__wrap--shake'), 400);
+    if (errEl) errEl.textContent = msg;
+  }
+
+  function validate() {
+    let valid = true;
+    clearErrors();
+    if (!isLogin) {
+      if (!firstInput?.value.trim()) { showError(firstWrap, firstErr, 'First name is required.'); valid = false; }
+      if (!lastInput?.value.trim())  { showError(lastWrap,  lastErr,  'Last name is required.');  valid = false; }
+    }
+    const email = emailInput?.value.trim();
+    const pass  = passInput?.value;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError(emailWrap, emailErr, 'Enter a valid email address.');
+      valid = false;
+    }
+    if (!pass || pass.length < 1) {
+      showError(passWrap, passErr, 'Password is required.');
+      valid = false;
+    }
+    return valid;
+  }
+
+  // Forgot password
+  if (forgotBtn) forgotBtn.addEventListener('click', () => {
+    const email = emailInput?.value.trim();
+    const msg = email
+      ? `A reset link will be sent to ${email}.`
+      : 'Enter your email above, then click Forgot password.';
+    if (passErr) { passErr.style.color = 'var(--primary)'; passErr.textContent = msg; }
+    setTimeout(() => { if (passErr) { passErr.style.color = ''; passErr.textContent = ''; } }, 3500);
+  });
+
+  // Show/hide password toggle
+  if (eyeBtn) eyeBtn.addEventListener('click', () => {
+    const isHidden = passInput.type === 'password';
+    passInput.type = isHidden ? 'text' : 'password';
+    eyeIcon.innerHTML = isHidden
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  if (toggleBtn) toggleBtn.addEventListener('click', () => {
+    const card = document.querySelector('.auth-card');
+    if (!card) { isLogin = !isLogin; submitBtn.disabled = false; updateMode(); return; }
+
+    // Exit
+    card.classList.remove('auth-card--entering');
+    card.classList.add('auth-card--exiting');
+
+    setTimeout(() => {
+      // Swap content
+      isLogin = !isLogin;
+      submitBtn.disabled = false;
+      updateMode();
+
+      // Enter
+      card.classList.remove('auth-card--exiting');
+      card.classList.add('auth-card--entering');
+
+      // Clean up after animation completes
+      setTimeout(() => card.classList.remove('auth-card--entering'), 500);
+    }, 220);
+  });
+
+  // Google auth — UI only, not yet implemented
+
+  function proceedToConversation() {
+    submitBtn.disabled = true;
+    submitLbl.textContent = isLogin ? 'Logging in…' : 'Creating account…';
+    // Restore and update profile chip with real name
+    const profileChip = document.querySelector('.profile-chip');
+    const profileName = document.querySelector('.profile-chip__name');
+    if (profileName) profileName.textContent = state.user.name.split(' ')[0];
+    if (profileChip) profileChip.style.visibility = '';
+    // Persist session so reload skips splash + auth
+    try { sessionStorage.setItem('fs_session', JSON.stringify({ name: state.user.name, view: 'conv', accountType: state.accountType || null })); } catch (e) {}
+    const authView = $('#view-auth');
+    setTimeout(() => {
+      if (authView) {
+        authView.classList.add('view--exiting');
+        setTimeout(() => {
+          showView('view-conv');
+          const convView = $('#view-conv');
+          if (convView) {
+            convView.classList.add('view--entering');
+            requestAnimationFrame(() => convView.classList.add('view--entered'));
+          }
+          runConversation();
+        }, 460);
+      } else {
+        showView('view-conv');
+        runConversation();
+      }
+    }, 600);
+  }
+
+  function submit() {
+    if (!validate()) return;
+    if (isLogin) {
+      // Login: derive name from email
+      const email = emailInput.value.trim();
+      const localPart = email.split('@')[0].replace(/[._\-+]/g, ' ');
+      state.user.name = localPart.split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    } else {
+      // Sign up: use actual first + last name
+      const first = firstInput.value.trim();
+      const last  = lastInput.value.trim();
+      state.user.name = `${first} ${last}`.trim();
+    }
+    proceedToConversation();
+  }
+
+  if (submitBtn) submitBtn.addEventListener('click', submit);
+
+  // Enter key submits
+  [emailInput, passInput].forEach(inp => {
+    if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  });
+
+  // Clear error on input
+  if (emailInput) emailInput.addEventListener('input', () => {
+    emailWrap?.classList.remove('auth-field__wrap--error');
+    if (emailErr) emailErr.textContent = '';
+  });
+  if (passInput) passInput.addEventListener('input', () => {
+    passWrap?.classList.remove('auth-field__wrap--error');
+    if (passErr) passErr.textContent = '';
+  });
+
+  updateMode();
 }
 
 function buildSplashLeft(idx) {
@@ -3622,15 +5094,125 @@ function boot() {
   setCrumbs(['Home', 'Onboarding', 'Conversation']);
   setComposerEnabled(false);
 
+  // Session + checkpoint restore: skip splash/auth and resume mid-conversation.
+  let savedSession = null;
+  let savedCheckpoint = null;
+  try { savedSession = JSON.parse(sessionStorage.getItem('fs_session') || 'null'); } catch (e) {}
+  try { savedCheckpoint = JSON.parse(sessionStorage.getItem(CHECKPOINT_KEY) || 'null'); } catch (e) {}
+
+  console.log('[boot] savedSession:', savedSession ? JSON.stringify(savedSession) : 'null');
+  if (savedSession && savedSession.name) {
+    console.log('[boot] entering session branch, view:', savedSession.view);
+    // Restore user identity
+    state.user.name = savedSession.name;
+    const profileChip = document.querySelector('.profile-chip');
+    const profileName = document.querySelector('.profile-chip__name');
+    if (profileName) profileName.textContent = savedSession.name.split(' ')[0];
+    if (profileChip) profileChip.style.visibility = '';
+    try { localStorage.setItem(SPLASH_FLAG_KEY, '1'); } catch (e) {}
+
+    if (savedSession.view === 'dash') {
+      state.accountType = savedSession.accountType || 'individual';
+      document.body.classList.remove('mode-onboarding');
+      document.body.classList.add('mode-app');
+      setCrumbs(['Home']);
+      try { renderDashboard(); } catch(e) { console.error('[dash render error]', e); }
+      showView('view-dash');
+      return;
+    }
+
+    // Restore checkpoint if available
+    if (savedCheckpoint && savedCheckpoint.step >= 0) {
+      const ck = savedCheckpoint;
+      const cs = ck.state || {};
+
+      // Restore serializable state
+      if (cs.accountType) state.accountType = cs.accountType;
+      if (cs.user?.name)  state.user.name   = cs.user.name;
+      if (cs.topics)      state.topics      = cs.topics;
+      if (cs.goals)       state.goals       = cs.goals;
+      if (cs.audience)    state.audience    = cs.audience;
+      if (cs.tone)        state.tone        = cs.tone;
+
+      // Re-derive brand persona from accountType
+      state.brand = { ...(state.accountType === 'brand' ? DEMO_BRAND : DEMO_INDIVIDUAL) };
+
+      // Restore KB reveal set
+      if (cs.kb) {
+        state.kb.activeId = cs.kb.activeId || 'brand';
+        state.kb.kbReveal = new Set(cs.kb.kbReveal || []);
+      }
+
+      // Inject saved stream HTML
+      const streamEl = document.querySelector('#stream');
+      if (streamEl && ck.html) {
+        streamEl.innerHTML = ck.html;
+      }
+
+      // Restore body classes (KB open state, etc.) without triggering CSS transitions
+      document.body.classList.add('mode-no-transition');
+      if (ck.bodyClasses) {
+        const keep = ['mode-onboarding', 'mode-app'];
+        ck.bodyClasses.forEach(c => { if (!keep.includes(c)) document.body.classList.add(c); });
+      }
+
+      // Re-render KB panel with restored data (whenever KB was open at checkpoint)
+      if (ck.bodyClasses && ck.bodyClasses.includes('mode-kb-open')) renderKB();
+
+      // Re-enable transitions after layout settles
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.body.classList.remove('mode-no-transition');
+      }));
+
+      // Tell runConversation to skip completed steps
+      _resumeFrom = ck.step;
+
+      // Show view with stream hidden, scroll to bottom silently, then fade in
+      const streamEl2 = document.querySelector('#stream');
+      if (streamEl2) streamEl2.style.opacity = '0';
+      showView('view-conv');
+      setTimeout(() => {
+        const body = document.querySelector('.conv');
+        if (body) body.scrollTop = body.scrollHeight;
+        // Fade stream in after scroll is settled
+        if (streamEl2) {
+          streamEl2.style.transition = 'opacity 0.25s ease';
+          streamEl2.style.opacity = '1';
+          setTimeout(() => { streamEl2.style.transition = ''; streamEl2.style.opacity = ''; }, 300);
+        }
+        runConversation();
+      }, 100);
+      return;
+    }
+
+    // No checkpoint — start conversation. accountType already in session
+    // so openingHero() will skip the picker if it was previously chosen.
+    if (savedSession.accountType) state.accountType = savedSession.accountType;
+    showView('view-conv');
+    setTimeout(() => runConversation(), 100);
+    return;
+  }
+
   // Splash gating:
   // - ?nosplash in the URL bypasses (for fast iteration when working on later flow)
   // - ?splash in the URL forces splash (clears the flag)
   // - Default: always show the splash. It's a brand moment and is skippable.
   const params = new URLSearchParams(location.search);
+  if (params.has('dashboard')) {
+    state.accountType = params.get('type') || 'individual';
+    state.user.name = params.get('name') || 'Abdullah Qamar';
+    if (params.has('published')) state.publishedPost = { body: 'First time I shipped a design system, I optimized the wrong thing for six months.', postedAt: Date.now() };
+    document.body.classList.remove('mode-onboarding');
+    document.body.classList.add('mode-app');
+    setCrumbs(['Home']);
+    renderHome();
+    showView('view-home');
+    return;
+  }
   if (params.has('nosplash')) {
     try { localStorage.setItem(SPLASH_FLAG_KEY, '1'); } catch (e) {}
-    showView('view-conv');
-    setTimeout(() => runConversation(), 200);
+    showView('view-auth');
+    setTimeout(() => initAuth(), 200);
     return;
   }
   if (params.has('splash')) {
