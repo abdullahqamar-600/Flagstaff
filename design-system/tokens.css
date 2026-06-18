@@ -99,8 +99,8 @@
   --text-tertiary:     var(--neutral-500);
   --text-disabled:     var(--neutral-400);
   --text-on-primary:   var(--neutral-0);
-  --text-link:         var(--indigo-500);
-  --text-scout:        var(--indigo-500);   /* "Scout" label / brand mark */
+  --text-link:         var(--indigo-600);   /* darkened from 500 for WCAG AA on light canvas (~3.9:1 → ~5:1) */
+  --text-scout:        var(--indigo-600);   /* "Scout" label / brand mark — AA on canvas */
 
   /* Borders */
   --border-subtle:     var(--neutral-150);
