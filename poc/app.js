@@ -465,23 +465,50 @@ function userMsg(text, { options = null, _restartStep = -1 } = {}) {
           class: 'qreply' + (opt === bubble.textContent ? ' qreply--chosen' : ''),
         }, opt);
         btn.addEventListener('click', () => {
-          picker.remove();
-          bubble.style.display = '';
-          editBtn.style.display = '';
           // If same option picked, no replay needed — just close
-          if (opt === bubble.textContent) return;
-          bubble.textContent = opt;
-          // Remove all stream nodes after this message node
-          const streamEl = document.querySelector('#stream');
-          while (streamEl.lastChild && streamEl.lastChild !== node) {
-            streamEl.removeChild(streamEl.lastChild);
+          if (opt === bubble.textContent) {
+            picker.remove();
+            bubble.style.display = '';
+            editBtn.style.display = '';
+            return;
           }
-          // Queue the new answer and re-run from the step that produced this message
-          _preAnswers.length = 0;
-          _preAnswers.push(opt);
-          _resumeFrom = _restartStep - 1;
-          delete stream.dataset.started;
-          runConversation();
+
+          // Changing this answer replays the conversation from here, discarding
+          // everything that came after (later answers, drafts, a published post).
+          // If there's downstream work, confirm before destroying it.
+          const streamEl = document.querySelector('#stream');
+          const downstream = [];
+          { let n = node.nextSibling; while (n) { downstream.push(n); n = n.nextSibling; } }
+
+          const performReplay = () => {
+            bubble.textContent = opt;
+            bubble.style.display = '';
+            editBtn.style.display = '';
+            picker.remove();
+            downstream.forEach((n) => streamEl.removeChild(n));
+            // Queue the new answer and re-run from the step that produced this message
+            _preAnswers.length = 0;
+            _preAnswers.push(opt);
+            _resumeFrom = _restartStep - 1;
+            delete stream.dataset.started;
+            runConversation();
+          };
+
+          if (downstream.length === 0) { performReplay(); return; }
+
+          // Inline confirmation — replace the pills with a warning + Confirm/Cancel.
+          picker.innerHTML = '';
+          const warn = el('div', { class: 'msg__edit-warn' },
+            'Changing this will clear everything after it and pick up from here. Continue?');
+          const confirmBtn = el('button', { class: 'qreply qreply--primary', type: 'button' }, 'Yes, change it');
+          const backBtn = el('button', { class: 'msg__edit-cancel', type: 'button' }, 'Keep as is');
+          confirmBtn.addEventListener('click', performReplay);
+          backBtn.addEventListener('click', () => {
+            picker.remove();
+            bubble.style.display = '';
+            editBtn.style.display = '';
+          });
+          picker.append(warn, el('div', { class: 'msg__edit-actions' }, [backBtn, confirmBtn]));
         });
         return btn;
       });
@@ -1391,23 +1418,7 @@ function trendCard(iconId, title, desc) {
    Compact: 2×2 grid of square blocks (40% empty / 80% filled).
    Expanded: 1/3 width vertical panel (100% opacity, full facts visible).
    ========================================================================= */
-const KB_META = [
-  { id: 'brand',     label: 'Brand',              empty: 'Identity, products, niche, voice' },
-  { id: 'trending',  label: 'Trending',           empty: 'Trends, competitors, audience patterns' },
-  { id: 'algorithm', label: 'Platform Algorithm', empty: 'X algorithm and content rules' },
-];
-
-// Brand block label depends on account type — "Brand" for brands,
-// "About you" for individuals. Resolved at render time.
-function kbBlockLabel(metaId) {
-  if (metaId === 'brand') {
-    return state.accountType === 'individual' ? 'About you' : 'Brand';
-  }
-  const meta = KB_META.find(m => m.id === metaId);
-  return meta ? meta.label : metaId;
-}
-
-/* ── New split-panel KB renderer ─────────────────────────────────────── */
+/* ── Split-panel KB renderer ─────────────────────────────────────────── */
 const KB_NEW_META = {
   brand:     { title: 'About You',         subtitle: 'Identity, products, niche, voice' },
   trending:  { title: 'Trending',           subtitle: 'Trends, competitors, audience patterns' },
@@ -1745,156 +1756,7 @@ function renderKB() {
   const panel = document.getElementById('kb-panel');
   if (!panel) return;
 
-  // New split-panel mode: delegate to incremental renderer
-  if (document.body.classList.contains('mode-kb-open')) {
-    renderKBNew(panel);
-    return;
-  }
-
-  panel.innerHTML = '';
-
-  const anyExpanded = ['brand', 'trending', 'algorithm'].some(k => state.kb[k].expanded);
-  panel.classList.toggle('kb-panel--has-expanded', anyExpanded);
-
-  // Backdrop overlay, mounted on body so it dims the entire app surface
-  // behind the expanded panel. Click closes whichever block is expanded
-  // (unless we're in a confirmation moment, which locks the panel open).
-  let overlay = document.getElementById('kb-overlay');
-  if (anyExpanded) {
-    if (!overlay) {
-      overlay = el('div', { id: 'kb-overlay', class: 'kb-overlay' });
-      document.body.appendChild(overlay);
-    }
-    overlay.onclick = () => {
-      if (state.kb.actionCallback) return;
-      ['brand', 'trending', 'algorithm'].forEach(k => state.kb[k].expanded = false);
-      renderKB();
-    };
-  } else if (overlay) {
-    overlay.remove();
-  }
-
-  // Always-visible heading — single combined "Knowledge" label.
-  panel.appendChild(el('div', { class: 'kb-panel__head' }, [
-    el('div', { class: 'kb-panel__title' }, 'Knowledge'),
-  ]));
-
-  const grid = el('div', { class: 'kb-panel__grid' });
-
-  KB_META.forEach((meta) => {
-    const kb = state.kb[meta.id];
-    const filled = kb.facts.length > 0;
-    const isActive = state.kb.activeId === meta.id;
-    const isExpanded = !!kb.expanded;
-    const showActions = isExpanded && state.kb.actionCallback != null;
-
-    // State precedence: expanded > active > filled > empty.
-    let stateClass = ' kb-block--empty';
-    if (isExpanded)      stateClass = ' kb-block--expanded';
-    else if (isActive)   stateClass = ' kb-block--active' + (filled ? ' kb-block--has-content' : '');
-    else if (filled)     stateClass = ' kb-block--filled';
-
-    const summary = isExpanded
-      ? null
-      : (filled
-          ? kb.facts.slice(0, 3).map(f => f.label).join(' · ') +
-            (kb.facts.length > 3 ? ` · +${kb.facts.length - 3} more` : '')
-          : meta.empty);
-
-    const factEls = isExpanded
-      ? (filled
-          ? kb.facts.map(f => el('div', { class: 'kb-block__fact' }, [
-              el('span', { class: 'kb-block__fact-label' }, f.label),
-              el('span', { class: 'kb-block__fact-value' }, f.value),
-            ]))
-          : [el('div', { class: 'kb-block__placeholder' }, meta.empty)])
-      : [];
-
-    // Right-side affordance: a collapse arrow when expanded. The active
-    // block shows a 4-corner animated sparkle field instead of a static dot
-    // (rendered separately, below).
-    let headRight = null;
-    if (isExpanded) {
-      headRight = el('button', {
-        class: 'kb-block__collapse',
-        'aria-label': 'Collapse',
-        html: icon('i-collapse'),
-        onclick: (e) => {
-          e.stopPropagation();
-          if (state.kb.actionCallback) return;
-          kb.expanded = false;
-          renderKB();
-        },
-      });
-    }
-
-    const blockChildren = [
-      el('div', { class: 'kb-block__head' }, [
-        el('div', { class: 'kb-block__title' }, kbBlockLabel(meta.id)),
-        headRight,
-      ]),
-      summary ? el('div', { class: 'kb-block__summary' }, summary) : null,
-      isExpanded ? el('div', { class: 'kb-block__body' }, factEls) : null,
-    ];
-
-    // Active-and-not-expanded: a quiet "Building…" status pinned to the
-    // bottom-left. Three dots fade in turn — a typing-indicator rhythm,
-    // subtle, no flash. Behind the status, three light-purple blobs
-    // drift across the lower third of the block to indicate active
-    // generation; a backdrop-blur layer above them softens into a
-    // gradient wash.
-    if (isActive && !isExpanded) {
-      blockChildren.push(
-        el('div', { class: 'kb-block__bloom', 'aria-hidden': 'true' }, [
-          el('span', { class: 'kb-block__bloom-blob kb-block__bloom-blob--a' }),
-          el('span', { class: 'kb-block__bloom-blob kb-block__bloom-blob--b' }),
-          el('span', { class: 'kb-block__bloom-blob kb-block__bloom-blob--c' }),
-          el('span', { class: 'kb-block__bloom-veil' }),
-        ])
-      );
-      blockChildren.push(
-        el('div', { class: 'kb-block__status', 'aria-live': 'polite' }, [
-          document.createTextNode('Building'),
-          el('span', { class: 'kb-block__status-dot' }, '.'),
-          el('span', { class: 'kb-block__status-dot' }, '.'),
-          el('span', { class: 'kb-block__status-dot' }, '.'),
-        ])
-      );
-    }
-
-    if (showActions) {
-      blockChildren.push(
-        el('div', { class: 'kb-block__action-footer' }, [
-          el('button', {
-            class: 'kb-block__action kb-block__action--ghost',
-            onclick: (e) => { e.stopPropagation(); state.kb.actionCallback && state.kb.actionCallback('edit'); },
-          }, 'Edit'),
-          el('button', {
-            class: 'kb-block__action kb-block__action--primary',
-            onclick: (e) => { e.stopPropagation(); state.kb.actionCallback && state.kb.actionCallback('confirm'); },
-          }, 'Looks right'),
-        ])
-      );
-    }
-
-    const block = el('div', {
-      class: 'kb-block' + stateClass,
-      'data-kb': meta.id,
-      onclick: isExpanded
-        // Click on an expanded block (away from buttons) collapses it,
-        // unless we're in a confirmation moment for that block.
-        ? (state.kb.actionCallback ? null : () => { kb.expanded = false; renderKB(); })
-        // Click on a compact block expands it (collapses any other expanded block).
-        : () => {
-            ['brand', 'trending', 'algorithm'].forEach(k => state.kb[k].expanded = false);
-            kb.expanded = true;
-            renderKB();
-          },
-    }, blockChildren);
-
-    grid.appendChild(block);
-  });
-  panel.appendChild(grid);
+  renderKBNew(panel);
 }
 
 function addKBFact(kbId, label, value) {
@@ -1910,7 +1772,7 @@ function addKBFact(kbId, label, value) {
 
 
 function renderHome() {
-  const home = $('#view-home');
+  const home = $('#home-main') || $('#view-home');
   home.innerHTML = '';
 
   const isBrand = state.accountType === 'brand';
@@ -1926,18 +1788,29 @@ function renderHome() {
     ? "Scout's tracking 3 trends and a peak window in your niche right now. Pick what's next."
     : "Scout's tracked 3 conversations and your peak window today. Pick what's next.";
   wrap.appendChild(el('div', { class: 'dash__welcome' }, [
-    el('h1', { class: 'dash__welcome-title' }, heroTitle),
-    el('p',  { class: 'dash__welcome-sub' }, heroSub),
+    el('div', { class: 'dash__welcome-top' }, [
+      el('div', { class: 'dash__welcome-text' }, [
+        el('h1', { class: 'dash__welcome-title' }, heroTitle),
+        el('p',  { class: 'dash__welcome-sub' }, heroSub),
+      ]),
+      el('div', { class: 'dash__welcome-actions' }, [
+        el('button', { class: 'dash__action-btn', type: 'button', onclick: () => {} }, [
+          el('span', { class: 'dash__action-btn-icon', html: icon('i-pencil') }),
+          document.createTextNode('New post'),
+        ]),
+        el('button', { class: 'dash__action-btn dash__action-btn--secondary', type: 'button', onclick: () => {} }, [
+          el('span', { class: 'dash__action-btn-icon', html: icon('i-trend') }),
+          document.createTextNode('Run a campaign'),
+        ]),
+      ]),
+    ]),
   ]));
 
   // ───── Account snapshot (top) ─────────────────────────────────────────
   wrap.appendChild(buildSnapshot(isBrand));
 
-  // ───── Two Scout-powered CTAs ─────────────────────────────────────────
-  wrap.appendChild(el('div', { class: 'dash__ctas' }, [
-    buildPostCTA(isBrand),
-    buildCampaignCTA(isBrand),
-  ]));
+  // ───── Recent activity ────────────────────────────────────────────────
+  wrap.appendChild(buildRecentActivity(isBrand));
 
   // ───── Scout's pulse ──────────────────────────────────────────────────
   wrap.appendChild(el('div', { class: 'dash__pulse' }, [
@@ -1956,14 +1829,304 @@ function renderHome() {
     ]),
   ]));
 
-  // ───── Recent activity ────────────────────────────────────────────────
-  wrap.appendChild(buildRecentActivity(isBrand));
-
   home.appendChild(wrap);
+  initHomeScout();
+}
+
+// ─── Shared Scout panel renderer (KB-card style) ──────────────────────────
+function initScoutPanel(innerId, inputId, sendId, cards, replyMap) {
+  const inner = $('#' + innerId);
+  const input = $('#' + inputId);
+  const send  = $('#' + sendId);
+  if (!inner || !input || !send) return;
+
+  inner.innerHTML = '';
+
+  // ── Scout header card ────────────────────────────────────────────────
+  const header = el('div', { class: 'sp-header' }, [
+    el('span', { class: 'sp-header__avatar' }, [
+      el('span', { html: icon('i-logo') }),
+    ]),
+    el('div', { class: 'sp-header__text' }, [
+      el('div', { class: 'sp-header__name' }, 'Scout'),
+      el('div', { class: 'sp-header__status' }, [
+        el('span', { class: 'sp-header__dot' }),
+        document.createTextNode('Active now'),
+      ]),
+    ]),
+  ]);
+  inner.appendChild(header);
+
+  // ── Build KB-style cards ─────────────────────────────────────────────
+  cards.forEach((card, i) => {
+    const cardEl = buildScoutCard(card);
+    cardEl.style.transitionDelay = (100 + i * 110) + 'ms';
+    inner.appendChild(cardEl);
+    requestAnimationFrame(() => requestAnimationFrame(() => cardEl.classList.add('kb-card--visible')));
+  });
+
+  // ── Chip handler ─────────────────────────────────────────────────────
+  inner.addEventListener('click', e => {
+    const chip = e.target.closest('.sp-chip');
+    if (!chip) return;
+    const label = chip.textContent.trim();
+    chip.closest('.sp-chips')?.querySelectorAll('.sp-chip').forEach(c => c.setAttribute('disabled', 'true'));
+    appendScoutReply(inner, label, replyMap);
+  });
+
+  // ── Composer wiring ──────────────────────────────────────────────────
+  function sendMsg() {
+    const v = input.value.trim();
+    if (!v) return;
+    input.value = '';
+    send.classList.remove('active');
+    appendUserMsg(inner, v);
+    appendScoutReply(inner, v, replyMap);
+  }
+  send.onclick = sendMsg;
+  input.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } };
+  input.oninput = () => send.classList.toggle('active', input.value.trim().length > 0);
+}
+
+function buildScoutCard({ title, subtitle, status, sections, chips, isActive }) {
+  const card = el('div', { class: 'kb-card ' + (isActive ? 'kb-card--active' : 'kb-card--upcoming') });
+
+  // Header
+  const hd = el('div', { class: 'kb-card__hd' }, [
+    el('div', {}, [
+      el('div', { class: 'kb-card__title' }, title),
+      ...(subtitle ? [el('div', { class: 'kb-card__subtitle' }, subtitle)] : []),
+    ]),
+    ...(status ? [el('div', { class: 'kb-card__status-tag' + (isActive ? '' : '') }, [
+      ...(isActive ? [el('span', { class: 'kb-card__status-spin' }, '↻')] : []),
+      document.createTextNode(status),
+    ])] : []),
+  ]);
+  card.appendChild(hd);
+
+  // Sections
+  if (sections) {
+    sections.forEach((sec, i) => {
+      const secEl = buildScoutSection(sec);
+      secEl.style.transitionDelay = (120 + i * 90) + 'ms';
+      card.appendChild(secEl);
+      requestAnimationFrame(() => requestAnimationFrame(() => secEl.classList.add('kbs--visible')));
+    });
+  }
+
+  // Chips
+  if (chips && chips.length) {
+    const chipsEl = el('div', { class: 'sp-chips' },
+      chips.map(c => el('button', { class: 'sp-chip', type: 'button' }, c))
+    );
+    card.appendChild(chipsEl);
+  }
+
+  return card;
+}
+
+function buildScoutSection({ type, eyebrow, body, bars, track, chips }) {
+  const sec = el('div', { class: 'kbs kbs--' + type });
+
+  if (eyebrow) sec.appendChild(el('div', { class: 'kbs__eyebrow' }, eyebrow));
+
+  if (type === 'identity') {
+    sec.appendChild(el('div', { class: 'kbs__identity-niche' }, body));
+  } else if (type === 'text') {
+    sec.appendChild(el('div', { class: 'sp-section-text' }, body));
+  } else if (type === 'topics' && bars) {
+    const list = el('div', { class: 'kbs__topics-list' });
+    bars.forEach(({ label, pct }, i) => {
+      const row = el('div', { class: 'kbs__topic-row' }, [
+        el('div', { class: 'kbs__topic-meta' }, [
+          el('span', { class: 'kbs__topic-name' }, label),
+          el('span', { class: 'kbs__topic-pct' }, pct),
+        ]),
+        el('div', { class: 'kbs__bar' }, [
+          el('div', { class: 'kbs__bar-fill', style: 'width:0' }),
+        ]),
+      ]);
+      list.appendChild(row);
+      setTimeout(() => {
+        const fill = row.querySelector('.kbs__bar-fill');
+        if (fill) fill.style.width = pct;
+      }, 280 + i * 100);
+    });
+    sec.appendChild(list);
+  } else if (type === 'peak' && track) {
+    sec.appendChild(el('div', { class: 'kbs__peak-wrap' }, [
+      el('div', { class: 'kbs__peak-track' }, [
+        el('div', { class: 'kbs__peak-pill', style: `left:${track.left};width:${track.width}` }),
+      ]),
+      el('div', { class: 'kbs__peak-labels' }, ['12a','6a','12p','6p','12a'].map(t =>
+        el('span', {}, t)
+      )),
+    ]));
+    if (body) sec.appendChild(el('div', { class: 'sp-section-note' }, body));
+  } else if (type === 'chips' && chips) {
+    const row = el('div', { class: 'kbs__chips' });
+    chips.forEach((c, i) => {
+      const chip = el('span', { class: 'kbs__chip' }, c);
+      setTimeout(() => chip.classList.add('kbs__chip--in'), 100 + i * 70);
+      row.appendChild(chip);
+    });
+    sec.appendChild(row);
+  }
+
+  return sec;
+}
+
+function appendUserMsg(inner, text) {
+  const msg = el('div', { class: 'sp-user-msg' }, [
+    el('div', { class: 'sp-user-msg__bubble' }, text),
+  ]);
+  inner.appendChild(msg);
+  inner.scrollTop = inner.scrollHeight;
+}
+
+function appendScoutReply(inner, label, replyMap) {
+  // Typing indicator card
+  const typing = el('div', { class: 'kb-card kb-card--active kb-card--visible sp-typing-card' }, [
+    el('div', { class: 'kb-card__hd' }, [
+      el('div', {}, [el('div', { class: 'kb-card__title' }, 'Scout')]),
+      el('div', { class: 'kb-card__status-tag' }, [
+        el('span', { class: 'kb-card__status-spin' }, '↻'),
+        document.createTextNode('Thinking…'),
+      ]),
+    ]),
+    el('div', { class: 'sp-typing-dots' }, [
+      el('span', { class: 'hmsg__dot' }),
+      el('span', { class: 'hmsg__dot' }),
+      el('span', { class: 'hmsg__dot' }),
+    ]),
+  ]);
+  inner.appendChild(typing);
+  inner.scrollTop = inner.scrollHeight;
+
+  setTimeout(() => {
+    typing.remove();
+    const replyText = replyMap[label] || `Got it — let me work on that. Give me a moment.`;
+    const replyCard = buildScoutCard({
+      title: 'Scout',
+      status: 'Done',
+      isActive: false,
+      sections: [{ type: 'text', body: replyText }],
+    });
+    replyCard.classList.add('kb-card--done');
+    inner.appendChild(replyCard);
+    requestAnimationFrame(() => requestAnimationFrame(() => replyCard.classList.add('kb-card--visible')));
+    inner.scrollTop = inner.scrollHeight;
+  }, 1100);
+}
+
+function initHomeScout() {
+  const isBrand = state.accountType === 'brand';
+
+  const cards = isBrand ? [
+    {
+      title: 'Right now',
+      subtitle: 'Trending opportunity',
+      status: 'Live',
+      isActive: true,
+      sections: [
+        { type: 'chips', eyebrow: 'TRENDING', chips: ['#SouthAsianHeritageWeek', 'Heritage content', 'Cultural storytelling'] },
+        { type: 'topics', eyebrow: 'SIGNAL STRENGTH', bars: [
+          { label: 'Personal stories', pct: '78%' },
+          { label: 'Brand content',    pct: '24%' },
+          { label: 'Product posts',    pct: '41%' },
+        ]},
+        { type: 'peak', eyebrow: 'PEAK WINDOW TODAY', track: { left: '50%', width: '17%' }, body: '2–4pm PKT · 3 drafts ready' },
+      ],
+      chips: ['Draft a thread →', 'Show me the data'],
+    },
+  ] : [
+    {
+      title: 'Right now',
+      subtitle: 'Spiking conversation',
+      status: 'Live',
+      isActive: true,
+      sections: [
+        { type: 'chips', eyebrow: 'TOPIC', chips: ['AI tooling debate', 'Nuanced takes', 'Design process'] },
+        { type: 'topics', eyebrow: 'ENGAGEMENT BY FORMAT', bars: [
+          { label: 'Nuanced takes',  pct: '85%' },
+          { label: 'Hot takes',      pct: '34%' },
+          { label: 'Tutorial posts', pct: '52%' },
+        ]},
+        { type: 'peak', eyebrow: 'PEAK WINDOW TODAY', track: { left: '50%', width: '17%' }, body: '2–4pm PKT · 3 drafts ready' },
+      ],
+      chips: ['Draft a follow-up →', 'Show the trend'],
+    },
+  ];
+
+  const replyMap = {
+    'Draft a thread →': `Here's a thread opener: "Heritage isn't a mood board. It's a body of knowledge being lost one generation at a time. Here's what I've been trying to learn…" Want the full 3-post thread?`,
+    'Draft a follow-up →': `Here's an opener: "The 'AI replaces designers' take is from people who've never shipped under a deadline. Here's what actually happens in the room…" Build out the full post?`,
+    'Show me the data': `#SouthAsianHeritageWeek is up 4.2× w/w. Personal stories are getting 3× more saves than brand content right now. Your last post hit exactly this note.`,
+    'Show the trend': `The AI tooling debate is seeing 5.6× saves on nuanced takes vs. hot takes. Your last post landed in the sweet spot — a follow-up has strong potential.`,
+    'See my drafts': `You have 3 drafts ready: (1) The collaboration post, (2) Tool audit thread, (3) A hot take on briefs. Which feels closest to ready?`,
+    'Schedule one': `I can schedule any of your 3 drafts for 2pm PKT today. Which post do you want to go out?`,
+    'Remind me later': `Got it — I'll surface this again closer to 2pm PKT.`,
+  };
+
+  initScoutPanel('home-scout-inner', 'home-scout-input', 'home-scout-send', cards, replyMap);
+}
+
+function initDashScout() {
+  const isBrand = state.accountType === 'brand';
+
+  const cards = isBrand ? [
+    {
+      title: 'This week\'s insight',
+      subtitle: 'Analytics summary',
+      status: 'Updated now',
+      isActive: true,
+      sections: [
+        { type: 'text', body: 'Bookmarks are your strongest signal — up +38% this month. Posts with visual storytelling drive 2× more saves than copy-only.' },
+        { type: 'topics', eyebrow: 'METRIC BREAKDOWN', bars: [
+          { label: 'Impressions', pct: '72%' },
+          { label: 'Bookmarks',   pct: '91%' },
+          { label: 'Reposts',     pct: '38%' },
+          { label: 'Likes',       pct: '55%' },
+        ]},
+        { type: 'chips', eyebrow: 'GROWING SEGMENT', chips: ['Women 25–34', 'Pakistan', 'UAE'] },
+      ],
+      chips: ['What drove this?', 'Draft for them'],
+    },
+  ] : [
+    {
+      title: 'This week\'s insight',
+      subtitle: 'Analytics summary',
+      status: 'Updated now',
+      isActive: true,
+      sections: [
+        { type: 'text', body: 'Bookmarks are your strongest signal — up +34% this month. Your nuanced takes on AI are driving 3× more saves than your tutorial posts.' },
+        { type: 'topics', eyebrow: 'METRIC BREAKDOWN', bars: [
+          { label: 'Impressions', pct: '65%' },
+          { label: 'Bookmarks',   pct: '88%' },
+          { label: 'Replies',     pct: '42%' },
+          { label: 'Reposts',     pct: '31%' },
+        ]},
+        { type: 'chips', eyebrow: 'GROWING SEGMENT', chips: ['Designers', 'PMs', '25–34 range'] },
+      ],
+      chips: ['What drove this?', 'Write for them'],
+    },
+  ];
+
+  const replyMap = {
+    'What drove this?': `Your bookmark spike tracks with the Heritage Week thread — posts that ask the reader to reflect (not just react) consistently drive 2–3× more saves in your niche.`,
+    'Dig deeper': `Your top-performing post this month had a 85% ER and 34 bookmarks on just 1.4K reach — that's a 2.4% bookmark rate, which is exceptional. Want to reverse-engineer what made it land?`,
+    'Draft for them': `Here's an angle for your 25–34 Pakistan/UAE audience: "The brief everyone ignores — and why the best projects start with it." Want me to build it out?`,
+    'Write for them': `Here's an angle for Designers & PMs: "The 'move fast' culture broke something in how we brief. Here's what I've started doing instead." Want the full draft?`,
+    'Tell me more': `The 25–34 women in Pakistan & UAE segment grew 12% this week, likely driven by the Heritage Week context. They're saving posts about craft, process, and cultural identity at 3× the baseline.`,
+    'Show analytics': `Your Designers & PMs segment is now 31% of your audience. They have a 6.2% avg bookmark rate — highest of any segment. Posts about tooling opinions and process critiques land best.`,
+  };
+
+  initScoutPanel('dash-scout-inner', 'dash-scout-input', 'dash-scout-send', cards, replyMap);
 }
 
 function goAnalytics() {
   renderDashboard();
+  initDashScout();
   showView('view-dash');
   setCrumbs(['Dashboard']);
 }
@@ -2092,14 +2255,15 @@ function buildRecentActivity(isBrand) {
 }
 
 function buildPostCTA(isBrand) {
+  const h = (state.brand && state.brand.handle) || (isBrand ? '@rasa' : '@aqamar');
   const samples = isBrand ? [
-    { handle: '@rasa', body: "Heritage isn't an aesthetic. It's a postcode and a person who can name the stitch." },
-    { handle: '@rasa', body: "Bibi taught us mirror work in Hyderabad. 31 years, hands faster than my notes." },
-    { handle: '@rasa', body: "Workshop reels outperform studio reels 1.8× for us. Tells you what your audience wants." },
+    { handle: h, body: "Heritage isn't an aesthetic. It's a postcode and a person who can name the stitch." },
+    { handle: h, body: "Bibi taught us mirror work in Hyderabad. 31 years, hands faster than my notes." },
+    { handle: h, body: "Workshop reels outperform studio reels 1.8× for us. Tells you what your audience wants." },
   ] : [
-    { handle: '@aqamar', body: "Most design-system posts skip the part that matters: adoption. Token tables are easy." },
-    { handle: '@aqamar', body: "First time I shipped a system, optimized the wrong thing for six months. Lesson logged." },
-    { handle: '@aqamar', body: "AI replacing designers is a take from people who don't ship. The real question is which 30%." },
+    { handle: h, body: "Most design-system posts skip the part that matters: adoption. Token tables are easy." },
+    { handle: h, body: "First time I shipped a system, optimized the wrong thing for six months. Lesson logged." },
+    { handle: h, body: "AI replacing designers is a take from people who don't ship. The real question is which 30%." },
   ];
 
   const stack = el('div', { class: 'cta-card__stack' },
@@ -2264,8 +2428,9 @@ function renderDashboard() {
 
 function buildLivePostCard(isBrand) {
   const post = state.publishedPost;
-  const handle   = isBrand ? '@rasa'   : '@aqamar';
-  const name     = isBrand ? 'Rasa'    : 'Abdullah Qamar';
+  const brand = state.brand || {};
+  const handle   = brand.handle || (isBrand ? '@rasa' : '@aqamar');
+  const name     = brand.displayName || brand.name || (isBrand ? 'Rasa' : 'Abdullah Qamar');
   const avatarSrc = isBrand ? '/ProfileBrand.jpeg' : '/ProfileIndividual.png';
   const timeAgo  = '2h ago';
 
@@ -2429,11 +2594,20 @@ function buildReachChart(isBrand) {
   ).join('');
 
   const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:200px">
+    <defs>
+      <style>
+        .rc-line { stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: rc-draw 1.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .rc-line--other { animation-delay: 0.15s; }
+        .rc-area { opacity: 0; animation: rc-fadein 0.6s ease 1s forwards; }
+        @keyframes rc-draw { to { stroke-dashoffset: 0; } }
+        @keyframes rc-fadein { to { opacity: 1; } }
+      </style>
+    </defs>
     ${gridLines}${xLabels}
-    <polygon points="${fArea}" fill="rgba(91,91,245,0.07)"/>
-    <polyline points="${fPts}" fill="none" stroke="#5B5BF5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    <polygon points="${oArea}" fill="rgba(52,211,153,0.07)"/>
-    <polyline points="${oPts}" fill="none" stroke="#34D399" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <polygon points="${fArea}" fill="rgba(91,91,245,0.07)" class="rc-area"/>
+    <polyline points="${fPts}" fill="none" stroke="#5B5BF5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="rc-line"/>
+    <polygon points="${oArea}" fill="rgba(52,211,153,0.07)" class="rc-area"/>
+    <polyline points="${oPts}" fill="none" stroke="#34D399" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="rc-line rc-line--other"/>
   </svg>`;
 
   return el('div', { class: 'dash__chart-card' }, [
@@ -2467,29 +2641,63 @@ function buildAgeChart(isBrand) {
     { range: '45+',   pct:  9, color: '#D0D0FD' },
   ];
 
+  const gender = isBrand
+    ? [{ label: 'Female', pct: 62 }, { label: 'Male', pct: 31 }, { label: 'Other', pct: 7 }]
+    : [{ label: 'Male', pct: 54 }, { label: 'Female', pct: 38 }, { label: 'Other', pct: 8 }];
+
+  const topLoc  = isBrand ? 'Pakistan · UAE' : 'United States · India';
+  const totalFollowers = isBrand ? '12.4k' : '12.4k';
+  const peakAge = segments.reduce((a, b) => a.pct > b.pct ? a : b);
+
   const maxPct = Math.max(...segments.map(s => s.pct));
-  const W = 260, H = 180;
-  const pad = { t: 20, r: 36, b: 28, l: 44 };
+  const W = 260, H = 155;
+  const pad = { t: 10, r: 40, b: 10, l: 44 };
   const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
-  const barH = Math.floor(ph / segments.length) - 6;
+  const barH = Math.floor(ph / segments.length) - 5;
 
   const bars = segments.map((s, i) => {
     const barW = (s.pct / maxPct) * pw;
-    const y = pad.t + i * (barH + 6);
+    const y = pad.t + i * (barH + 5);
     return `<text x="${pad.l - 8}" y="${y + barH / 2 + 4}" fill="#71717a" font-size="11" text-anchor="end">${s.range}</text>
-            <rect x="${pad.l}" y="${y}" width="${barW.toFixed(1)}" height="${barH}" rx="3" fill="${s.color}"/>
+            <rect x="${pad.l}" y="${y}" width="0" height="${barH}" rx="3" fill="${s.color}">
+              <animate attributeName="width" from="0" to="${barW.toFixed(1)}" dur="0.7s" calcMode="spline" keySplines="0.4 0 0.2 1" fill="freeze" begin="${0.1 + i * 0.1}s"/>
+            </rect>
             <text x="${pad.l + barW + 6}" y="${y + barH / 2 + 4}" fill="#3f3f46" font-size="11" font-weight="600">${s.pct}%</text>`;
   }).join('');
 
-  const svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">
-    ${bars}
-  </svg>`;
+  const genderColors = ['#5B5BF5', '#34D399', '#F59E0B'];
 
   return el('div', { class: 'dash__chart-card dash__chart-card--narrow' }, [
     el('div', { class: 'dash__chart-head' }, [
       el('span', { class: 'dash__chart-title' }, 'Audience by age'),
     ]),
-    el('div', { class: 'dash__chart-body', html: svg }),
+    // Summary stat row
+    el('div', { class: 'dash__age-summary' }, [
+      el('div', { class: 'dash__age-stat' }, [
+        el('span', { class: 'dash__age-stat-val' }, totalFollowers),
+        el('span', { class: 'dash__age-stat-lbl' }, 'followers'),
+      ]),
+      el('div', { class: 'dash__age-stat' }, [
+        el('span', { class: 'dash__age-stat-val' }, peakAge.range),
+        el('span', { class: 'dash__age-stat-lbl' }, 'top bracket'),
+      ]),
+    ]),
+    // Gender split
+    el('div', { class: 'dash__age-section' }, [
+      el('div', { class: 'dash__age-eyebrow' }, 'GENDER'),
+      el('div', { class: 'dash__age-gender-row' },
+        gender.map((g, i) => el('div', { class: 'dash__age-gender-item' }, [
+          el('span', { class: 'dash__age-gender-dot', style: `background:${genderColors[i]}` }),
+          el('span', { class: 'dash__age-gender-label' }, g.label),
+          el('span', { class: 'dash__age-gender-pct' }, g.pct + '%'),
+        ]))
+      ),
+    ]),
+    // Top location
+    el('div', { class: 'dash__age-section dash__age-section--loc' }, [
+      el('div', { class: 'dash__age-eyebrow' }, 'TOP LOCATIONS'),
+      el('div', { class: 'dash__age-loc' }, topLoc),
+    ]),
   ]);
 }
 
@@ -2596,6 +2804,31 @@ function buildAudienceList(isBrand) {
    Each step is an async function that updates state and returns when complete.
    ========================================================================= */
 
+// Derive an @handle from a person's name: first initial + last name.
+function handleFromName(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '';
+  if (parts.length === 1) return '@' + parts[0].toLowerCase();
+  return '@' + (parts[0][0] || '').toLowerCase() + parts[parts.length - 1].toLowerCase();
+}
+
+// Sync the connected-account identity to the logged-in user so their name
+// shows everywhere (posts, profile, dashboard). For individuals the person IS
+// the account. Brands keep their own brand identity (e.g. the company name).
+// Safe to call repeatedly and from any entry point.
+function applyUserIdentity() {
+  if (!state.brand) {
+    const persona = state.accountType === 'brand' ? DEMO_BRAND : DEMO_INDIVIDUAL;
+    state.brand = { ...persona };
+  }
+  if (state.accountType === 'brand') return;
+  const name = (state.user.name || '').trim();
+  if (!name) return;
+  state.brand.name        = name;
+  state.brand.displayName = name;
+  state.brand.handle      = handleFromName(name) || state.brand.handle;
+}
+
 async function step1_opening() {
   // Hero owns the only human touch point at this stage: profile type.
   // openingHero() blocks until the user picks Individual or Brand and writes
@@ -2604,6 +2837,7 @@ async function step1_opening() {
 
   const persona = state.accountType === 'brand' ? DEMO_BRAND : DEMO_INDIVIDUAL;
   state.brand = { ...persona };
+  applyUserIdentity(); // reflect the logged-in user's name/handle on their account
   state.kb.kbReveal = new Set(); // identity reveals only after X connect or website scan
   state.audience = persona.audienceDefault;
   state.tone = persona.tone;
@@ -2809,15 +3043,7 @@ async function step5_x_connect() {
   openKBPanel();
 
   // Update the brand profile to reflect the logged-in user.
-  // Derive a plausible handle from their name (lowercase, no spaces).
-  const loggedInName = state.user.name || state.brand.name;
-  const nameParts = loggedInName.trim().split(/\s+/);
-  const firstInitial = nameParts[0]?.[0]?.toLowerCase() || '';
-  const lastName = (nameParts[nameParts.length - 1] || '').toLowerCase();
-  const loggedInHandle = '@' + firstInitial + lastName;
-  state.brand.name        = loggedInName;
-  state.brand.displayName = loggedInName;
-  state.brand.handle      = loggedInHandle;
+  applyUserIdentity();
 
   userMsg('Authorized X');
 
@@ -2928,7 +3154,7 @@ async function step6_profile_scan() {
         ? 'Following list confirms positioning in the South Asian fashion creator ecosystem.'
         : 'Following list confirms positioning in the design-craft community.' },
     ]);
-    await scoutMsg("Got a clear picture. Here's what stands out:", { typingFor: 600, beat: 400 });
+    await scoutMsg("Got a clear picture. I've got a good read from your X profile. Here's what stands out:", { typingFor: 600, beat: 400 });
     xProfilePreview(buildProfileSummary());
   }
   // Seed Main KB with what we just learned from the scan
@@ -3414,10 +3640,16 @@ async function step_audience_infer() {
   await scoutMsg(lead, { typingFor: 1100, beat: 300 });
 
   const proposal = state.brand.audienceDefault || state.audience;
-  // Insight pulled from persona/data signals; persona-specific.
-  const insight = isBrand
-    ? 'They respond best to heritage-explained posts paired with modern visuals. Saves run 3× the niche average on context-rich posts versus pure product shots.'
-    : 'They respond best to specific examples over abstract principles. Bookmark rate is 2.4× higher when posts name the tool, the task, and the tradeoff.';
+  // Insight framing depends on whether we actually have the user's data. When X
+  // is connected we can speak to measured numbers; when skipped, present the
+  // same patterns honestly as niche-level signals, not as "your" metrics.
+  const insight = xConnected
+    ? (isBrand
+        ? 'They respond best to heritage-explained posts paired with modern visuals. Saves run 3× the niche average on context-rich posts versus pure product shots.'
+        : 'They respond best to specific examples over abstract principles. Bookmark rate is 2.4× higher when posts name the tool, the task, and the tradeoff.')
+    : (isBrand
+        ? "In this niche, heritage-explained posts paired with modern visuals tend to outperform pure product shots. Connect your account later and I'll tune this to your actual numbers."
+        : "In this niche, specific examples tend to beat abstract principles. Connect your account later and I'll tune this to your actual numbers.");
   await scoutMsg(proposal, { typingFor: 1000, beat: 300 });
   await scoutMsg(insight, { typingFor: 1300, beat: 400 });
 
@@ -3455,44 +3687,6 @@ async function step_audience_infer() {
   state.kb.kbReveal.add('audience');
   renderKB();
   refreshBrandDrawer();
-}
-
-// Second drawer open: the final review just before Scout shifts to trends.
-// Reopens the drawer with everything Scout has gathered, including new
-// sections (tone, goals, validated audience). Same lifecycle as the first.
-async function step_brand_review_final() {
-  await scoutMsg(
-    "Here's the complete picture on your right. Take a look, and accept when it reads right.",
-    { typingFor: 1200, beat: 400 }
-  );
-
-  // Show action buttons inside the KB card. Loop until user confirms.
-  while (true) {
-    const action = await new Promise((resolve) => {
-      state.kb.actionCallback = (a) => {
-        state.kb.actionCallback = null;
-        renderKB();
-        resolve(a);
-      };
-      renderKB();
-    });
-
-    if (action === 'confirm') {
-      userMsg('Looks right');
-      break;
-    }
-
-    userMsg('Not quite');
-    await scoutMsg(
-      "What needs adjusting? Tell me what's off and I'll update it.",
-      { typingFor: 700, beat: 400 }
-    );
-    await awaitComposer({ placeholder: 'What should I change?' });
-    await scoutMsg(
-      "Got it, updated. Take another look and let me know if that reads right.",
-      { typingFor: 800, beat: 400 }
-    );
-  }
 }
 
 // Tone/voice as its own beat: 3 editable cards, each a sample post in a
@@ -3634,7 +3828,7 @@ async function stepMaterials() {
   if (xConnected) {
     // X gave us a solid foundation — extra context is optional.
     await scoutMsg(
-      "I've got a good read from your X profile. If you have a website, a portfolio link, or anything else you'd like me to factor in, drop it here — I'll pull from it. Or tap Skip to move on.",
+      "If you have a website, a portfolio link, or anything else you'd like me to factor in, drop it here — I'll pull from it. Or tap Skip to move on.",
       { typingFor: 1300, beat: 500 }
     );
     const reply = await awaitInputOrSkip('Skip');
@@ -3893,12 +4087,12 @@ async function step_post_directions() {
         onclick: () => {
           if (commitTimer) clearTimeout(commitTimer);
           state.skipped.add('first-post');
-          userMsg('Save these and decide later');
+          userMsg('Save these for later');
           wrapper.style.pointerEvents = 'none';
           laterRow.remove();
           resolve('later');
         },
-      }, 'Save these and decide later'),
+      }, 'Save these for later'),
     ]);
 
     append(wrapper);
@@ -3935,62 +4129,106 @@ function directionImage(d, i) {
   return wrap;
 }
 
-// Edit the chosen draft, then publish (simulated).
+// Edit the chosen draft, then publish (simulated). The draft is loaded straight
+// into the chat bar — the user edits in place and publishes from there, rather
+// than a separate editor card in the stream.
 async function step_edit_publish() {
   await scoutMsg(
-    "Edit anything you want. When it's right, hit Publish.",
+    "Edit anything you want right in the bar below. When it's right, hit Publish.",
     { typingFor: 800, beat: 400 }
   );
 
   await new Promise((resolve) => {
-    const ta = el('textarea', { class: 'post-editor__textarea', rows: '6' }, state.draftPost);
-    const counter = el('span', { class: 'post-editor__counter' }, String(state.draftPost.length) + ' / 280');
+    const pill      = $('.conv__composer .composer-pill');
+    const input     = $('#composer-input');
+    const sendBtn   = $('#composer-send');
+    const attachBtn = pill.querySelector('.composer-pill__attach');
 
-    const updateCounter = () => {
-      const len = ta.value.length;
-      counter.textContent = `${len} / 280`;
-      counter.classList.toggle('post-editor__counter--warn', len > 260);
-      counter.classList.toggle('post-editor__counter--over', len > 280);
-    };
+    // Enter publish mode: hide the normal single-line input + send/attach, drop
+    // in a growing textarea pre-filled with the draft, a counter, and a labeled
+    // Publish button.
+    setComposerEnabled(true);
+    pill.classList.add('composer-pill--publish');
+    input.style.display = 'none';
+    sendBtn.style.display = 'none';
+    if (attachBtn) attachBtn.style.display = 'none';
 
-    const editor = el('div', { class: 'post-editor' }, [
-      el('div', { class: 'post-editor__head' }, [
-        el('span', { class: 'post-editor__head-icon', html: icon('i-pencil') }),
-        document.createTextNode('Your first post'),
-      ]),
-      ta,
-      el('div', { class: 'post-editor__foot' }, [
-        counter,
-        el('div', { class: 'post-editor__actions' }, [
-          el('button', {
-            class: 'btn-primary post-editor__publish',
-            onclick: async () => {
-              const body = ta.value.trim();
-              if (!body) return;
-              state.draftPost = body;
-              state.publishedPost = { body, postedAt: Date.now() };
-              editor.remove();
-              userMsg('Publish');
-              await narratedProcess('Publishing to X', [
-                { icon: 'i-sparkle', text: 'Queueing to X publish endpoint.' },
-                { icon: 'i-clock',   text: "Posting at the next peak window for your audience." },
-                { icon: 'i-check',   text: 'Posted. Tracking will update on the dashboard.' },
-              ], { lineBeat: 800 });
-              renderPublishedPost(body);
-              addKBFact('brand', 'First post', body.length > 80 ? body.slice(0, 77) + '…' : body);
-              resolve();
-            },
-          }, [
-            el('span', { class: 'post-editor__publish-label' }, 'Publish'),
-            el('span', { html: icon('i-arrow-right') }),
-          ]),
-        ]),
-      ]),
+    const ta = el('textarea', { class: 'composer-pill__textarea', rows: '1' });
+    ta.value = state.draftPost;
+
+    const counter = el('span', { class: 'composer-pill__counter', role: 'status', 'aria-live': 'polite' }, String(state.draftPost.length) + ' / 280');
+
+    const publishBtn = el('button', { class: 'btn-primary composer-pill__publish', 'aria-label': 'Publish post' }, [
+      el('span', { class: 'composer-pill__publish-label' }, 'Publish'),
+      el('span', { html: icon('i-arrow-right') }),
     ]);
 
-    ta.addEventListener('input', updateCounter);
-    append(editor);
-    requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); });
+    pill.insertBefore(ta, sendBtn);
+    pill.insertBefore(counter, sendBtn);
+    pill.insertBefore(publishBtn, sendBtn);
+
+    const autoGrow = () => {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+    };
+    // A post is publishable only when it has content and is within the X limit.
+    // Reflect that in the counter colour AND the Publish button's enabled state,
+    // so the limit isn't merely decorative and empty drafts can't be sent.
+    const isValid = () => {
+      const len = ta.value.trim().length;
+      return len > 0 && ta.value.length <= 280;
+    };
+    const updateState = () => {
+      const len = ta.value.length;
+      counter.textContent = `${len} / 280`;
+      counter.classList.toggle('composer-pill__counter--warn', len > 260 && len <= 280);
+      counter.classList.toggle('composer-pill__counter--over', len > 280);
+      const ok = isValid();
+      publishBtn.disabled = !ok;
+      publishBtn.setAttribute('aria-disabled', String(!ok));
+    };
+
+    const restoreComposer = () => {
+      ta.remove();
+      counter.remove();
+      publishBtn.remove();
+      pill.classList.remove('composer-pill--publish');
+      input.style.display = '';
+      sendBtn.style.display = '';
+      if (attachBtn) attachBtn.style.display = '';
+      setComposerEnabled(false);
+    };
+
+    const doPublish = async () => {
+      if (!isValid()) return;
+      const body = ta.value.trim();
+      state.draftPost = body;
+      state.publishedPost = { body, postedAt: Date.now() };
+      restoreComposer();
+      userMsg('Publish');
+      await narratedProcess('Publishing to X', [
+        { icon: 'i-sparkle', text: 'Formatting your post for X.' },
+        { icon: 'i-clock',   text: 'Posting to your account now.' },
+        { icon: 'i-check',   text: 'Posted. Tracking starts from here.' },
+      ], { lineBeat: 800 });
+      renderPublishedPost(body);
+      addKBFact('brand', 'First post', body.length > 80 ? body.slice(0, 77) + '…' : body);
+      resolve();
+    };
+
+    publishBtn.addEventListener('click', doPublish);
+    ta.addEventListener('input', () => { autoGrow(); updateState(); });
+    // Cmd/Ctrl+Enter publishes; plain Enter inserts a newline (it's a textarea).
+    ta.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); doPublish(); }
+    });
+
+    updateState();
+    requestAnimationFrame(() => {
+      autoGrow();
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    });
   });
 }
 
@@ -4086,8 +4324,8 @@ async function step_profile_score() {
       el('div', { class: 'conf__actions' }, [
         el('button', {
           class: 'btn-ghost',
-          onclick: () => { card.remove(); userMsg("I'll fix these later"); resolve('later'); },
-        }, "I'll fix these later"),
+          onclick: () => { card.remove(); userMsg("Fix these later"); resolve('later'); },
+        }, "Fix these later"),
         el('button', {
           class: 'btn-primary',
           onclick: () => { card.remove(); userMsg('Show me how'); resolve('how'); },
@@ -4123,19 +4361,6 @@ async function step_infrastructure_build() {
 
 async function step13_handoff() {
   if (state.publishedPost) {
-    // Ask how they feel about the post going live
-    await scoutMsg("How are you feeling about it?", { typingFor: 900, beat: 400 });
-    const feel = await quickReplies(
-      ["Excited to see how it does", "A bit nervous", "Ready to post more"]
-    );
-
-    const responseMap = {
-      "Excited to see how it does": "Good. That energy shows in posts. Scout will keep an eye on it and flag when something picks up.",
-      "A bit nervous": "That's normal for a first one. The data takes the guesswork out — you'll see exactly what resonated.",
-      "Ready to post more": "That's the move. Consistency compounds. I've already lined up the next angles for you.",
-    };
-    await scoutMsg(responseMap[feel] || "Got it.", { typingFor: 900, beat: 400 });
-    await sleep(400);
     await scoutMsg(`Your post is live, ${state.user.name.split(' ')[0]}. I'll track performance and surface what's working.`, { typingFor: 1000, beat: 500 });
   } else {
     await scoutMsg(`Everything's set up, ${state.user.name.split(' ')[0]}. Your drafts and trends are waiting whenever you're ready.`, { typingFor: 1000, beat: 500 });
@@ -4146,7 +4371,7 @@ async function step13_handoff() {
   // In-chat dashboard CTA
   await new Promise((resolve) => {
     const btn = el('button', {
-      class: 'qreply',
+      class: 'qreply qreply--primary',
       onclick: () => {
         userMsg('Go to Dashboard');
         btn.parentElement && btn.parentElement.remove();
@@ -4314,6 +4539,7 @@ function bindDemoControls() {
   if (analyticsBtn) {
     analyticsBtn.addEventListener('click', () => {
       renderDashboard();
+      initDashScout();
       showView('view-dash');
       setCrumbs(['Dashboard']);
     });
@@ -5182,10 +5408,11 @@ function boot() {
 
     if (savedSession.view === 'dash') {
       state.accountType = savedSession.accountType || 'individual';
+      applyUserIdentity();
       document.body.classList.remove('mode-onboarding');
       document.body.classList.add('mode-app');
       setCrumbs(['Home']);
-      try { renderDashboard(); } catch(e) { console.error('[dash render error]', e); }
+      try { renderDashboard(); initDashScout(); } catch(e) { console.error('[dash render error]', e); }
       showView('view-dash');
       return;
     }
@@ -5205,6 +5432,7 @@ function boot() {
 
       // Re-derive brand persona from accountType
       state.brand = { ...(state.accountType === 'brand' ? DEMO_BRAND : DEMO_INDIVIDUAL) };
+      applyUserIdentity();
 
       // Restore KB reveal set
       if (cs.kb) {
@@ -5271,6 +5499,9 @@ function boot() {
     state.accountType = params.get('type') || 'individual';
     state.user.name = params.get('name') || 'Abdullah Qamar';
     if (params.has('published')) state.publishedPost = { body: 'First time I shipped a design system, I optimized the wrong thing for six months.', postedAt: Date.now() };
+    applyUserIdentity();
+    const dashChip = document.querySelector('.profile-chip__name');
+    if (dashChip) dashChip.textContent = (state.user.name || 'Guest').split(' ')[0];
     document.body.classList.remove('mode-onboarding');
     document.body.classList.add('mode-app');
     setCrumbs(['Home']);

@@ -311,6 +311,48 @@ a { color: var(--text-link); text-decoration: none; }
 .composer-pill__send.active { background: var(--primary); color: white; }
 .composer-pill svg { width: 16px; height: 16px; }
 
+/* Publish mode — the draft is edited directly in the chat bar. The pill grows
+   to fit a multi-line textarea, with a counter and a labeled Publish button. */
+.composer-pill--publish {
+  align-items: flex-end;
+}
+.composer-pill__textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  font-size: var(--text-md);
+  color: var(--text-primary);
+  line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+.composer-pill__counter {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  padding-bottom: 14px;
+}
+.composer-pill__counter--warn { color: #b45309; }
+.composer-pill__counter--over { color: #b91c1c; font-weight: var(--weight-semibold); }
+.composer-pill__publish {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+.composer-pill__publish svg { width: 18px; height: 18px; }
+.composer-pill__publish:disabled,
+.composer-pill__publish[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* ------------------- Messages ------------------- */
 .msg {
   display: flex; gap: var(--space-3);
@@ -637,7 +679,7 @@ a { color: var(--text-link); text-decoration: none; }
 .conf__val ul { margin: 0; padding-left: var(--space-5); }
 .conf__edit {
   color: var(--text-tertiary);
-  width: 24px; height: 24px;
+  width: 32px; height: 32px;
   display: grid; place-items: center;
   border-radius: var(--radius-sm);
 }
@@ -1031,7 +1073,38 @@ a { color: var(--text-link); text-decoration: none; }
 }
 
 .dash::-webkit-scrollbar { display: none; }
-#view-home { overflow-y: auto; scrollbar-width: none; }
+#view-home, #view-dash { overflow: hidden; }
+
+/* Left panel content — contained, centered, breathing room */
+.scout-layout__main .dash {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 28px 12px 40px;
+}
+
+/* KPI strip: 5-col on analytics, keep as-is */
+/* Charts row: stack vertically inside the narrower panel */
+.scout-layout__main .dash__charts-row {
+  grid-template-columns: 1fr;
+}
+.scout-layout__main .dash__chart-card--narrow {
+  max-width: 100%;
+}
+
+/* Analytics row: 2-col instead of 3 */
+.scout-layout__main .dash__analytics-row {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Snapshot tiles: 4-col (one row) */
+.scout-layout__main .dash__snapshot-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Pulse grid: 1-col stack */
+.scout-layout__main .dash__pulse-grid {
+  grid-template-columns: 1fr;
+}
 
 /* ───── Header ────────────────────────────────────────────────────────── */
 .dash__header {
@@ -1301,6 +1374,22 @@ a { color: var(--text-link); text-decoration: none; }
   display: flex; flex-direction: column;
   gap: 6px;
 }
+.dash__welcome-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.dash__welcome-text {
+  display: flex; flex-direction: column;
+  gap: 6px;
+}
+.dash__welcome-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
 .dash__welcome-title {
   margin: 0;
   font-size: 36px;
@@ -1315,6 +1404,213 @@ a { color: var(--text-link); text-decoration: none; }
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
   max-width: 70ch;
+}
+.dash__action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, transform 0.1s;
+  background: var(--primary);
+  color: #fff;
+}
+.dash__action-btn:hover { background: var(--primary-pressed); }
+.dash__action-btn:active { transform: scale(0.97); }
+.dash__action-btn-icon { display: flex; align-items: center; }
+.dash__action-btn-icon svg { width: 14px; height: 14px; }
+.dash__action-btn--secondary {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+.dash__action-btn--secondary:hover { background: var(--surface-sunken); }
+
+/* ───── Shared 60/40 Scout layout (home + analytics) ─────────────────── */
+.scout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 384px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding-right: 12px;
+  gap: 0;
+}
+.scout-layout__main {
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scout-layout__main::-webkit-scrollbar { display: none; }
+
+/* ───── Scout panel — aurora gradient, floating with rounded corners ──── */
+.scout-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  margin: 12px 0 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 4px 24px rgba(91,91,245,0.08), 0 1px 4px rgba(0,0,0,0.05);
+  background: linear-gradient(
+    -45deg,
+    #ffffff,
+    #D8D5FF,
+    #ffffff,
+    #E8EEFF,
+    #ffffff,
+    #DDD9FF,
+    #ffffff
+  );
+  background-size: 400% 400%;
+  animation: kb-aurora 16s ease infinite;
+}
+.scout-panel__inner {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.scout-panel__inner::-webkit-scrollbar { display: none; }
+.scout-panel__composer {
+  flex-shrink: 0;
+  padding: 10px 16px 16px;
+}
+.scout-panel__pill {
+  width: 100% !important;
+  max-width: 100% !important;
+  background: rgba(255,255,255,0.75) !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* ───── Scout panel header card ──────────────────────────────────────── */
+.sp-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px 10px;
+}
+.sp-header__avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ai-gradient);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(91,91,245,0.25);
+}
+.sp-header__avatar svg { width: 14px; height: 14px; color: #fff; }
+.sp-header__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+.sp-header__status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #888;
+  margin-top: 1px;
+}
+.sp-header__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+/* ───── Scout panel action chips ─────────────────────────────────────── */
+.sp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 18px 16px;
+}
+.sp-chip {
+  font-size: 12.5px;
+  padding: 6px 13px;
+  border-radius: 100px;
+  border: 1.5px solid #5b5bf5;
+  color: #5b5bf5;
+  background: rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  backdrop-filter: blur(4px);
+}
+.sp-chip:hover:not(:disabled) {
+  background: #5b5bf5;
+  color: #fff;
+}
+.sp-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ───── Scout panel user message ─────────────────────────────────────── */
+.sp-user-msg {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px;
+}
+.sp-user-msg__bubble {
+  background: #5b5bf5;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 9px 14px;
+  border-radius: 14px 14px 3px 14px;
+  max-width: 88%;
+}
+
+/* ───── Scout panel section text ─────────────────────────────────────── */
+.sp-section-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #444;
+  padding: 2px 18px 14px;
+}
+.sp-section-note {
+  font-size: 12px;
+  color: #888;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ───── Typing dots (used in sp-typing-card) ─────────────────────────── */
+.sp-typing-card .kb-card__hd { padding-bottom: 12px; }
+.sp-typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 18px 16px;
+}
+.hmsg__dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #bbb;
+  animation: hmsg-bounce 1.2s infinite ease-in-out;
+}
+.hmsg__dot:nth-child(2) { animation-delay: 0.2s; }
+.hmsg__dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes hmsg-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%            { transform: translateY(-5px); opacity: 1; }
 }
 
 /* ───── Two Scout-powered CTA cards ───────────────────────────────────── */
@@ -1633,6 +1929,75 @@ a { color: var(--text-link); text-decoration: none; }
   gap: var(--space-3);
 }
 .dash__chart-card--narrow { min-width: 0; }
+
+/* ── Age chart enrichment ──────────────────────────────────────────────── */
+.dash__age-summary {
+  display: flex;
+  gap: var(--space-4);
+  padding: 0 0 var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.dash__age-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dash__age-stat-val {
+  font-size: 18px;
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+.dash__age-stat-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  font-weight: var(--weight-semibold);
+}
+.dash__age-section {
+  padding-top: var(--space-3);
+  margin-top: var(--space-2);
+}
+.dash__age-section--loc { margin-top: var(--space-2); }
+.dash__age-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+.dash__age-gender-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.dash__age-gender-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.dash__age-gender-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dash__age-gender-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+.dash__age-gender-pct {
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+.dash__age-loc {
+  font-size: 12.5px;
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+}
 .dash__chart-head {
   display: flex;
   align-items: center;
@@ -3168,345 +3533,6 @@ body.mode-connecting #kb-panel { display: none; }
   transition: width var(--duration-base) var(--ease-standard),
               max-width var(--duration-base) var(--ease-standard);
 }
-/* When any block is expanded, the panel breaks out of the chat container
-   and becomes a fixed right-side overlay covering the viewport top-to-bottom.
-   A backdrop (.kb-overlay) dims everything behind it. */
-.kb-panel--has-expanded {
-  position: fixed;
-  top: var(--space-4);
-  right: var(--space-4);
-  bottom: var(--space-4);
-  left: auto;
-  width: 50vw;
-  max-width: 720px;
-  max-height: none;
-  z-index: 50;
-  background: var(--surface-raised, #fff);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg, 0 16px 48px rgba(15, 23, 42, 0.18));
-  padding: var(--space-4);
-  overflow-y: auto;
-  pointer-events: auto;
-  animation: kbPanelIn var(--duration-base) var(--ease-decelerate) both;
-}
-.kb-panel--has-expanded .kb-block:not(.kb-block--expanded) {
-  display: none;
-}
-.kb-panel--has-expanded .kb-panel__head {
-  display: none;
-}
-.kb-panel--has-expanded .kb-block--expanded {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  padding: var(--space-2) var(--space-3);
-  min-height: 0;
-}
-.kb-panel--has-expanded .kb-block--expanded .kb-block__title {
-  font-size: var(--text-xl, 20px);
-  font-weight: var(--weight-semibold);
-}
-.kb-panel--has-expanded .kb-block--expanded .kb-block__head {
-  margin-bottom: var(--space-3);
-}
-
-/* Subtle dimming backdrop. Reused everywhere an overlay is needed
-   (kb expanded panel, OAuth modal, payment modal). Click closes the panel. */
-.kb-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(1px);
-  z-index: 49;
-  animation: fadeIn var(--duration-base) var(--ease-standard) both;
-  cursor: pointer;
-}
-
-@keyframes kbPanelIn {
-  from { opacity: 0; transform: translateX(8px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.kb-panel::-webkit-scrollbar { width: 0; height: 0; display: none; }
-
-.kb-panel__head {
-  display: flex; align-items: center;
-  padding: 2px var(--space-1) 4px;
-  pointer-events: auto;
-}
-.kb-panel__title {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--text-tertiary);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/* Vertical stack — always 1 column. */
-.kb-panel__grid {
-  display: flex; flex-direction: column;
-  gap: var(--space-2);
-  pointer-events: auto;
-}
-
-.kb-block {
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  display: flex; flex-direction: column;
-  gap: 4px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition:
-    opacity var(--duration-base) var(--ease-standard),
-    background-color var(--duration-base) var(--ease-standard),
-    border-color var(--duration-base) var(--ease-standard);
-}
-
-/* Three states (compact mode):
-   - empty:   dimmed (40% opacity), title only
-   - filled:  brighter (80%), title + summary subtitle
-   - active:  full opacity, title + dot indicator + summary subtitle (if filled)
-*/
-.kb-block--empty {
-  background: #fff;
-  opacity: 1;
-  border: 1px solid rgba(0,0,0,0.18);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.kb-block--filled {
-  background: #fff;
-  opacity: 1;
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-}
-.kb-block--active {
-  background: rgba(255, 255, 255, 1.0);
-  opacity: 1;
-  border-color: var(--border-subtle);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  overflow: hidden;
-}
-
-/* ------- Active KB block "bloom" — moving gradient at bottom 1/3 -------
-   Three light-purple blobs drift across the lower third of the block.
-   A blurred veil sits above them, smoothing their motion into a soft
-   gradient wash. Reads as ambient "Scout is building this." */
-.kb-block__bloom {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 33%;
-  pointer-events: none;
-  overflow: hidden;
-  border-bottom-left-radius: inherit;
-  border-bottom-right-radius: inherit;
-  z-index: 0;
-}
-.kb-block__bloom-blob {
-  position: absolute;
-  border-radius: 999px;
-  /* Light purple, low saturation. The three blobs vary in size and
-     drift on offset cycles so the gradient never settles. */
-  background: radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.85), rgba(167, 139, 250, 0) 70%);
-  filter: blur(2px);
-  opacity: 0.65;
-}
-.kb-block__bloom-blob--a {
-  width: 70%; height: 220%;
-  left: -10%; bottom: -90%;
-  animation: kbBloomDriftA 5.6s ease-in-out infinite;
-  background: radial-gradient(circle at 50% 50%, rgba(196, 181, 253, 0.95), rgba(196, 181, 253, 0) 70%);
-}
-.kb-block__bloom-blob--b {
-  width: 50%; height: 180%;
-  left: 30%; bottom: -70%;
-  animation: kbBloomDriftB 7.2s ease-in-out infinite;
-  background: radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.80), rgba(167, 139, 250, 0) 70%);
-  animation-delay: -1.8s;
-}
-.kb-block__bloom-blob--c {
-  width: 40%; height: 150%;
-  left: 55%; bottom: -60%;
-  animation: kbBloomDriftC 8.4s ease-in-out infinite;
-  background: radial-gradient(circle at 50% 50%, rgba(216, 180, 254, 0.85), rgba(216, 180, 254, 0) 70%);
-  animation-delay: -3.4s;
-}
-@keyframes kbBloomDriftA {
-  0%, 100% { transform: translate(0, 0)        scale(1); }
-  50%      { transform: translate(18%, -8%)    scale(1.10); }
-}
-@keyframes kbBloomDriftB {
-  0%, 100% { transform: translate(0, 0)        scale(1); }
-  50%      { transform: translate(-22%, -12%)  scale(1.15); }
-}
-@keyframes kbBloomDriftC {
-  0%, 100% { transform: translate(0, 0)        scale(1); }
-  50%      { transform: translate(14%, -6%)    scale(0.92); }
-}
-/* The veil sits ABOVE the blobs and blurs them into a soft wash. The
-   gradient overlay also fades the top edge of the bloom into the block,
-   so there's no hard seam where the bottom third begins. */
-.kb-block__bloom-veil {
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(14px) saturate(135%);
-  -webkit-backdrop-filter: blur(14px) saturate(135%);
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.30) 40%,
-    rgba(255, 255, 255, 0.10) 100%);
-}
-.kb-block__status {
-  position: relative;
-  z-index: 1; /* sit above the bloom */
-}
-@media (prefers-reduced-motion: reduce) {
-  .kb-block__bloom-blob { animation: none; }
-}
-
-/* Per-block expanded — the only "expanded" mode. Grows in place to show
-   captured facts (and an action footer if Scout staged the block for review). */
-.kb-block--expanded {
-  background: rgba(255, 255, 255, 1.0);
-  opacity: 1;
-  border-color: var(--border-subtle);
-  box-shadow: var(--shadow-md);
-}
-
-.kb-block:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: var(--border-subtle);
-  opacity: 1;
-}
-.kb-block--expanded:hover { box-shadow: var(--shadow-md); }
-
-/* Hide the summary subtitle when the block is expanded (full facts shown). */
-.kb-block--expanded .kb-block__summary { display: none; }
-
-.kb-block__head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--space-2);
-}
-.kb-block__title {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.kb-block__dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--primary);
-  flex-shrink: 0;
-  animation: kbDotPulse 1.6s var(--ease-standard) infinite;
-}
-.kb-block__collapse {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  color: var(--text-tertiary);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--duration-fast) var(--ease-standard),
-              color var(--duration-fast) var(--ease-standard);
-}
-.kb-block__collapse:hover {
-  background: var(--neutral-100, var(--surface-canvas));
-  color: var(--text-primary);
-}
-.kb-block__collapse svg { width: 14px; height: 14px; }
-@keyframes kbDotPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(0.6); opacity: 0.5; }
-}
-
-/* Summary subtitle: short list of captured fact labels */
-.kb-block__summary {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.kb-block--active .kb-block__summary { color: var(--text-secondary); }
-
-/* Action footer — appears in the expanded block when Scout has staged it
-   for confirmation. Two buttons: ghost Edit and primary Looks right. */
-.kb-block__action-footer {
-  display: flex; justify-content: flex-end; gap: var(--space-2);
-  padding-top: var(--space-3);
-  margin-top: var(--space-2);
-  border-top: 1px solid var(--border-subtle);
-  animation: fadeUp var(--duration-base) var(--ease-emphasized) both;
-}
-.kb-block__action {
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  border: 1px solid transparent;
-  transition: background var(--duration-fast) var(--ease-standard),
-              border-color var(--duration-fast) var(--ease-standard);
-}
-.kb-block__action--primary {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-.kb-block__action--primary:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
-}
-.kb-block__action--ghost {
-  background: transparent;
-  color: var(--text-secondary);
-}
-.kb-block__action--ghost:hover {
-  background: var(--neutral-100);
-  color: var(--text-primary);
-}
-
-.kb-block__body {
-  display: flex; flex-direction: column;
-  gap: 2px;
-  padding-top: var(--space-1);
-  animation: fadeUp var(--duration-base) var(--ease-emphasized) both;
-}
-.kb-block__fact {
-  display: flex; flex-direction: column;
-  padding: var(--space-1) 0;
-  border-top: 1px solid var(--border-subtle);
-  animation: fadeUp var(--duration-base) var(--ease-emphasized) both;
-}
-.kb-block__fact:first-child { border-top: none; }
-.kb-block__fact-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  color: var(--text-tertiary);
-  font-weight: var(--weight-semibold);
-}
-.kb-block__fact-value {
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-  line-height: 1.4;
-}
-.kb-block__placeholder {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  font-style: italic;
-}
 
 /* =========================================================================
    MULTI-PLATFORM CONNECT CARD
@@ -3868,87 +3894,6 @@ body.mode-connecting #kb-panel { display: none; }
 }
 .iteration-card:hover .iteration-card__select { opacity: 1; color: var(--primary); }
 
-/* =========================================================================
-   Post editor — inline draft surface before publishing
-   ========================================================================= */
-.post-editor {
-  background: rgba(15, 23, 42, 0.025);
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 20px;
-  padding: 24px 28px 26px;
-  margin: var(--space-2) 0 var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  animation: cardIn var(--duration-slow) var(--ease-decelerate);
-}
-.post-editor__head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-}
-.post-editor__head-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-}
-.post-editor__head-icon svg { width: 14px; height: 14px; }
-.post-editor__textarea {
-  width: 100%;
-  resize: vertical;
-  min-height: 180px;
-  padding: 18px 20px;
-  border: 1.5px solid var(--primary);
-  border-radius: 14px;
-  background: #fff;
-  font: inherit;
-  font-size: 17px;
-  line-height: 1.45;
-  color: #0f1419;
-  letter-spacing: -0.005em;
-  outline: none;
-  transition: border-color var(--duration-base) var(--ease-standard), box-shadow var(--duration-base) var(--ease-standard);
-}
-.post-editor__textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 14%, transparent);
-}
-.post-editor__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-.post-editor__counter {
-  font-size: 14px;
-  color: var(--text-tertiary);
-  font-variant-numeric: tabular-nums;
-}
-.post-editor__counter--warn  { color: #b45309; }
-.post-editor__counter--over  { color: #b91c1c; font-weight: var(--weight-semibold); }
-.post-editor__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.post-editor__publish {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 22px;
-  height: auto;
-  font-size: 16px;
-  font-weight: 700;
-  border-radius: 12px;
-}
-.post-editor__publish svg { width: 16px; height: 16px; }
-
 /* Live-post variant of successPostTeaser (used after Publish). */
 .success-post--published .success-post__badge--live {
   background: color-mix(in oklab, #16a34a 14%, transparent);
@@ -3967,7 +3912,6 @@ body.mode-connecting #kb-panel { display: none; }
 .conv__stream .connect,
 .conv__stream .trend-group-list,
 .conv__stream .iteration-list,
-.conv__stream .post-editor,
 .conv__stream .tone-list {
   margin-left: 0;
   margin-right: 0;
@@ -3990,71 +3934,10 @@ body.mode-connecting #kb-panel { display: none; }
 .conf__row { padding-top: var(--space-2); padding-bottom: var(--space-2); }
 .conf__title { border-bottom: 0; }
 .conf__actions { border-top: 0; background: transparent; }
-.kb-block__fact { border-top: 0; padding: var(--space-1) 0; }
-.kb-block__action-footer { border-top: 0; }
 .topic-row + .topic-row { border-top: 0; }
 .trend-card + .trend-card { border-top: 0; }
 .pl-tree__item + .pl-tree__item { border-top: 0; }
 .pending__item + .pending__item { border-top: 0; }
-
-/* =========================================================================
-   KB BLOCK — square 180×180 compact cards (1920px reference design size).
-   Active block paints a 4-corner sparkle field; others are plain title +
-   subtitle. Cards collapse from squares back to natural height in the
-   expanded overlay panel where they sit alone, full-width.
-   ========================================================================= */
-.kb-block {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  padding: var(--space-4);
-  gap: var(--space-2);
-  overflow: hidden;
-}
-.kb-block__title {
-  font-size: var(--text-base);
-  letter-spacing: -0.01em;
-}
-.kb-block__summary {
-  -webkit-line-clamp: 4;
-}
-
-/* Active-block status: small "Building…" label pinned to the bottom-left.
-   Three dots fade in sequence — a typing-indicator rhythm. Quiet, slow,
-   never grabs the eye away from the chat. */
-.kb-block__status {
-  position: absolute;
-  left: var(--space-4);
-  bottom: var(--space-3);
-  font-size: var(--text-xs, 12px);
-  font-weight: var(--weight-medium);
-  letter-spacing: 0;
-  color: var(--text-tertiary);
-  pointer-events: none;
-  display: inline-flex;
-  align-items: baseline;
-}
-.kb-block__status-dot {
-  display: inline-block;
-  opacity: 0.25;
-  animation: kbStatusDot 1600ms ease-in-out infinite;
-}
-.kb-block__status-dot:nth-of-type(1) { animation-delay:   0ms; }
-.kb-block__status-dot:nth-of-type(2) { animation-delay: 220ms; }
-.kb-block__status-dot:nth-of-type(3) { animation-delay: 440ms; }
-
-@keyframes kbStatusDot {
-  0%, 70%, 100% { opacity: 0.25; }
-  35%           { opacity: 0.85; }
-}
-
-/* Expanded overlay block: drop the square aspect-ratio, drop the sparkle
-   field (handled by JS — only rendered when isActive && !isExpanded). */
-.kb-block--expanded {
-  width: auto;
-  aspect-ratio: auto;
-  min-height: 0;
-}
 
 /* =========================================================================
    CONNECT CARD — no internal separators, tight vertical rhythm
@@ -4366,6 +4249,15 @@ body.mode-connecting #kb-panel { display: none; }
 }
 .msg__edit-actions {
   display: flex; justify-content: flex-end; gap: 8px;
+}
+.msg__edit-warn {
+  font-size: 13px;
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+  background: var(--warning-bg-light);
+  border: 1px solid var(--warning-main);
+  border-radius: var(--radius-block);
+  padding: 10px 12px;
 }
 .msg__edit-save {
   padding: 6px 16px;
@@ -5473,22 +5365,32 @@ body.mode-connecting #kb-panel { display: none; }
 .dir-dots {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 2px;
   margin-top: 8px;
   position: relative;
   z-index: 10;
 }
+/* 24×24 hit target (WCAG 2.5.8) with the visible 6px dot drawn via ::before so
+   the dot itself stays small. */
 .dir-dot {
-  width: 6px; height: 6px;
+  width: 24px; height: 24px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.15);
+  background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.dir-dot::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.15);
   transition: background 0.2s, transform 0.2s;
 }
-.dir-dot--active {
-  background: #5b5bf5;
+.dir-dot--active::before {
+  background: var(--primary);
   transform: scale(1.3);
 }
 .direction-card--dim { opacity: 0.42; }
@@ -6625,47 +6527,6 @@ body.mode-connecting #kb-panel { display: none; }
 .splash2-section--in  {
   opacity: 1; transform: translateY(0);
   transition: opacity 480ms var(--ease-emphasized), transform 480ms var(--ease-emphasized);
-}
-.splash2-kb .kb-block__title {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-.splash2-kb .kb-block__summary {
-  font-size: 13px;
-  margin-top: 4px;
-}
-.splash2-kb .kb-block__body {
-  margin-top: 12px;
-  gap: 0;
-}
-.splash2-kb .kb-block__fact {
-  padding: 10px 0;
-  border-top: 1px solid var(--border-subtle);
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 280ms var(--ease-emphasized), transform 280ms var(--ease-emphasized);
-}
-.splash2-kb .kb-block__fact:first-child { border-top: 0; }
-.splash2-fact--pre { opacity: 0; transform: translateY(6px); }
-.splash2-fact--in  { opacity: 1; transform: translateY(0); }
-.splash2-kb .kb-block__fact-label {
-  font-size: 10px;
-  letter-spacing: 1.2px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-}
-.splash2-kb .kb-block__fact-value {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  line-height: 1.45;
-}
-.splash2-kb .kb-block__status {
-  margin-top: 10px;
-  font-size: 12px;
-  color: var(--primary);
-  font-weight: 500;
 }
 
 /* Conversation-grade KB drawer panel — same vocabulary as .brand-drawer
@@ -7857,12 +7718,8 @@ body.mode-kb-open .conv__main {
   position: relative !important;
 }
 /* Freeze stream width during split so text doesn't reflow */
-body.mode-kb-open .conv__stream {
-  transition: opacity 0.18s ease;
-}
 body.mode-kb-transitioning .conv__stream,
 body.mode-kb-transitioning .conv__composer {
-  opacity: 0 !important;
   pointer-events: none;
 }
 
@@ -7887,7 +7744,7 @@ body.mode-kb-open #kb-panel {
   width: 40% !important;
   height: 100% !important;
   align-self: stretch !important;
-  opacity: 0;
+  opacity: 1;
   overflow: hidden !important;
   background: linear-gradient(
     -45deg,
@@ -7902,7 +7759,6 @@ body.mode-kb-open #kb-panel {
   background-size: 400% 400%;
   animation: kb-aurora 16s ease infinite;
   border-left: 1px solid rgba(0,0,0,0.06);
-  transition: opacity 0.4s ease;
 }
 body.mode-kb-open.mode-kb-visible #kb-panel {
   flex: 0 0 40% !important;
@@ -7913,9 +7769,6 @@ body.mode-kb-open.mode-kb-visible #kb-panel {
 
 /* ── KB panel aurora animation ── */
 
-/* Suppress old panel elements in new mode */
-body.mode-kb-open #kb-panel > .kb-panel__head,
-body.mode-kb-open #kb-panel > .kb-panel__grid { display: none !important; }
 
 /* Inner scroll wrapper */
 .kb-panel__inner {
@@ -8036,21 +7889,19 @@ body.mode-kb-open #kb-panel > .kb-panel__grid { display: none !important; }
 
 /* ---- Fact rows ---- */
 .kb-facts-list {
-  padding: 4px 18px 0;
+  padding: 4px 18px 18px;
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 .kb-fact-item {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  padding: 7px 0;
-  border-top: 1px solid rgba(0,0,0,0.05);
+  gap: var(--space-1);
   opacity: 0;
   transform: translateX(-5px);
   transition: opacity 0.28s ease, transform 0.28s ease;
 }
-.kb-fact-item:first-child { border-top: none; }
 .kb-fact-item--visible { opacity: 1; transform: translateX(0); }
 .kb-fact-item__lbl {
   font-size: 11.5px;

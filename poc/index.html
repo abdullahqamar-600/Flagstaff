@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Flagstaff Social — Onboarding POC</title>
-  <link rel="stylesheet" href="./styles.css?v=104" />
+  <link rel="stylesheet" href="./styles.css?v=1781769900" />
 </head>
 <body class="mode-onboarding">
   <!-- Reusable SVG sprite (icons referenced by id from JS) -->
@@ -311,10 +311,35 @@
         </div>
       </section>
 
-      <!-- View 3: Dashboard -->
-      <section class="view" id="view-home"></section>
+      <!-- View 3: Dashboard Home (60/40 split) -->
+      <section class="view" id="view-home">
+        <div class="scout-layout">
+          <div class="scout-layout__main" id="home-main"></div>
+          <aside class="scout-panel" id="home-scout">
+            <div class="scout-panel__inner" id="home-scout-inner"></div>
+            <div class="scout-panel__composer">
+              <div class="composer-pill scout-panel__pill">
+                <input type="text" id="home-scout-input" placeholder="Ask Scout anything…" />
+                <button class="composer-pill__send" id="home-scout-send" aria-label="Send"><svg><use href="#i-arrow-right"/></svg></button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <!-- View 4: Analytics (60/40 split) -->
       <section class="view" id="view-dash">
-        <div class="dash" id="dash"></div>
+        <div class="scout-layout">
+          <div class="scout-layout__main"><div class="dash" id="dash"></div></div>
+          <aside class="scout-panel" id="dash-scout">
+            <div class="scout-panel__inner" id="dash-scout-inner"></div>
+            <div class="scout-panel__composer">
+              <div class="composer-pill scout-panel__pill">
+                <input type="text" id="dash-scout-input" placeholder="Ask Scout anything…" />
+                <button class="composer-pill__send" id="dash-scout-send" aria-label="Send"><svg><use href="#i-arrow-right"/></svg></button>
+              </div>
+            </div>
+          </aside>
+        </div>
       </section>
     </main>
   </div>
@@ -338,6 +363,6 @@
     </button>
   </div>
 
-  <script src="./app.js?v=67"></script>
+  <script src="./app.js?v=1781769900"></script>
 </body>
 </html>
