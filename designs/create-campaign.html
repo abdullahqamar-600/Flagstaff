@@ -6433,7 +6433,7 @@
       // landing warmth and commit the surface to the conversation state
       // synchronously — otherwise the gradient flashes on first paint.
       const qs = new URLSearchParams(location.search);
-      if (qs.get('shape') || qs.get('seed') || qs.get('skip') === 'drafts') {
+      if (qs.get('shape') || qs.get('seed') || qs.get('scout-brief') || qs.get('skip') === 'drafts') {
         document.body.classList.add('in-conversation');
       }
 
@@ -6461,8 +6461,24 @@
       // with the chosen shape already committed. Falls back to reactive
       // if the key is unrecognized.
       const shapeParam = new URLSearchParams(location.search).get('shape');
+      // ?scout-brief=<text>&campaign-title=<text> — deep-link from the
+      // Scout rationale panel. Prepends a Scout chat message carrying the
+      // reasoning that generated the campaign, so the user opens the flow
+      // with context on WHY this campaign exists before Turn 1 runs.
+      const scoutBrief = qs.get('scout-brief');
+      const campaignTitle = qs.get('campaign-title');
       let commit = null;
-      if (seed) {
+      if (scoutBrief) {
+        leaveLanding();
+        commit = { shapeKey: (shapeParam && SHAPES[shapeParam]) ? shapeParam : 'holiday' };
+        await beat(300);
+        if (campaignTitle) {
+          appendSelectionPill({ kind: 'CAMPAIGN', label: campaignTitle, icon: 'i-megaphone' });
+          await beat(200);
+        }
+        await appendScoutMsg(scoutBrief, { thinkFor: 260, beatAfter: 340 });
+        await beat(200);
+      } else if (seed) {
         // Seed comes from a URL param — treat as a typed brief so we
         // still surface what the user asked for.
         appendSelectionPill({ kind: 'YOUR BRIEF', label: seed, icon: 'i-pencil-line' });

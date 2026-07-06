@@ -3973,19 +3973,35 @@ function openScoutRationale(campaigns) {
     const axis = c.leadAxis || 'default';
     const dateRange = c.endDate ? (c.startDate + ' to ' + c.endDate) : c.startDate;
     const postsLabel = (c.postCount || 0) + ((c.postCount === 1) ? ' post' : ' posts');
-    // Icon per axis reinforces the source type at a glance — trending = past
-    // pattern, flame = external signal / hot moment.
-    const bannerIcon = axis === 'reactive' ? 'i-flame'
-                    : axis === 'experiment' ? 'i-bolt'
-                    : 'i-trending';
+    // Banner leads with Scout's mark so the card carries its authorship in
+    // the message itself — the footer no longer needs a separate "Scout ·
+    // curated" label.
+    const bannerIcon = 'i-logo';
 
     // Match the dashboard's camp-card structure so the two surfaces read as
     // the same UI element. .scout-rat__item just adds button-reset niceties.
+    //
+    // Clicking a card jumps into the campaign creation flow with a
+    // scout-brief param carrying the reasoning that generated the
+    // campaign. The flow uses it as Scout's opening chat message so the
+    // user sees why this campaign exists before shaping it further.
+    // Axis → shape mapping keeps the deep-link aligned with the closest
+    // existing SHAPES entry in create-campaign.html.
+    const shapeForAxis = axis === 'reactive' ? 'trend'
+                       : axis === 'pattern-echo' ? 'success'
+                       : axis === 'experiment' ? 'custom'
+                       : 'holiday';
+    const briefParts = [c.banner, c.fact, c.move].filter(Boolean).join(' ');
+    const briefUrl = '../designs/create-campaign.html'
+      + '?shape=' + encodeURIComponent(shapeForAxis)
+      + '&scout-brief=' + encodeURIComponent(briefParts)
+      + '&campaign-title=' + encodeURIComponent(c.title);
+
     return el('button', {
       class: 'camp-card scout-rat__item',
       type: 'button',
       'aria-label': 'Open ' + c.title + ' — tweak and review',
-      onclick: () => { closeScoutRationale(); goToScout('p2'); },
+      onclick: () => { closeScoutRationale(); location.href = briefUrl; },
     }, [
       // Banner citing the reasoning source — replaces the axis pill so the
       // card leads with WHY, not with a label.
@@ -4005,13 +4021,7 @@ function openScoutRationale(campaigns) {
         el('span', { class: 'camp-card__posts' }, postsLabel),
       ]),
       el('div', { class: 'camp-card__divider', 'aria-hidden': 'true' }),
-      el('footer', { class: 'camp-card__foot' }, [
-        el('span', { class: 'camp-card__author' }, [
-          ((c.author || 'Scout · curated').startsWith('Scout'))
-            ? el('span', { class: 'camp-card__avatar camp-card__avatar--scout', 'aria-hidden': 'true', html: icon('i-logo') })
-            : el('span', { class: 'camp-card__avatar', 'aria-hidden': 'true' }),
-          document.createTextNode(c.author || 'Scout · curated'),
-        ]),
+      el('footer', { class: 'camp-card__foot camp-card__foot--timestamp-only' }, [
         el('span', { class: 'camp-card__timestamp' }, c.createdAt || ''),
       ]),
     ].filter(Boolean));

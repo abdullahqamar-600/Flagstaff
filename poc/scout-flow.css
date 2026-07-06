@@ -754,12 +754,13 @@ body.mode-campaigns #view-campaigns.view-campaigns--split .campaigns-panel {
   text-overflow: ellipsis;
 }
 
-/* Palettes match the old axis-pill palette so the axis identity stays
-   consistent across cards, badges, and dashboard states. */
-.scout-rat__banner--reactive     { background: #FFF4E5; border-color: #FCE1B4; color: #663C00; }
-.scout-rat__banner--pattern-echo { background: #F1F2FA; border-color: #DDE0F1; color: #2E3273; }
-.scout-rat__banner--experiment   { background: #F4EEFF; border-color: #D9C9FF; color: #6B2EE0; }
-.scout-rat__banner--default      { background: #F8F9FC; border-color: #E4E4E8; color: #2E3273; }
+/* Unified blue — every Scout banner reads as one signal ("this is Scout
+   talking"), so we no longer colour-code by axis. Kept the four selectors
+   as aliases in case call-sites still pass the axis modifier. */
+.scout-rat__banner--reactive,
+.scout-rat__banner--pattern-echo,
+.scout-rat__banner--experiment,
+.scout-rat__banner--default { background: #F1F2FA; border-color: #DDE0F1; color: #2E3273; }
 
 /* Foot — thin divider above, single ghost link back to Phase-1 curated. */
 .scout-rationale__foot {
