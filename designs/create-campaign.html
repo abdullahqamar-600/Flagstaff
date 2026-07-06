@@ -3635,6 +3635,76 @@
     }
   }
 
+  /* Final draft-chat rail overrides.
+     Kept at the end of the page CSS so generic chat/component rules
+     cannot override the split-view behavior. */
+  body.has-drafts.has-side-panel {
+    --cc-split-gap: 18px;
+    --cc-draft-chat-w: clamp(360px, 30vw, 520px);
+    --cc-panel-w: calc(100vw - var(--sidebar-w, 80px) - var(--cc-rail-inset) - var(--cc-draft-chat-w) - var(--cc-split-gap));
+  }
+  body.has-drafts.has-side-panel .cc-main {
+    padding-left: var(--cc-gutter-left) !important;
+    padding-right: calc(var(--cc-panel-w) + var(--cc-split-gap)) !important;
+  }
+  body.has-drafts.has-side-panel .cc-main .cc-chat {
+    width: var(--cc-draft-chat-w) !important;
+    max-width: var(--cc-draft-chat-w) !important;
+    margin: 0 !important;
+  }
+  body.has-drafts.has-side-panel .cc-composer-dock {
+    left: var(--cc-gutter-left) !important;
+    right: auto !important;
+    width: var(--cc-draft-chat-w) !important;
+    max-width: var(--cc-draft-chat-w) !important;
+  }
+  body.has-drafts.has-side-panel .chatmsg--user,
+  body.has-drafts.has-side-panel .chatmsg--post-instruction {
+    align-self: flex-end !important;
+    width: fit-content !important;
+    max-width: calc(100% - 40px) !important;
+    margin-left: 40px !important;
+    margin-right: 0 !important;
+  }
+  body.has-drafts.has-side-panel .chatmsg--scout {
+    align-self: flex-start !important;
+    width: fit-content !important;
+    max-width: calc(100% - 40px) !important;
+    margin-left: 0 !important;
+    margin-right: 40px !important;
+  }
+  body.has-drafts.has-side-panel .cc-conf,
+  body.has-drafts.has-side-panel .cc-playback,
+  body.has-drafts.has-side-panel .cc-proc-line,
+  body.has-drafts.has-side-panel .cc-actions {
+    align-self: stretch !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+  }
+  @media (max-width: 1440px) {
+    body.has-drafts.has-side-panel {
+      --cc-draft-chat-w: clamp(340px, 29vw, 440px);
+    }
+  }
+  @media (max-width: 1200px) {
+    body.has-drafts.has-side-panel {
+      --cc-draft-chat-w: clamp(320px, 31vw, 380px);
+    }
+  }
+  @media (max-width: 900px) {
+    body.has-drafts.has-side-panel {
+      --cc-draft-chat-w: clamp(280px, 34vw, 320px);
+    }
+  }
+  @media (max-width: 720px) {
+    body.has-drafts.has-side-panel {
+      --cc-draft-chat-w: 250px;
+    }
+  }
+
 </style>
 </head>
 <body class="mode-campaigns">
