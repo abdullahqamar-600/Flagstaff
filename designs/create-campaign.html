@@ -81,25 +81,31 @@
     border-top: 1px solid var(--camp-border-hairline) !important;
   }
 
-  /* Bottom fade mask — always on. A tall gradient at the viewport bottom
-     that goes from solid canvas at the bottom to transparent 200px up.
-     This is what keeps the conversation from bleeding under the fixed
-     composer / qdock: content simply fades into the canvas before it
-     ever reaches the input surface. Sits BELOW the composer/qdock
-     (z-index 30) and ABOVE the chat (z-index 1). */
+  /* -------------------------------------------------------------------
+     Glass system — a single material recipe shared across the drafting
+     card, the qdock scrim, and the bottom fade. Reads as one language:
+     - Warm-white tint (rgba(252, 252, 254, ...)) instead of pure white
+     - saturate(1.08) adds a hint of colour warmth through the glass
+     - Intensity (opacity + blur strength) varies per role, not the tint
+     ------------------------------------------------------------------- */
+
+  /* Bottom fade mask — always on during conversation. Fades from a warm
+     glass tint (bridging the qdock scrim material) into the canvas so
+     content never bleeds under the fixed composer / qdock. */
   .cc-scroll-mask {
     position: fixed;
     left: var(--sidebar-w, 80px);
     right: 0;
     bottom: 0;
-    height: 200px;
+    height: 220px;
     z-index: 30;
     pointer-events: none;
     background: linear-gradient(
       to top,
       var(--camp-surface-canvas, #ECECEC) 0%,
-      var(--camp-surface-canvas, #ECECEC) 40%,
-      rgba(236, 236, 236, 0) 100%
+      var(--camp-surface-canvas, #ECECEC) 32%,
+      rgba(252, 252, 254, 0.55) 62%,
+      rgba(252, 252, 254, 0) 100%
     );
   }
   /* Panel-aware trim — when the drafts panel is open, the mask stops at
@@ -131,11 +137,13 @@
     pointer-events: none;
   }
   /* Bottom layer — strongest blur, revealed only across the lower ~60%
-     of the scrim with a smooth easing fade to invisible above. */
+     of the scrim with a smooth easing fade to invisible above. Both
+     layers share the same warm-glass tint so the gradient reads as an
+     intensity change (blur strength), not a colour drift. */
   .cc-qdock-scrim::before {
-    backdrop-filter: blur(15px) saturate(0.9);
-    -webkit-backdrop-filter: blur(15px) saturate(0.9);
-    background: rgba(255, 255, 255, 0.20);
+    backdrop-filter: blur(12px) saturate(1.08);
+    -webkit-backdrop-filter: blur(12px) saturate(1.08);
+    background: rgba(252, 252, 254, 0.22);
     -webkit-mask-image: linear-gradient(
       to top,
       rgba(0, 0, 0, 1) 0%,
@@ -154,12 +162,13 @@
     );
   }
   /* Middle layer — gentler blur, extends further up so the transition
-     from "blurred" to "sharp" isn't a hard step. Overlaps the bottom
-     layer to reinforce mid-band softness without stacking harshly. */
+     from "blurred" to "sharp" isn't a hard step. Same tint as the
+     bottom layer at half strength (0.10) — reinforces mid-band softness
+     without stacking harshly. */
   .cc-qdock-scrim::after {
-    backdrop-filter: blur(6px) saturate(0.95);
-    -webkit-backdrop-filter: blur(6px) saturate(0.95);
-    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(5px) saturate(1.08);
+    -webkit-backdrop-filter: blur(5px) saturate(1.08);
+    background: rgba(252, 252, 254, 0.10);
     -webkit-mask-image: linear-gradient(
       to top,
       rgba(0, 0, 0, 0.7) 0%,
@@ -326,7 +335,7 @@
   }
   .cc-main .cc-chat {
     max-width: var(--cc-chat-max);
-    margin: 0;
+    margin: 0 auto;
   }
   /* Lift the bottom clearance once drafts + footbar + lifted composer land. */
   body.has-drafts .cc-main { padding-bottom: 220px; }
@@ -390,9 +399,189 @@
   body.has-side-panel .cc-header {
     padding-right: calc(var(--cc-panel-w) + 24px);
   }
+  /* In drafting state the header keeps its usual left inset but doesn't
+     compress the title — the drafts panel to the right handles its own
+     space. Title/subtitle scale down so they sit above the card without
+     dominating it. */
+  body.has-drafts .cc-header {
+    padding-right: calc(var(--cc-panel-w, 900px) + 24px);
+    padding-bottom: 12px;
+  }
+  body.has-drafts .cc-title { font-size: 24px; line-height: 30px; }
+  body.has-drafts .cc-subtitle { font-size: 14px; line-height: 20px; }
   body.has-side-panel .cc-chat {
     max-width: none;
     width: 100%;
+  }
+
+  /* ==================================================================
+     Drafting state — the left chat becomes a bounded conversation card,
+     visually balanced against the drafts panel on the right. Per Figma:
+     translucent white surface (rgba(255,255,255,0.4)), 24px radius,
+     internal scroll, composer integrated at the bottom edge.
+     ================================================================== */
+  body.has-drafts .cc-main {
+    position: fixed;
+    /* Left/right derived so the card centers within the left column of
+       the split layout (between the sidebar + heading rail and the
+       drafts panel). max-width matches the spec's 667.5px inner cap. */
+    left: calc(var(--sidebar-w, 80px) + 24px);
+    right: calc(var(--cc-panel-w, 900px) + 24px);
+    top: calc(var(--cc-topbar-h, 66px) + 148px);
+    bottom: 24px;
+    max-width: 668px;
+    margin: 0 auto;
+    padding: 16px;
+    /* Warm-glass material — same recipe as the qdock scrim layers:
+       cream-white tint + gentle saturate, softened by a 12px backdrop
+       blur so the card reads as a frosted surface, not a flat pane. */
+    background: rgba(252, 252, 254, 0.55);
+    backdrop-filter: blur(12px) saturate(1.08);
+    -webkit-backdrop-filter: blur(12px) saturate(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+    z-index: 10;
+    transition: none;
+  }
+  /* The chatlog now scrolls INSIDE the card, not with the page. Gives
+     each message a consistent 24px rhythm and 16/24 inner padding.
+     Stacked class selector `.has-drafts.has-side-panel` beats the plain
+     `.has-side-panel` rule further down in the sheet (both classes are
+     always present together in drafting state). */
+  body.has-drafts.has-side-panel .cc-main .cc-chat,
+  body.has-drafts .cc-main .cc-chat {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px 24px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+    max-width: none;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  /* Custom scroll rail on the right — 4px, muted, rounded. Firefox uses
+     `scrollbar-width: thin` as a graceful fallback; Chromium/WebKit gets
+     the exact spec. */
+  body.has-drafts .cc-main .cc-chat {
+    scrollbar-width: thin;
+    scrollbar-color: #D8D8D8 transparent;
+  }
+  body.has-drafts .cc-main .cc-chat::-webkit-scrollbar { width: 6px; }
+  body.has-drafts .cc-main .cc-chat::-webkit-scrollbar-track { background: transparent; }
+  body.has-drafts .cc-main .cc-chat::-webkit-scrollbar-thumb {
+    background: #D8D8D8;
+    border-radius: 8px;
+  }
+  /* Composer floats fixed, positioned to visually sit INSIDE the card's
+     bottom edge. Its horizontal bounds match the card's inner padding,
+     its vertical position hugs the card's bottom. 50px height, 16px
+     radius, white surface — matches Figma spec. */
+  body.has-drafts .cc-composer-dock {
+    position: fixed;
+    /* Card left = sidebar + 24; add 16px inner padding = 40 total. */
+    left: calc(var(--sidebar-w, 80px) + 40px);
+    right: calc(var(--cc-panel-w, 900px) + 40px);
+    bottom: 40px; /* card bottom (24) + inner padding (16) */
+    max-width: 636px;
+    padding: 0;
+    z-index: 15;
+    margin: 0 auto;
+  }
+  body.has-drafts .cc-composer-dock .chat-composer {
+    max-width: none;
+    margin: 0;
+    padding: 12px 20px;
+    height: 50px;
+    background: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 16px;
+    box-shadow: none;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Give the chat log enough bottom padding so the last message doesn't
+     tuck under the composer overlay. 50 (composer) + 16 (breathing) = 66. */
+  body.has-drafts .cc-main .cc-chat { padding-bottom: 82px; }
+  /* Bottom mask + qdock scrim don't apply inside the card — they were
+     designed for the page-scroll world. Turn them off in drafting state
+     so the card's own boundary reads as the edge of the conversation. */
+  body.has-drafts .cc-scroll-mask { display: none; }
+
+  /* Messages inside the card — Figma-spec styling. User turns become
+     compact right-aligned pills; Scout turns become bordered response
+     cards so the two sides read as clearly separate. */
+  body.has-drafts .cc-main .chatmsg--user {
+    align-self: flex-end;
+    max-width: 560px;
+  }
+  body.has-drafts .cc-main .chatmsg--user .chatmsg__bubble {
+    background: #F4F4F4;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 17px;
+    color: #263238;
+    letter-spacing: 0;
+    box-shadow: none;
+  }
+  /* Scout responses in the card get a bordered surface — reads like a
+     versioned response block, not free-flowing chat. */
+  body.has-drafts .cc-main .chatmsg--scout {
+    align-self: stretch;
+    border: 1px solid #E6E6E6;
+    border-radius: 12px;
+    padding: 12px;
+    background: #FFFFFF;
+    box-shadow: none;
+  }
+  body.has-drafts .cc-main .chatmsg--scout .chatmsg__head { margin-bottom: 6px; }
+  body.has-drafts .cc-main .chatmsg--scout .chatmsg__text {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 22px;
+    color: #263238;
+  }
+  /* Action-state receipt stays subtle inline metadata even inside the
+     card — no chip treatment, just muted grey. */
+  body.has-drafts .cc-main .cc-actions { margin: 0; padding: 0; }
+  body.has-drafts .cc-main .cc-actions__receipt { padding: 0; }
+
+  /* Composer input inside the card — tighten the placeholder + send
+     button to the spec's proportions. */
+  body.has-drafts .cc-composer-dock .chat-composer__input {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 24px;
+    color: #263238;
+    height: 26px;
+    flex: 1;
+  }
+  body.has-drafts .cc-composer-dock .chat-composer__input::placeholder {
+    color: #9AA4B2;
+  }
+  body.has-drafts .cc-composer-dock .chat-composer__send {
+    width: 26px; height: 26px;
+    background: #EEF2F6;
+    border-radius: 32px;
+    border: none;
+    display: grid; place-items: center;
+    padding: 5px;
+  }
+  body.has-drafts .cc-composer-dock .chat-composer__send svg {
+    width: 16px; height: 16px;
+    color: #98A2B3;
   }
 
   /* Narrower viewports: shrink the panel so the chat column keeps at
@@ -497,9 +686,12 @@
     max-width: none;
     margin: 0;
   }
-  /* Chatlog matches composer width. Left-anchored (not auto-centered) so
-     it visually connects to the campaign heading in the top-left. */
-  .cc-chat { max-width: var(--cc-chat-max); margin: 0; width: 100%; }
+  /* Chatlog matches composer width. Auto-centered horizontally during
+     planning so the conversation sits in the middle of the viewport.
+     Once drafts land, has-drafts rules re-anchor it inside the left
+     card. `width` deliberately unset so auto margins can distribute
+     the spare space and actually center the block. */
+  .cc-chat { max-width: var(--cc-chat-max); margin: 0 auto; }
   .cc-landing {
     padding: 0 var(--cc-gutter-right) 0 0;
     max-width: none;
@@ -857,9 +1049,14 @@
   .cc-postcard__grip-row span {
     width: 4px; height: 4px;
     border-radius: 999px;
-    background: #CDD5DF;
+    background: #D9DEE7;
     display: inline-block;
+    transition: background 160ms var(--ease-standard);
   }
+  .cc-postcard:hover .cc-postcard__grip-row span { background: #98A2B3; }
+  .cc-postcard__grip { flex: 0 0 22px; padding-left: 6px; }
+  .cc-postcard__grip-row { gap: 3px; }
+  .cc-postcard__grip { gap: 3px; }
 
   /* Content cell — 16px padding, three stacked rows. */
   .cc-postcard__cell {
@@ -878,12 +1075,23 @@
     display: flex; align-items: center; gap: 8px;
     min-width: 0;
   }
+  /* Post index — small, tabular, monospaced-feel; the counter recedes
+     so it does not compete with the actual post copy. "01 / 04" reads
+     as a quiet tally, not a heading. */
   .cc-postcard__num {
     font-family: var(--font-sans);
-    font-size: 12px; font-weight: 400; line-height: 20px;
-    color: #4B5565;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 16px;
+    color: #98A2B3;
+    letter-spacing: 0.2px;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    display: inline-flex; align-items: baseline; gap: 2px;
   }
+  .cc-postcard__num-idx { color: #4B5565; font-weight: 600; }
+  .cc-postcard__num-sep { color: #CBD5E1; padding: 0 1px; }
+  .cc-postcard__num-total { color: #98A2B3; }
   .cc-postcard__ai {
     display: inline-flex; align-items: center; justify-content: center;
     width: 20px; height: 20px;
@@ -926,18 +1134,51 @@
   .cc-postcard__minus:hover { background: var(--camp-surface-hover); color: var(--camp-text-primary); }
   .cc-postcard__minus svg { width: 18px; height: 18px; }
 
-  /* Body copy — 2-line clamp so cards stay 135px tall. */
+  /* Body copy — the hook leads (stronger weight, slightly larger), the
+     body sits behind it as secondary prose. Structuring the copy this
+     way lets the reader scan the strongest sentence before deciding to
+     invest in the rest. Editable-on-focus with a subtle affordance. */
   .cc-postcard__text {
     font-family: var(--font-sans);
-    font-size: 14px; font-weight: 400; line-height: 18px;
-    color: #263238;
     margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    display: block;
     overflow: hidden;
-    min-height: 36px;
+    min-height: 44px;
     flex: 0 0 auto;
+    padding: 4px 6px;
+    margin: -4px -6px;
+    border-radius: 8px;
+    cursor: text;
+    transition: background 140ms var(--ease-standard), box-shadow 140ms var(--ease-standard);
+  }
+  .cc-postcard__text:hover,
+  .cc-postcard__text:focus-visible {
+    background: rgba(84, 91, 209, 0.035);
+    outline: none;
+  }
+  .cc-postcard__text:focus-visible {
+    box-shadow: inset 0 0 0 1.5px rgba(84, 91, 209, 0.35);
+  }
+  .cc-postcard__hook {
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 20px;
+    color: #1E293B;
+    letter-spacing: -0.05px;
+  }
+  .cc-postcard__hook::after { content: ' '; }
+  .cc-postcard__body {
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #4B5565;
+  }
+  /* Two-line clamp on the WHOLE copy so cards stay compact. Applies to
+     the flex-inline hook + body sequence rendered inside the container. */
+  .cc-postcard__body-row .cc-postcard__text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
   }
 
   /* Bottom row: schedule + attachments on the left, arrow-up-right on the right. */
@@ -1068,11 +1309,47 @@
     outline: none;
     box-shadow: var(--camp-shadow-focus-ring, 0 0 0 3px rgba(84, 91, 209, 0.18));
   }
-  .cc-postcard__tone-chip > svg:first-child { width: 14px; height: 14px; color: var(--camp-primary); }
+  .cc-postcard__tone-chip > svg:first-child { display: none; }
   .cc-postcard__tone-chip-chev { width: 10px; height: 10px; margin-left: 2px; opacity: 0.6; }
   /* Retire the status pill on the card head — tone chip now carries
      that role. */
   .cc-postcard__status { display: none !important; }
+
+  /* Tone dot — a small colored circle that carries the tone at a glance.
+     Warm = amber; Direct/expert = indigo; Playful = pink; Craft = teal.
+     Multiple posts sharing a tone read as a group visually. */
+  .cc-postcard__tone-dot {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: #F59E0B;
+    display: inline-block;
+    flex: 0 0 auto;
+  }
+  .cc-postcard[data-tone^="warm"]    .cc-postcard__tone-dot { background: #F59E0B; }
+  .cc-postcard[data-tone^="direct"]  .cc-postcard__tone-dot { background: #5B5BF5; }
+  .cc-postcard[data-tone^="playful"] .cc-postcard__tone-dot { background: #EC4899; }
+  .cc-postcard[data-tone^="craft"]   .cc-postcard__tone-dot { background: #14B8A6; }
+  .cc-postcard[data-tone^="expert"]  .cc-postcard__tone-dot { background: #5B5BF5; }
+
+  /* Character count — a subtle tabular readout so users can gauge X's
+     280 limit at a glance. Sits in the foot row next to the tone chip
+     and can flip to amber/red states via .is-warn / .is-over. */
+  .cc-postcard__count {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--camp-text-tertiary, #98A2B3);
+    letter-spacing: 0.2px;
+    font-variant-numeric: tabular-nums;
+    margin-left: 2px;
+  }
+  .cc-postcard__count-num { color: #4B5565; font-weight: 600; }
+  .cc-postcard__count-sep { padding: 0 2px; color: #CBD5E1; }
+  .cc-postcard__count-max { color: #98A2B3; }
+  .cc-postcard__count.is-warn .cc-postcard__count-num { color: #B54708; }
+  .cc-postcard__count.is-over .cc-postcard__count-num { color: #B42318; }
 
   /* Inline "insert post" divider — 2px indigo-tint line with a plus
      button on the right. Sits between adjacent cc-postcards. */
@@ -2103,6 +2380,41 @@
   .cc-landing--intents .cc-shape-grid { display: none; }
 
   /* ==================================================================
+     Pre-generation state — the whole conversation stays centered
+     (landing pills + shaping chat + composer) so the pre-campaign
+     experience reads as calm and gathered. Once the campaign is
+     generated and the drafts side panel opens (body.has-side-panel),
+     the layout shifts to the left rail so the conversation lines up
+     with the drafts column edge.
+     The heading itself stays left-anchored throughout — it's the
+     campaign's identity marker on the top-left corner regardless
+     of state.
+     ================================================================== */
+  body:not(.has-side-panel) .cc-landing--intents {
+    align-items: center;
+    text-align: center;
+  }
+  body:not(.has-side-panel) .cc-landing--intents .cc-landing__lead {
+    justify-content: center;
+  }
+  body:not(.has-side-panel) .cc-intent-pills,
+  body:not(.has-side-panel) .cc-intent-hint {
+    align-self: center;
+  }
+  body:not(.has-side-panel) .cc-composer-dock .chat-composer {
+    margin: 0 auto;
+  }
+  body:not(.has-side-panel) .cc-qdock__card {
+    margin: 0 auto !important;
+  }
+  /* Chat items always hug the left edge of the chat container itself,
+     regardless of whether the container is centered or left-anchored.
+     Scout messages already use align-self: flex-start from the shared
+     base; user bubbles keep flex-end. */
+  .cc-chat .chatlog { align-items: flex-start; }
+  .cc-chat .chatmsg--user { align-self: flex-end; }
+
+  /* ==================================================================
      Chat widgets go edge-to-edge inside the conversational container.
      The chat column is --cc-chat-max wide and the bottom composer sits
      at the same width; every Scout widget (plan card, proc-line, chip
@@ -2324,18 +2636,34 @@
     color: var(--camp-text-tertiary, #98A2B3);
     letter-spacing: 0.1px;
   }
+  /* Empty image slot — solid tint (no dashed border) so it recedes
+     visually. The whole slot is the affordance; the icon carries meaning,
+     the label appears only on hover. Multiplied across 4 cards, the panel
+     stays calm instead of shouting "Add image" four times. */
   .cc-postcard__imgslot--empty {
-    border: 1.5px dashed rgba(84, 91, 209, 0.3);
-    background: rgba(84, 91, 209, 0.03);
+    border: 1px solid rgba(84, 91, 209, 0.10);
+    background: rgba(84, 91, 209, 0.04);
+    color: rgba(84, 91, 209, 0.55);
   }
   .cc-postcard__imgslot--empty:hover {
-    border-color: var(--camp-primary, #545BD1);
-    background: rgba(84, 91, 209, 0.06);
+    border-color: rgba(84, 91, 209, 0.35);
+    background: rgba(84, 91, 209, 0.09);
     color: var(--camp-primary, #545BD1);
   }
   .cc-postcard__imgslot--empty .cc-postcard__imgslot-icon {
-    width: 22px; height: 22px;
-    opacity: 0.7;
+    width: 20px; height: 20px;
+    opacity: 0.85;
+  }
+  /* Hide the "Add image" label at rest — the icon speaks. Reveal on hover
+     so the affordance is still discoverable. */
+  .cc-postcard__imgslot--empty .cc-postcard__imgslot-label {
+    display: none;
+  }
+  .cc-postcard__imgslot--empty:hover .cc-postcard__imgslot-label {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 500;
+    margin-top: 2px;
   }
   .cc-postcard__imgslot--busy {
     border: 1px solid var(--camp-border-hairline);
@@ -2538,7 +2866,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
         <button class="topbar__acct-switch">
-          PepsiCo, Inc.
+          @swiftie.central
           <svg><use href="#i-chevron-down"/></svg>
         </button>
         <button class="topbar__icon-btn" aria-label="Search"><svg><use href="#i-search"/></svg></button>
@@ -2555,7 +2883,7 @@
 
     <header class="cc-header">
       <h1 class="cc-title" id="cc-title">New campaign</h1>
-      <p class="cc-subtitle" id="cc-subtitle">Pick a starting point below, or tell me what to plan around in the chat.</p>
+      <p class="cc-subtitle" id="cc-subtitle">Pick a starting point below, or tell me a moment, era, or theory to build around.</p>
       <!-- Draft status pill + KB chip lived here previously — retired now that
            the campaign heading itself carries the state (title updates to the
            campaign name as soon as Scout starts drafting). -->
@@ -2584,19 +2912,19 @@
           A few directions I'd start from
         </div>
         <div class="cc-intent-pills" id="cc-shape-grid">
-          <button class="cc-intent-pill cc-intent-pill--rec" type="button" data-shape="success">
-            <span class="cc-intent-pill__label">Rerun Beat the Brown-Out</span>
-            <span class="cc-intent-pill__meta">Last summer's top performer</span>
+          <button class="cc-intent-pill cc-intent-pill--rec" type="button" data-shape="holiday">
+            <span class="cc-intent-pill__label">1989 anniversary week</span>
+            <span class="cc-intent-pill__meta">Oct 27 · your top-reach format</span>
           </button>
 
           <button class="cc-intent-pill" type="button" data-shape="trend">
-            <span class="cc-intent-pill__label">Heat-stress lawn rescue</span>
-            <span class="cc-intent-pill__meta">Local search + 3.4× this week</span>
+            <span class="cc-intent-pill__label">Track 5 easter-egg theory</span>
+            <span class="cc-intent-pill__meta">Fandom theory chatter up this week</span>
           </button>
 
-          <button class="cc-intent-pill" type="button" data-shape="holiday">
-            <span class="cc-intent-pill__label">July 4th weekend push</span>
-            <span class="cc-intent-pill__meta">5 days out</span>
+          <button class="cc-intent-pill" type="button" data-shape="success">
+            <span class="cc-intent-pill__label">Rank the eras poll</span>
+            <span class="cc-intent-pill__meta">Your highest-comment format</span>
           </button>
         </div>
         <div class="cc-intent-hint">Or tell me your own in the chat below.</div>
@@ -4081,13 +4409,15 @@
               <span class="cc-postcard__imgslot-label">Add image</span>
             </button>`;
         }
+        const charCount = (p.hook + ' ' + p.body).length;
+        const toneKey = (p.tone || '').toLowerCase().split(',')[0].trim();
         return `
-        <article class="cc-postcard" style="animation-delay: ${i * 90}ms" data-post-idx="${i}">
+        <article class="cc-postcard" style="animation-delay: ${i * 90}ms" data-post-idx="${i}" data-tone="${toneKey}">
           ${rowGrip}
           <div class="cc-postcard__cell">
             <div class="cc-postcard__row-head">
               <div class="cc-postcard__row-head-left">
-                <span class="cc-postcard__num">Post ${i+1} of ${postState.length}</span>
+                <span class="cc-postcard__num"><span class="cc-postcard__num-idx">${String(i+1).padStart(2,'0')}</span><span class="cc-postcard__num-sep">/</span><span class="cc-postcard__num-total">${String(postState.length).padStart(2,'0')}</span></span>
                 <span class="cc-postcard__ver" ${p.version ? '' : 'hidden'}>v1.${p.version}</span>
               </div>
               <div class="cc-postcard__row-head-right">
@@ -4098,7 +4428,10 @@
               </div>
             </div>
             <div class="cc-postcard__body-row">
-              <p class="cc-postcard__text">${p.hook} ${p.body}</p>
+              <div class="cc-postcard__text" role="textbox" tabindex="0">
+                <span class="cc-postcard__hook">${p.hook}</span>
+                <span class="cc-postcard__body">${p.body}</span>
+              </div>
               ${imageSlotHTML}
             </div>
             <div class="cc-postcard__row-foot">
@@ -4108,10 +4441,13 @@
                   <span class="cc-postcard__schedule-text" data-post-time-val>${p.day}</span>
                 </span>
                 <button class="cc-postcard__tone-chip" type="button" data-post-tone-chip aria-label="Change tone">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-tone"/></svg>
+                  <span class="cc-postcard__tone-dot" aria-hidden="true"></span>
                   <span data-post-tone-chip-val>${p.tone}</span>
                   <svg class="cc-postcard__tone-chip-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
+                <span class="cc-postcard__count" aria-label="Character count">
+                  <span class="cc-postcard__count-num" data-post-count>${charCount}</span><span class="cc-postcard__count-sep">/</span><span class="cc-postcard__count-max">280</span>
+                </span>
               </div>
               <button class="cc-postcard__ai-icon" type="button" data-post-ai aria-label="Edit with Scout" title="Edit with Scout">
                 <svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-sparkle"/></svg>
@@ -4144,8 +4480,8 @@
 
       // Drafting is done — restore the campaign identity on the page
       // heading, and switch the panel count to a settled message.
-      if (titleEl) titleEl.textContent = 'Summer lawn revival';
-      if (subEl)   subEl.textContent   = 'Four posts, warm and practical, drafted from your Craftsperson tone.';
+      if (titleEl) titleEl.textContent = '1989 anniversary week';
+      if (subEl)   subEl.textContent   = 'Four posts, celebratory and community-first, drafted in your Swiftie voice.';
       const countEl = document.getElementById('cc-panel-count');
       if (countEl) countEl.textContent = postState.length + ' drafts ready';
       panel.classList.remove('side-panel--loading');
@@ -4771,31 +5107,31 @@
       // opener so Scout's Turn 1 message reflects why the user picked it.
       success: {
         kind: 'Replay',
-        title: 'Beat the Brown-Out (rerun)',
-        summary: 'Rerun of last summer\'s top performer.',
-        subtitleFactual: 'A rerun of last July\'s top summer campaign, tuned to the current heat wave.',
-        openingScout: "You picked what worked. Last July, Beat the Brown-Out was your top summer performer — 2.3× replies, 15 bookings. The conditions match again this week, so here's the plan I'd rerun:",
+        title: 'Rank the eras poll',
+        summary: "Your highest-comment format, run again.",
+        subtitleFactual: "A community poll built on your highest-comment format from the last three months.",
+        openingScout: "Your \"rank the eras\" poll was your top-commented post this year — 4.1× your usual replies. Fandom's warmed up again this week, so here's the plan I'd build on:",
       },
       trend: {
         kind: 'Trend',
-        title: 'Heat-stress lawn rescue',
-        summary: 'Riding the local heat-stress search surge.',
-        subtitleFactual: 'A reactive sprint that rides the local heat-stress search surge.',
-        openingScout: "\"Lawn care near me\" is up 3.4× in your zip this week — heat-stressed lawns are the top local search. Here's the plan I'd land while the trend is hot:",
+        title: 'Track 5 easter-egg theory',
+        summary: 'Riding the theory chatter this week.',
+        subtitleFactual: "A theory-carousel sprint that rides the Track 5 easter-egg chatter buzzing in the fandom this week.",
+        openingScout: "\"Track 5\" mentions in your niche are up 3.4× this week — Swifties are decoding fresh clues. Theory carousels are your highest-save format, so here's the plan I'd land while the chatter's live:",
       },
       holiday: {
         kind: 'Holiday',
-        title: 'July 4th weekend push',
-        summary: 'Pre-holiday booking window.',
-        subtitleFactual: 'A pre-holiday sprint sized to the Independence Day booking window.',
-        openingScout: "Independence Day is 5 days out and front-yard traffic peaks over the weekend. Lawn crews book heavy for pre-holiday touch-ups — here's the plan I'd time to that window:",
+        title: '1989 anniversary week',
+        summary: "Oct 27 anniversary countdown.",
+        subtitleFactual: "A 5-post anniversary countdown timed to the 1989 anniversary on Oct 27.",
+        openingScout: "Big week coming up — the 1989 anniversary lands Oct 27, and your anniversary throwback posts are consistently your highest-reach content. Here's the plan I'd build on:",
       },
       custom: {
         kind: 'Your own',
         title: 'Custom campaign',
         summary: 'Sized to your prompt.',
         subtitleFactual: 'Sized to your prompt.',
-        openingScout: "Got it. Let me shape that around what's worked for you before — here's where I'd start:",
+        openingScout: "Got it. Let me shape that around what's landed for you before — here's where I'd start:",
       },
       // Legacy keys — kept for compat with old ?shape= links and any
       // callers that still point at the previous vocabulary.
@@ -4831,7 +5167,7 @@
         // sends anything, treat it as a custom intent. Silent so the
         // caller can render a designed selection pill instead of a
         // plain user bubble.
-        input.placeholder = 'Or tell me what to plan around — a holiday, a goal, an angle…';
+        input.placeholder = 'Or tell me what to plan around — a moment, an era, a theory, a post type…';
         composerResolver = {
           fn: (text) => pick('custom', text),
           silent: true,
@@ -5075,7 +5411,7 @@
           ...SHAPES.custom,
           title: trimmed,
           subtitleFactual: 'Shaping around: ' + commit.customText.slice(0, 80),
-          openingScout: 'Got it. I\'ll shape "' + trimmed + '" as a small sprint using your Craftsperson tone. Four posts, warm openers, spaced through the week.',
+          openingScout: 'Got it. I\'ll shape "' + trimmed + '" into a short build in your Swiftie voice — theory-first, community-forward, spaced through the week.',
         };
       } else {
         shape = SHAPES[commit.shapeKey] || SHAPES.reactive;
@@ -5092,37 +5428,37 @@
       // analytics, forecast. The last hints at the plan so it doesn't
       // land cold. On completion they collapse to an expandable receipt.
       await appendActionStates([
-        { icon: 'i-search',    text: 'Looking through your past summer campaigns…',
-          short: 'past campaigns',
-          detail: 'Pulled 12 summer campaigns across 3 seasons.',
+        { icon: 'i-search',    text: 'Looking through your top-performing posts…',
+          short: 'top posts',
+          detail: 'Pulled your 40 highest-reach posts across the last 6 months.',
           hold: 1150 },
-        { icon: 'i-analytics', text: 'Checking what performed best…',
-          short: 'analytics',
-          detail: 'Beat the Brown-Out (Jul \'25) — 2.3× replies, 15 bookings.',
+        { icon: 'i-analytics', text: 'Checking what your followers engage with most…',
+          short: 'engagement',
+          detail: 'Theory carousels + polls lead your saves and comments.',
           hold: 1250 },
-        { icon: 'i-cloud-sun', text: "Scanning this week's forecast…",
-          short: 'forecast',
-          detail: 'Heat wave forecast to land Thursday in your area.',
+        { icon: 'i-cal',       text: 'Scanning the fandom calendar…',
+          short: 'fandom calendar',
+          detail: '1989 anniversary lands Oct 27 — five days out.',
           hold: 1150 },
         { icon: 'i-sparkle',   text: 'Putting a plan together…',
           short: 'plan',
-          detail: 'Reactive sprint, booking-driven, 4 touches across Instagram + email.',
+          detail: '5-post build-up, theory + poll centrepieces, Instagram + TikTok.',
           hold: 900 },
       ]);
 
       // Scout's Turn 1 opener adapts to the intent the user picked at
       // the landing (or typed in the composer). The plan itself is close
-      // in each case — Brown-Out Rescue is the strongest bet — but the
-      // framing changes so the message feels earned, not canned.
+      // in each case — the 1989 anniversary build is the strongest bet
+      // — but the framing changes so the message feels earned, not canned.
       const openerText = shape.openingScout ||
-        "Summer's your biggest lawn window — and last July your Beat the Brown-Out campaign was your top performer of the season. Here's the plan I'd build on:";
+        "Big week coming up — the 1989 anniversary lands Oct 27, and your anniversary throwback posts are consistently your highest-reach content. Here's the plan I'd build on:";
       const planSubtitle = shape.kind === 'Holiday'
-        ? 'Tuned to the July 4th booking window.'
+        ? 'Timed to the 1989 anniversary on Oct 27.'
         : shape.kind === 'Trend'
-        ? 'Sized to this week\'s local search surge.'
+        ? "Sized to this week's Track 5 theory chatter."
         : shape.kind === 'Your own'
-        ? 'Shaped around your idea, backed by what converts.'
-        : 'Rebuilt from what worked for you last summer.';
+        ? "Shaped around your idea, backed by what your fandom engages with."
+        : "Rebuilt from your highest-comment format this year.";
 
       await appendScoutMsg(openerText, { thinkFor: 260, beatAfter: 320 });
 
@@ -5130,20 +5466,26 @@
         title: 'The plan',
         subtitle: planSubtitle,
         sections: [
-          { label: 'Goal',     value: 'New treatment bookings',
-            meta: 'Same primary goal as your top summer campaign last year.' },
-          { label: 'Who',      value: 'Past customers due for re-treatment + nearby lookalike homeowners',
-            meta: 'Estimated reach 3.8k · 42 replies · 18 bookings target.' },
-          { label: 'Angle',    value: 'Heat-stress "brown-out" rescue',
-            meta: 'Your highest-converting summer theme (Jul \'25).' },
-          { label: 'Channels', value: 'Instagram + email',
-            meta: 'Your two best-performing channels last summer.' },
+          { label: 'Goal',     value: 'Grow reach + follower engagement',
+            meta: "Same primary goal as your top anniversary posts this year." },
+          { label: 'Who',      value: 'Core Swifties + eras-curious lookalikes in your niche',
+            meta: 'Estimated reach 42k · 3.1k saves · 890 comments target.' },
+          { label: 'Angle',    value: '1989 anniversary — countdown + fan memories',
+            meta: 'Your highest-reach theme (anniversary throwbacks).' },
+          { label: 'Format',   value: 'Theory/easter-egg carousel + mid-week fan poll',
+            meta: 'Your two highest-engagement post types.' },
+          { label: 'Channels', value: 'Instagram + TikTok',
+            meta: "Where your account moves fastest." },
           { label: 'Timing',   value: shape.kind === 'Holiday'
-              ? '4-touch sequence, closing on July 4th'
-              : '4-touch sequence, launching with the next heat wave',
+              ? '5-post build-up, landing on Oct 27'
+              : shape.kind === 'Trend'
+              ? '3-post theory sprint, live while the chatter is up'
+              : '5-post build-up across the week',
             meta: shape.kind === 'Holiday'
-              ? "Aligned to the Independence Day booking peak."
-              : "Aligned to Thursday's forecasted heat wave." },
+              ? 'Aligned to the 1989 anniversary drop day.'
+              : shape.kind === 'Trend'
+              ? 'Ride the theory wave before it settles.'
+              : "Save the biggest post for the anniversary itself." },
         ],
       });
 
@@ -5166,22 +5508,22 @@
       // ---------------------------------------------------------------
       if (fork === 'other') {
         await appendScoutMsg(
-          "Two other directions your data supports. Neither's as strong as Brown-Out Rescue for bookings, but they win on different metrics.",
+          "Two other directions your data supports. Neither pulls the reach of the 1989 anniversary build, but they win on different metrics.",
           { thinkFor: 260, beatAfter: 260 }
         );
         fork = await appendQuickReplies([
-          { label: 'Sprinkler-timing tips',           value: 'go',
+          { label: 'Track-by-track appreciation',     value: 'go',
             primary: true,
-            sub: 'Evergreen · warmer replies, slower on bookings. Highest save-rate last year.' },
-          { label: 'Neighbourhood before/afters',     value: 'go',
-            sub: 'Story-first · biggest reach lift, but converts on the 3rd touch, not the 1st.' },
-          { label: 'Back to the Brown-Out plan',      value: 'go',
+            sub: 'Evergreen · warmer replies, slower on reach. Highest save-rate this year.' },
+          { label: 'Fan-art + bracelet reposts',      value: 'go',
+            sub: 'Community-first · biggest follower lift, but momentum builds over the week.' },
+          { label: 'Back to the 1989 anniversary plan', value: 'go',
             sub: 'Return to the original plan.' },
           { label: "Actually, I have my own idea",    value: 'own',
             sub: 'Switch to shaping around your angle instead.' },
         ]);
         if (fork === 'go') {
-          await appendScoutMsg("Good — that one still leans on your Brown-Out shape underneath. Let me nail the last details.", { thinkFor: 240, beatAfter: 260 });
+          await appendScoutMsg("Good — that one still leans on the anniversary build underneath. Let me nail the last details.", { thinkFor: 240, beatAfter: 260 });
         }
       }
 
@@ -5193,25 +5535,25 @@
       // ---------------------------------------------------------------
       if (fork === 'own') {
         await appendScoutMsg(
-          "Tell me what you've got in mind — a goal, an angle, an audience, or just a rough thought. I'll shape it around what's worked for you before.",
+          "Tell me what you've got in mind — an era, a moment, a post type, or just a rough thought. I'll shape it around what's worked for your account before.",
           { thinkFor: 240, beatAfter: 260 }
         );
         const userIdea = await awaitFreeText("Type your angle or idea…");
 
         await appendActionStates([
-          { icon: 'i-search',    text: 'Checking this against your past results…',
-            short: 'past results',
-            detail: "Compared your idea to every summer campaign you've run.",
+          { icon: 'i-search',    text: 'Checking this against your past posts…',
+            short: 'past posts',
+            detail: "Compared your idea to every anniversary and theory post you've run.",
             hold: 1200 },
-          { icon: 'i-analytics', text: "Finding what's converted for similar campaigns…",
-            short: 'similar campaigns',
-            detail: 'Two comparables from Jun/Aug \'25 — mixed on conversion.',
+          { icon: 'i-analytics', text: "Finding what's landed with your followers…",
+            short: 'engagement fit',
+            detail: 'Two comparables from the last two months — mixed on reach.',
             hold: 1250 },
         ]);
 
         // Soft flag — honest read, then defer to the user's instinct.
         await appendScoutMsg(
-          'Good instinct — "' + userIdea + '". Honest read: your booking-driven summer plays have usually beaten pure-awareness ones on this list, so I\'d expect fewer bookings than Brown-Out. Happy to run with your angle though. Here\'s how I\'d shape it, using the pieces of your voice that convert:',
+          'Love it — "' + userIdea + '". Honest read: your anniversary + theory formats have pulled the strongest reach on this list, so a straight appreciation post may land quieter. Happy to run with your angle though. To give it the best shot, here\'s how I\'d frame it against what\'s driven your top engagement:',
           { thinkFor: 320, beatAfter: 340 }
         );
 
@@ -5227,18 +5569,20 @@
         const reshapedIdea = userIdea.length > 60 ? userIdea.slice(0, 57) + '…' : userIdea;
         const plan2 = appendPlanCard({
           title: 'The plan',
-          subtitle: 'Shaped around your angle, backed by what converts.',
+          subtitle: "Shaped around your angle, backed by what your fandom engages with.",
           sections: [
-            { label: 'Goal',     value: 'New treatment bookings',
-              meta: "Kept booking-focused so we don't lose the conversion path." },
-            { label: 'Who',      value: 'Past customers + nearby lookalike homeowners',
-              meta: 'Same audience shape as your last three summer wins.' },
+            { label: 'Goal',     value: 'Grow reach + follower engagement',
+              meta: "Kept reach-first so we don't lose momentum into the anniversary." },
+            { label: 'Who',      value: 'Core Swifties + eras-curious lookalikes',
+              meta: 'Same audience shape as your last three top posts.' },
             { label: 'Angle',    value: reshapedIdea,
-              meta: 'Your idea, framed for your Craftsperson voice.' },
-            { label: 'Channels', value: 'Instagram + email',
-              meta: 'Your two best-performing channels last summer.' },
-            { label: 'Timing',   value: '4-touch sequence, launching with the next heat wave',
-              meta: "Aligned to Thursday's forecasted heat wave." },
+              meta: 'Your idea, framed as a theory rather than confirmed fact.' },
+            { label: 'Format',   value: 'Theory/easter-egg carousel + fan poll',
+              meta: 'Your two highest-engagement post types.' },
+            { label: 'Channels', value: 'Instagram + TikTok',
+              meta: 'Where your account moves fastest.' },
+            { label: 'Timing',   value: '5-post build-up across the week',
+              meta: "Saving the biggest post for anniversary day itself." },
           ],
         });
         // Replace our handle so downstream reads pick up the reshaped plan.
