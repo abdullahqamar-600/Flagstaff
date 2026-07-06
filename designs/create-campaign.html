@@ -98,23 +98,24 @@
      - Intensity (opacity + blur strength) varies per role, not the tint
      ------------------------------------------------------------------- */
 
-  /* Bottom fade mask — always on during conversation. Fades from a warm
-     glass tint (bridging the qdock scrim material) into the canvas so
-     content never bleeds under the fixed composer / qdock. */
+  /* Bottom fade mask — always on during conversation. Pure canvas fade,
+     no warm-glass tint in the intermediate stops. The scrim material
+     is only meant to appear when the qdock is open; when closed, the
+     bottom should read as clean canvas fading to transparent, not
+     glass-tinted haze. */
   .cc-scroll-mask {
     position: fixed;
     left: var(--sidebar-w, 80px);
     right: 0;
     bottom: 0;
-    height: 220px;
+    height: 200px;
     z-index: 30;
     pointer-events: none;
     background: linear-gradient(
       to top,
       var(--camp-surface-canvas, #ECECEC) 0%,
-      var(--camp-surface-canvas, #ECECEC) 32%,
-      rgba(252, 252, 254, 0.55) 62%,
-      rgba(252, 252, 254, 0) 100%
+      var(--camp-surface-canvas, #ECECEC) 42%,
+      rgba(236, 236, 236, 0) 100%
     );
   }
   /* Panel-aware trim — when the drafts panel is open, the mask stops at
@@ -133,8 +134,14 @@
     z-index: 33; /* below qdock (34), above mask (30) */
     background: transparent;
     opacity: 0;
+    /* CRITICAL: visibility: hidden fully kills the backdrop-filter on
+       the ::before/::after pseudo-elements. With opacity:0 alone, some
+       browsers keep computing the filter and it bleeds a subtle blur
+       into the bottom of the page even when the qdock is closed. */
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 340ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 340ms cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0s linear 340ms;
     overflow: hidden;
   }
   .cc-qdock-scrim::before,
@@ -243,7 +250,11 @@
   }
   body.has-qdock .cc-qdock-scrim {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    /* Match transition — no delay on visibility when opening. */
+    transition: opacity 340ms cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0s linear 0s;
   }
   /* Keep the campaign header readable above the scrim so users always
      see what they're planning. */
@@ -480,9 +491,22 @@
   }
   body.has-drafts .cc-title { font-size: 24px; line-height: 30px; }
   body.has-drafts .cc-subtitle { font-size: 14px; line-height: 20px; }
+  /* When the drafts panel is open, the left conversation column should
+     stay narrow (matching the composer) rather than sprawling across
+     the whole viewport. Was `max-width: none; width: 100%` — that let
+     the chat sprawl 1300px+ next to a 560px composer, making the left
+     side read as cropped and imbalanced. */
   body.has-side-panel .cc-chat {
-    max-width: none;
+    max-width: var(--cc-chat-max, 780px);
     width: 100%;
+    margin: 0;
+  }
+  /* In the drafting phase specifically, the chat column matches the
+     composer's floating pill width so the two feel like one column. */
+  body.has-drafts .cc-chat,
+  body.has-drafts.has-side-panel .cc-chat {
+    max-width: 636px;
+    margin: 0;
   }
 
   /* ==================================================================
@@ -532,7 +556,9 @@
     flex-direction: column;
     align-items: stretch;
     gap: 24px;
-    max-width: none;
+    /* Cap the chat column to the composer's width so the left side reads
+       as one balanced column instead of a wide chat over a narrow input. */
+    max-width: 636px;
     margin: 0;
     width: 100%;
     box-sizing: border-box;
@@ -1225,22 +1251,22 @@
     color: #D92D20;
   }
 
-  /* Body row with image on the LEFT — flex row, image first, text
-     stretches to fill the rest of the width. */
-  .cc-postcard__body-row--image-left {
+  /* Body row with image on the RIGHT — flex row, text first, image
+     pinned to a fixed 96px column on the right. DOM order matches
+     visual order so tab / screen-reader flow reads copy first. */
+  .cc-postcard__body-row--image-right {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
     gap: 14px;
   }
-  .cc-postcard__body-row--image-left .cc-postcard__text {
+  .cc-postcard__body-row--image-right .cc-postcard__text {
     flex: 1 1 auto;
     min-width: 0;
   }
-  .cc-postcard__body-row--image-left .cc-postcard__imgslot,
-  .cc-postcard__body-row--image-left .cc-postcard__image {
+  .cc-postcard__body-row--image-right .cc-postcard__imgslot,
+  .cc-postcard__body-row--image-right .cc-postcard__image {
     flex: 0 0 96px;
-    order: 0;
   }
 
   /* Schedule chip variant — reuses the tone chip pill shape so the two
@@ -3396,7 +3422,13 @@
     <symbol id="i-arrow-up-right" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="10" x2="10" y2="4"/><polyline points="5 4 10 4 10 9"/></symbol>
     <symbol id="i-cloud-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7.5" r="2.5"/><line x1="7.5" y1="2.5" x2="7.5" y2="3.5"/><line x1="7.5" y1="11.5" x2="7.5" y2="12.5"/><line x1="2.5" y1="7.5" x2="3.5" y2="7.5"/><line x1="11.5" y1="7.5" x2="12.5" y2="7.5"/><line x1="4" y1="4" x2="4.7" y2="4.7"/><line x1="10.3" y1="10.3" x2="11" y2="11"/><path d="M13 18a4 4 0 0 1 4-4c.5 0 1 .1 1.4.3A3 3 0 0 1 21 17a3 3 0 0 1-3 3H8a3.5 3.5 0 0 1 0-7 3.9 3.9 0 0 1 1.5.3"/></symbol>
     <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-8 8a2 2 0 0 1-2.8 0L3 14.6a2 2 0 0 1 0-2.8l8-8H20v9.6z"/><circle cx="16" cy="8" r="1.2" fill="currentColor" stroke="none"/></symbol>
-    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="3.5"/><path d="M22 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <!-- Sidebar icons — kept in sync with poc/index.html so both surfaces
+         share exactly the same nav visuals. -->
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-user"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"   stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></symbol>
+    <symbol id="i-bold"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h6a3.5 3.5 0 0 1 0 7H7z"/><path d="M7 12h7a3.5 3.5 0 0 1 0 7H7z"/></symbol>
+    <symbol id="i-question" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/><path d="M9.5 9a2.5 2.5 0 1 1 3 2.5c-.7.2-1 .7-1 1.4V13"/><line x1="11.5" y1="16" x2="11.51" y2="16"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1c0 .7.4 1.3 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0c.2.6.8 1 1.5 1H21a2 2 0 1 1 0 4h-.1c-.7 0-1.3.4-1.5 1z"/></symbol>
     <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2"/></symbol>
     <!-- Scout loader — 4 circles animate via CSS to signal "thinking". -->
     <symbol id="i-scout-loader" viewBox="0 0 24 24"><g><circle class="scout-loader__c scout-loader__c--1" cx="7"  cy="7"  r="3"/><circle class="scout-loader__c scout-loader__c--2" cx="7"  cy="17" r="3"/><circle class="scout-loader__c scout-loader__c--3" cx="17" cy="17" r="3"/><circle class="scout-loader__c scout-loader__c--4" cx="17" cy="7"  r="3"/></g></symbol>
@@ -3409,17 +3441,26 @@
     <div class="atmosphere__blob atmosphere__blob--indigo"></div>
   </div>
 
-  <aside class="sidebar">
-    <div class="sidebar__logo"><svg width="26" height="26"><use href="#i-logo"/></svg></div>
-    <nav class="sidebar__nav">
-      <button class="sidebar__btn" title="Home" data-goto="../poc/index.html?view=home"><svg><use href="#i-home"/></svg></button>
-      <button class="sidebar__btn" title="Scout"><svg><use href="#i-chat"/></svg></button>
-      <button class="sidebar__btn is-active" title="Campaigns" data-goto="../poc/index.html"><svg><use href="#i-megaphone"/></svg></button>
-      <button class="sidebar__btn" title="Scheduler"><svg><use href="#i-cal"/></svg></button>
-      <button class="sidebar__btn" title="Analytics"><svg><use href="#i-analytics"/></svg></button>
+  <!-- Sidebar — mirrors poc/index.html exactly (buttons, order, classes,
+       data-nav attrs). Since this is a standalone page, we ALSO run a
+       small routing shim below that turns data-nav clicks into
+       navigations back into the POC so nothing breaks. -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__logo" aria-label="Flagstaff Social">
+      <svg width="26" height="26"><use href="#i-logo"/></svg>
+    </div>
+    <nav class="sidebar__nav" aria-label="Primary">
+      <button class="sidebar__btn" data-nav="home"      title="Home"><svg><use href="#i-home"/></svg></button>
+      <button class="sidebar__btn" data-nav="posts"     title="Posts"><svg><use href="#i-chat"/></svg></button>
+      <button class="sidebar__btn is-active" data-nav="campaigns" title="Campaigns" aria-current="page"><svg><use href="#i-megaphone"/></svg></button>
+      <button class="sidebar__btn" data-nav="calendar"  title="Scheduler"><svg><use href="#i-cal"/></svg></button>
+      <button class="sidebar__btn" data-nav="analytics" title="Analytics"><svg><use href="#i-analytics"/></svg></button>
+      <button class="sidebar__btn sidebar__btn--campaigns-only" data-nav="team"    title="Team Management"><svg><use href="#i-users"/></svg></button>
+      <button class="sidebar__btn sidebar__btn--campaigns-only" data-nav="content" title="Content"><svg><use href="#i-bold"/></svg></button>
     </nav>
     <div class="sidebar__footer">
-      <button class="sidebar__btn" title="Search"><svg><use href="#i-search"/></svg></button>
+      <button class="sidebar__btn sidebar__btn--campaigns-only" data-nav="support" title="Support"><svg><use href="#i-question"/></svg></button>
+      <button class="sidebar__btn sidebar__settings" title="Settings"><svg><use href="#i-settings"/></svg></button>
     </div>
   </aside>
 
@@ -3488,15 +3529,15 @@
 
           <button class="cc-intent-pill" type="button" data-shape="trend">
             <span class="cc-intent-pill__label">Track 5 easter-egg theory</span>
-            <span class="cc-intent-pill__meta">Fandom theory chatter up this week</span>
+            <span class="cc-intent-pill__meta">"Track 5" mentions up 3.4× this week</span>
           </button>
 
           <button class="cc-intent-pill" type="button" data-shape="success">
             <span class="cc-intent-pill__label">Rank the eras poll</span>
-            <span class="cc-intent-pill__meta">Your highest-comment format</span>
+            <span class="cc-intent-pill__meta">Your top-commented post this year — 4.1× replies</span>
           </button>
         </div>
-        <div class="cc-intent-hint">Or tell me your own in the chat below.</div>
+        <div class="cc-intent-hint">Or type your own idea below.</div>
       </section>
 
       <section class="cc-chat" aria-live="polite">
@@ -3514,7 +3555,7 @@
     <button class="chat-composer__attach" type="button" aria-label="Attach an image" title="Attach an image" id="cc-attach-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5l-8.5 8.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 1 1 5 5l-9 9a2 2 0 1 1-2.8-2.8L15 9"/></svg>
     </button>
-    <input class="chat-composer__input" type="text" placeholder="Reply to Scout..." autofocus />
+    <input class="chat-composer__input" type="text" placeholder="Or type your own — a moment, an era, a theory…" autofocus />
     <button class="chat-composer__send" type="submit" aria-label="Send" disabled>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
     </button>
@@ -3680,7 +3721,7 @@
     <button class="cc-ai-popover__tile" type="button" data-ai-preset="rewrite">Rewrite</button>
     <button class="cc-ai-popover__tile" type="button" data-ai-preset="punchier">Make it punchier</button>
     <button class="cc-ai-popover__tile" type="button" data-ai-preset="softer">Softer tone</button>
-    <button class="cc-ai-popover__tile" type="button" data-ai-preset="stronger-cta">Stronger CTA</button>
+    <button class="cc-ai-popover__tile" type="button" data-ai-preset="stronger-cta">Stronger prompt</button>
   </div>
 </div>
 
@@ -3694,8 +3735,8 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
         </span>
       </div>
-      <h2 class="cc-modal__title" id="cc-schedule-title">Post your campaign to X</h2>
-      <p class="cc-modal__desc" id="cc-schedule-desc">Post 1 goes live now. The rest queue up to the schedule you saw.</p>
+      <h2 class="cc-modal__title" id="cc-schedule-title">Publish your campaign</h2>
+      <p class="cc-modal__desc" id="cc-schedule-desc">Post 1 goes live now. The other three publish at the times shown below.</p>
 
       <!-- Per-post schedule preview -->
       <div class="cc-schedule-list" id="cc-schedule-list" role="list"></div>
@@ -3703,13 +3744,13 @@
       <!-- Optional warning strip when a post has an unresolved issue. -->
       <div class="cc-schedule-warn" id="cc-schedule-warn" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
-        <span id="cc-schedule-warn-text">One post has an unresolved image mismatch. Post anyway?</span>
+        <span id="cc-schedule-warn-text">One post has an image that looked off-brief. Publish anyway, or open the post to swap it.</span>
       </div>
 
       <div class="cc-modal__foot cc-modal__foot--three">
-        <button class="cc-modal__btn cc-modal__btn--ghost" type="button" id="cc-schedule-cancel">Not yet</button>
+        <button class="cc-modal__btn cc-modal__btn--ghost" type="button" id="cc-schedule-cancel">Keep editing</button>
         <button class="cc-modal__btn cc-modal__btn--secondary" type="button" id="cc-schedule-publish-now">Schedule for later</button>
-        <button class="cc-modal__btn cc-modal__btn--primary" type="button" id="cc-schedule-confirm">Post campaign</button>
+        <button class="cc-modal__btn cc-modal__btn--primary" type="button" id="cc-schedule-confirm">Publish now</button>
       </div>
     </div>
 
@@ -3723,8 +3764,8 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
         </span>
       </div>
-      <h2 class="cc-modal__title" id="cc-schedule-posting-title">Posting your campaign…</h2>
-      <p class="cc-modal__desc" id="cc-schedule-posting-desc">Publishing Post 1 to X and queuing the rest on your schedule.</p>
+      <h2 class="cc-modal__title" id="cc-schedule-posting-title">Publishing your campaign…</h2>
+      <p class="cc-modal__desc" id="cc-schedule-posting-desc">Post 1 goes out now. The other three queue up at the times you set.</p>
       <ul class="cc-schedule-progress" id="cc-schedule-progress" aria-live="polite"></ul>
     </div>
 
@@ -3739,7 +3780,7 @@
         </span>
       </div>
       <h2 class="cc-modal__title" id="cc-schedule-success-title">Your campaign is live</h2>
-      <p class="cc-modal__desc" id="cc-schedule-success-desc">Post 1 just went out. The remaining three are queued to publish on their schedule.</p>
+      <p class="cc-modal__desc" id="cc-schedule-success-desc">Post 1 just went out. The other three publish at the times you set — you can still edit them from Campaigns.</p>
       <!-- Per-post live vs queued receipt. -->
       <div class="cc-schedule-receipt" id="cc-schedule-receipt" role="list"></div>
       <div class="cc-modal__foot">
@@ -4099,8 +4140,8 @@
         e.stopPropagation();
         fireToast({
           kind: 'info',
-          title: 'Craftsperson KB',
-          desc: 'Warm-portrait tone, first-person voice. Trained on your March campaign.',
+          title: 'Swiftie voice profile',
+          desc: 'Playful, theory-fluent, fandom-first. Trained on your top 40 posts this year.',
           duration: 4200,
         });
       }
@@ -4119,7 +4160,7 @@
         body: 'A fifth post drafted from the same warm voice. Edit anything below or refine with Scout.',
       };
       postState.push(newPost);
-      renderPostCards();
+      insertPostCardDOM(idx);
       fireToast({ kind: 'info', title: 'Added post ' + (idx+1), desc: 'Refine it with Scout, or reschedule below.', duration: 3200 });
     }
 
@@ -4740,9 +4781,9 @@
       Shape: {
         title: 'Which shape should we go with?',
         options: [
-          { label: 'Reactive · Heatwave sprint', primary: true },
-          { label: 'Evergreen · Q&A Fridays' },
-          { label: 'Launch · New apron drop' },
+          { label: '1989 anniversary countdown', primary: true },
+          { label: 'Track 5 theory sprint' },
+          { label: 'Rank-the-eras poll' },
         ],
       },
       Cadence: {
@@ -4756,17 +4797,17 @@
       Voice: {
         title: 'What voice should the posts use?',
         options: [
-          { label: 'Warm, local (Craftsperson KB)', primary: true },
-          { label: 'Playful, high energy' },
+          { label: 'Swiftie voice (theory-fluent, playful)', primary: true },
+          { label: 'Softer, memory-forward' },
           { label: 'Direct, no frills' },
         ],
       },
       Audience: {
         title: 'Who should this reach?',
         options: [
-          { label: 'Existing followers plus local search', primary: true },
+          { label: 'Core Swifties + eras-curious lookalikes', primary: true },
           { label: 'Existing followers only' },
-          { label: 'Broaden to lookalike regional audiences' },
+          { label: 'Broaden to cross-fandom pop audiences' },
         ],
       },
     };
@@ -4859,14 +4900,14 @@
     // Draft reveal — same as before but factored out.
     // -----------------------------------------------------------------
     const POSTS = [
-      { day: 'Thu, 7:30 AM',  hook: 'Ninety by noon. Your lawn feels it before you do.',
-        body: 'The first sign is not brown, it is dull. Cut high, water at dawn, and skip the mid-day sprinklers. If it is already turning, we run a free 10-minute lawn check Thu to Sun. No upsell, just a plan. Link in bio.' },
-      { day: 'Fri, 12:30 PM', hook: 'The five-minute test every homeowner should know.',
-        body: 'Step barefoot on the grass and lift your foot. If the blades stay flat, the roots are already drought-stressed. Fifteen bookings left this week for our free check. We come by, walk the yard, tell you what it actually needs.' },
-      { day: 'Sat, 8:00 AM',  hook: 'Before Monday, this yard was giving up.',
-        body: 'Deep watering, aeration at two inches, and a fresh cut at the right height. Three days later, the roots are drinking again. Same street, same summer, different story. Swipe for the after.' },
-      { day: 'Sun, 4:00 PM',  hook: 'One quiet Sunday tip that saves a season.',
-        body: 'Sharpen your mower blade before next weekend. A dull blade tears the grass instead of slicing it, and torn tips are what turn brown first. Ten minutes now saves a month of stress. Free checks continue Mon to Wed if you missed us.' }
+      { day: 'Thu, 7:00 PM',  hook: 'Ten years ago tonight, we all clocked the same clue on Track 5.',
+        body: 'Cornelia Street was never just a street. Swipe through the six lyrics that reroute the whole 1989 timeline — and the one line that\'s still open for debate. Which reading do you land on? Drop it in the comments.' },
+      { day: 'Fri, 12:30 PM', hook: 'The 1989 lyric that everyone quotes wrong.',
+        body: 'You know the one. Half the fandom sings it a beat too late, and the other half swears their version is canon. Here\'s the studio take, the tour take, and why the "wrong" one might actually be the point. Save this for the next debate.' },
+      { day: 'Sat, 10:00 AM', hook: 'Rank the 1989 tracklist. No wrong answers — but there are wrong answers.',
+        body: 'Vote your top three. I\'ll pin the winners tomorrow, and #1 gets its own deep-dive next week. Tag the friend who\'ll fight you on Wildest Dreams being top three.' },
+      { day: 'Sun, 12:00 PM',  hook: 'Ten years of 1989. Every clue you sent me this week, in one place.',
+        body: 'Every theory, every lyric decode, every rewatch moment you dropped — stitched into one carousel. Screenshot your favourite. New here? This is what we do every era.' }
     ];
     // Two-phase reveal:
     //   openPanelLoading() — right after Scout says "On it.", slide the
@@ -5016,6 +5057,145 @@
     const SCHEDULE_DAYS = ['Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed'];
     const SCHEDULE_TIMES = ['9:00 AM', '10:00 AM', '12:30 PM', '2:00 PM', '4:00 PM', '7:00 PM'];
 
+    // ---- Single-card template + incremental DOM helpers -----------------
+    // Extracted so add/duplicate/delete can touch just the affected DOM
+    // nodes instead of blowing away and rebuilding the whole list.
+
+    function postImageSlotHTML(p, i) {
+      if (p.imageState === 'ready' && p.image) {
+        const sourceLabel = p.image.source === 'generated' ? 'AI' : 'Uploaded';
+        return `<button type="button" class="cc-postcard__imgslot cc-postcard__imgslot--ready" data-post-image aria-label="Change image"><img src="${p.image.url}" alt="Post ${i+1} image" /><span class="cc-postcard__imgtag">${sourceLabel}</span></button>`;
+      }
+      if (p.imageState === 'uploading' || p.imageState === 'generating') {
+        return `<div class="cc-postcard__imgslot cc-postcard__imgslot--busy" data-post-image aria-label="${p.imageState}"><span class="cc-postcard__imgspin"></span><span class="cc-postcard__imgbusy-label">${p.imageState === 'generating' ? 'Generating…' : 'Uploading…'}</span></div>`;
+      }
+      return `<button type="button" class="cc-postcard__imgslot cc-postcard__imgslot--empty" data-post-image aria-label="Add image"><svg class="cc-postcard__imgslot-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-9 9"/></svg><span class="cc-postcard__imgslot-label">Add image</span></button>`;
+    }
+    const postGripHTML = () =>
+      '<div class="cc-postcard__grip" aria-hidden="true">' +
+        '<div class="cc-postcard__grip-row"><span></span><span></span></div>' +
+        '<div class="cc-postcard__grip-row"><span></span><span></span></div>' +
+        '<div class="cc-postcard__grip-row"><span></span><span></span></div>' +
+      '</div>';
+    const postDividerHTML = () =>
+      '<div class="cc-post-divider" data-cc-insert-post aria-hidden="true">' +
+        '<span class="cc-post-divider__line"></span>' +
+        '<button class="cc-post-divider__plus" type="button" aria-label="Insert post here">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+        '</button>' +
+      '</div>';
+
+    function postCardHTML(p, i, total) {
+      const charCount = (p.hook + ' ' + p.body).length;
+      const toneKey = (p.tone || '').toLowerCase().split(',')[0].trim();
+      const toneIcon = (TONE_OPTIONS.find(t => t.value === p.tone) || TONE_OPTIONS[0]).icon;
+      return `
+        <article class="cc-postcard" style="animation-delay: ${i * 90}ms" data-post-idx="${i}" data-tone="${toneKey}">
+          ${postGripHTML()}
+          <div class="cc-postcard__cell">
+            <div class="cc-postcard__row-head">
+              <div class="cc-postcard__row-head-left">
+                <span class="cc-postcard__num"><span class="cc-postcard__num-idx">${String(i+1).padStart(2,'0')}</span><span class="cc-postcard__num-sep">/</span><span class="cc-postcard__num-total">${String(total).padStart(2,'0')}</span></span>
+                <span class="cc-postcard__ver" ${p.version ? '' : 'hidden'}>v1.${p.version}</span>
+              </div>
+              <div class="cc-postcard__row-head-right">
+                <span class="cc-postcard__status" data-post-tone>${p.tone === 'Celebratory' ? 'In Draft' : p.tone}</span>
+                <button class="cc-postcard__act cc-postcard__act--duplicate" type="button" aria-label="Duplicate post" title="Duplicate" data-post-duplicate>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><use href="#i-duplicate"/></svg>
+                </button>
+                <button class="cc-postcard__act cc-postcard__act--delete" type="button" aria-label="Delete post" title="Delete" data-post-delete>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><use href="#i-trash"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="cc-postcard__body-row cc-postcard__body-row--image-right">
+              <div class="cc-postcard__text" role="textbox" tabindex="0">
+                <span class="cc-postcard__hook">${p.hook}</span>
+                <span class="cc-postcard__body">${p.body}</span>
+              </div>
+              ${postImageSlotHTML(p, i)}
+            </div>
+            <div class="cc-postcard__row-foot">
+              <div class="cc-postcard__row-foot-left">
+                <button class="cc-postcard__tone-chip cc-postcard__tone-chip--schedule" type="button" data-post-time aria-label="Change schedule">
+                  <svg class="cc-postcard__tone-chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg>
+                  <span data-post-time-val>${p.day}</span>
+                  <svg class="cc-postcard__tone-chip-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <button class="cc-postcard__tone-chip" type="button" data-post-tone-chip aria-label="Change tone">
+                  <svg class="cc-postcard__tone-chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#${toneIcon}"/></svg>
+                  <span data-post-tone-chip-val>${p.tone}</span>
+                  <svg class="cc-postcard__tone-chip-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <span class="cc-postcard__count" aria-label="Character count">
+                  <span class="cc-postcard__count-num" data-post-count>${charCount}</span><span class="cc-postcard__count-sep">/</span><span class="cc-postcard__count-max">280</span>
+                </span>
+              </div>
+              <button class="cc-postcard__ai-icon" type="button" data-post-ai aria-label="Edit with Scout" title="Edit with Scout">
+                <svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-sparkle"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renumberPostCards() {
+      const cards = drafts.querySelectorAll('.cc-postcard');
+      const total = postState.length;
+      cards.forEach((card, i) => {
+        card.setAttribute('data-post-idx', String(i));
+        const idxEl = card.querySelector('.cc-postcard__num-idx');
+        const totEl = card.querySelector('.cc-postcard__num-total');
+        if (idxEl) idxEl.textContent = String(i + 1).padStart(2, '0');
+        if (totEl) totEl.textContent = String(total).padStart(2, '0');
+      });
+      const countEl = document.getElementById('cc-panel-count');
+      if (countEl) countEl.textContent = total + ' drafts ready';
+    }
+
+    function nodeFromHTML(html) {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = html.trim();
+      return wrap.firstElementChild;
+    }
+
+    function insertPostCardDOM(idx) {
+      const state = postState[idx];
+      if (!state) return;
+      const cardNode = nodeFromHTML(postCardHTML(state, idx, postState.length));
+      const addBtn = drafts.querySelector('.cc-add-post');
+      const existingCards = drafts.querySelectorAll('.cc-postcard');
+      if (idx >= existingCards.length) {
+        if (existingCards.length > 0) drafts.insertBefore(nodeFromHTML(postDividerHTML()), addBtn);
+        drafts.insertBefore(cardNode, addBtn);
+      } else {
+        const anchor = existingCards[idx];
+        drafts.insertBefore(cardNode, anchor);
+        drafts.insertBefore(nodeFromHTML(postDividerHTML()), anchor);
+      }
+      renumberPostCards();
+    }
+
+    function removePostCardDOM(idx) {
+      const target = drafts.querySelectorAll('.cc-postcard')[idx];
+      if (!target) return;
+      const next = target.nextElementSibling;
+      const prev = target.previousElementSibling;
+      if (next && next.classList.contains('cc-post-divider')) next.remove();
+      else if (prev && prev.classList.contains('cc-post-divider')) prev.remove();
+      target.remove();
+      renumberPostCards();
+    }
+
+    function replacePostCardDOM(idx) {
+      const state = postState[idx];
+      const target = drafts.querySelectorAll('.cc-postcard')[idx];
+      if (!state || !target) return;
+      const fresh = nodeFromHTML(postCardHTML(state, idx, postState.length));
+      target.replaceWith(fresh);
+    }
+
     function renderPostCards() {
       const rowGrip =
         '<div class="cc-postcard__grip" aria-hidden="true">' +
@@ -5074,12 +5254,12 @@
                 </button>
               </div>
             </div>
-            <div class="cc-postcard__body-row cc-postcard__body-row--image-left">
-              ${imageSlotHTML}
+            <div class="cc-postcard__body-row cc-postcard__body-row--image-right">
               <div class="cc-postcard__text" role="textbox" tabindex="0">
                 <span class="cc-postcard__hook">${p.hook}</span>
                 <span class="cc-postcard__body">${p.body}</span>
               </div>
+              ${imageSlotHTML}
             </div>
             <div class="cc-postcard__row-foot">
               <div class="cc-postcard__row-foot-left">
@@ -5157,7 +5337,7 @@
         imageState: 'empty',
       };
       postState.splice(idx, 0, newPost);
-      renderPostCards();
+      insertPostCardDOM(idx);
       fireToast({ kind: 'info', title: 'Inserted post ' + (idx+1), duration: 2600 });
     }
 
@@ -5245,12 +5425,12 @@
       const st = postState[idx];
       if (!st) return;
       st.imageState = 'uploading';
-      renderPostCards();
+      replacePostCardDOM(idx);
       // Simulate the tiny beat of write-back.
       setTimeout(() => {
         st.image = image;
         st.imageState = 'ready';
-        renderPostCards();
+        replacePostCardDOM(idx);
         fireToast({
           kind: 'success',
           title: 'Image added to Post ' + (idx + 1),
@@ -5264,9 +5444,8 @@
       const st = postState[idx];
       if (!st) return;
       st.imageState = 'generating';
-      renderPostCards();
+      replacePostCardDOM(idx);
       setTimeout(() => {
-        // Simple SVG-in-datauri so no network round-trip. Softly branded.
         const hues = [
           ['#A7B7FF', '#6266E7'],
           ['#B6DFCF', '#3E8E7E'],
@@ -5278,7 +5457,7 @@
         const url = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         st.image = { url, source: 'generated' };
         st.imageState = 'ready';
-        renderPostCards();
+        replacePostCardDOM(idx);
         fireToast({ kind: 'success', title: 'Image generated for Post ' + (idx + 1), duration: 3000 });
       }, 1400);
     }
@@ -5463,28 +5642,32 @@
         return;
       }
 
-      // Duplicate — clone the post, insert at idx+1.
+      // Duplicate — clone the post, insert at idx+1 via incremental DOM.
       const dupBtn = e.target.closest('[data-post-duplicate]');
       if (dupBtn) {
         e.stopPropagation();
         const clone = { ...state, comments: [], version: 0 };
         postState.splice(idx + 1, 0, clone);
-        renderPostCards();
+        insertPostCardDOM(idx + 1);
         fireToast({ title: 'Duplicated', desc: 'A copy is now Post ' + (idx+2) + '.', duration: 2600 });
         return;
       }
-      // Delete — remove with undo affordance in the toast.
+      // Delete — remove with undo affordance in the toast. Both paths
+      // touch only the affected card DOM, not the whole list.
       const delBtn = e.target.closest('[data-post-delete]');
       if (delBtn) {
         e.stopPropagation();
         const removed = state;
         postState.splice(idx, 1);
-        renderPostCards();
+        removePostCardDOM(idx);
         fireToast({
           kind: 'warn',
           title: 'Post ' + (idx+1) + ' deleted',
           actionLabel: 'Undo',
-          onAction: () => { postState.splice(idx, 0, removed); renderPostCards(); },
+          onAction: () => {
+            postState.splice(idx, 0, removed);
+            insertPostCardDOM(idx);
+          },
           duration: 5000,
         });
         return;
@@ -5517,7 +5700,7 @@
           listDropdownHTML(IMAGE_OPTIONS),
           (value) => {
             if (value === 'generate') {
-              fireToast({ kind: 'info', title: 'Generating image for Post ' + (idx+1), desc: 'On-brand shot from your Craftsperson KB.', duration: 3200 });
+              fireToast({ kind: 'info', title: 'Generating image for Post ' + (idx+1), desc: 'On-brand shot from your Swiftie voice profile.', duration: 3200 });
             } else if (value === 'upload') {
               fireToast({ kind: 'info', title: 'Choose an image', desc: 'Upload not wired in this prototype.', duration: 2800 });
             } else if (value === 'skip') {
@@ -5635,17 +5818,17 @@
     // read pixel/colour/subject; the prototype uses keywords so users
     // can see the flag interaction reliably. Everything else is treated
     // as "off-brief" and surfaced instead of silently hidden.
-    const IMG_RELEVANT_KEYWORDS = ['lawn', 'grass', 'yard', 'garden', 'before', 'after', 'mower', 'green', 'sprinkler', 'crew', 'aerat'];
+    const IMG_RELEVANT_KEYWORDS = ['1989', 'taylor', 'swift', 'concert', 'era', 'tour', 'poster', 'lyric', 'polaroid', 'stage', 'friendship', 'bracelet'];
     function classifyImage(im) {
       const name = (im.name || '').toLowerCase();
       const relevant = IMG_RELEVANT_KEYWORDS.some(k => name.includes(k));
       // Best-guess "subject" for the Scout narration.
-      const subject = /before/.test(name) ? 'a stressed lawn (before shot)'
-                    : /after/.test(name)  ? 'a revived lawn (after shot)'
-                    : /crew|team/.test(name) ? 'the crew at work'
-                    : /mower|blade/.test(name) ? 'a mower/blade close-up'
-                    : /green|lush/.test(name)  ? 'a healthy lawn'
-                    : relevant ? 'a lawn subject' : 'something off-brief';
+      const subject = /polaroid/.test(name) ? 'a polaroid-style era shot'
+                    : /concert|tour|stage/.test(name)  ? 'a concert / tour moment'
+                    : /bracelet|friendship/.test(name) ? 'a friendship-bracelet close-up'
+                    : /poster|album/.test(name) ? 'a poster / album still'
+                    : /lyric/.test(name)  ? 'a lyric graphic'
+                    : relevant ? 'a Swiftie-era subject' : 'something off-brief';
       return { relevant, subject };
     }
 
@@ -5667,11 +5850,11 @@
       if (!draftsReady) {
         pendingImages.push(...classified);
         if (good.length && flagged.length) {
-          await appendScoutMsg('Kept ' + good.length + ' that fit — ' + flagged.length + ' looked off-brief so I\'ll flag those on the draft, you decide.', { thinkFor: 260, beatAfter: 300 });
+          await appendScoutMsg('Kept ' + good.length + ' that fit the 1989 brief. ' + flagged.length + ' looked off-era — I\'ll flag those on the drafts so you can decide.', { thinkFor: 260, beatAfter: 300 });
         } else if (good.length) {
-          await appendScoutMsg('Nice — all of these fit the summer-lawn brief. I\'ll weave them into the drafts as I go.', { thinkFor: 260, beatAfter: 300 });
+          await appendScoutMsg('All of these fit the 1989 anniversary brief. I\'ll weave them into the drafts as I go.', { thinkFor: 260, beatAfter: 300 });
         } else {
-          await appendScoutMsg('These read as off-brief for a lawn campaign. I can still slot them in on your say-so, or you can pick different ones.', { thinkFor: 260, beatAfter: 300 });
+          await appendScoutMsg('These read as off-era for a 1989 campaign. I can still slot them in on your say-so, or you can pick different shots.', { thinkFor: 260, beatAfter: 300 });
         }
         return;
       }
@@ -5696,7 +5879,7 @@
                      : 'Posts ' + applied.slice(0, -1).join(', ') + ' and ' + applied.slice(-1) + '.';
         await appendScoutMsg('These fit — swapped onto ' + suffix + ' Tap any card to swap or ask Scout to regenerate.', { thinkFor: 260, beatAfter: 300 });
       } else {
-        await appendScoutMsg('None of these read on-brief. Want me to generate lawn shots on your voice instead?', { thinkFor: 260, beatAfter: 300 });
+        await appendScoutMsg('None of these read on-brief. Want me to generate 1989-era shots in your voice instead?', { thinkFor: 260, beatAfter: 300 });
       }
       fireToast({ kind: 'info', title: applied.length + ' image' + (applied.length===1?'':'s') + ' applied', desc: flagged.length ? flagged.length + ' flagged as off-brief.' : 'On-brand and on-brief.', duration: 3600 });
     }
@@ -5734,7 +5917,7 @@
           '<div class="cc-flag-note__thumb" style="background-image:url(' + im.url + ')"></div>' +
           '<div class="cc-flag-note__body">' +
             '<div class="cc-flag-note__label">' + im.name + '</div>' +
-            '<div class="cc-flag-note__hint">Looks off-brief for a lawn campaign. Skip, or use it anyway?</div>' +
+            '<div class="cc-flag-note__hint">Looks off-era for the 1989 anniversary campaign. Skip, or use it anyway?</div>' +
             '<div class="cc-flag-note__actions">' +
               '<button class="cc-flag-note__btn" type="button" data-flag-skip>Skip</button>' +
               '<button class="cc-flag-note__btn cc-flag-note__btn--primary" type="button" data-flag-use>Use anyway</button>' +
@@ -5859,9 +6042,9 @@
       const result = await openQDock({
         title: 'Which shape should I use instead?',
         options: [
-          { label: 'Reactive, summer lawn revival', primary: true, value: 'reactive' },
-          { label: 'Evergreen, Q&A Fridays',        value: 'evergreen' },
-          { label: 'Launch, apron drop',            value: 'launch' },
+          { label: '1989 anniversary week (Oct 27)', primary: true, value: 'holiday' },
+          { label: 'Track 5 easter-egg theory',      value: 'trend' },
+          { label: 'Rank the eras poll',             value: 'success' },
         ],
         placeholder: 'Or tell me a different angle',
       });
@@ -5881,6 +6064,21 @@
     // for the prototype. In production this would navigate away.
     exitBtn.addEventListener('click', () => {
       fireToast({ kind: 'info', title: 'Saved as draft', desc: 'You can pick this back up from Campaigns.', duration: 3400 });
+    });
+
+    // Sidebar nav — mirror POC's `bindSidebarNav()` contract. POC only
+    // wires the `home` + `campaigns` buttons to actual navigation; the
+    // rest stay visual-only. Since we're on a standalone page, both
+    // handlers navigate BACK into the POC so the whole nav stays
+    // consistent regardless of where the user is.
+    document.querySelectorAll('.sidebar__btn[data-nav]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-nav');
+        if (target === 'home')      location.href = '../poc/index.html?view=home';
+        else if (target === 'campaigns') location.href = '../poc/index.html';
+        // Other targets: no-op (matches POC's behaviour where they're
+        // presentational-only in this prototype).
+      });
     });
 
     // Post-campaign modal wiring — three states: confirm → posting → success.
@@ -6356,11 +6554,11 @@
         sections: [
           { label: 'Goal',     value: 'Grow reach + follower engagement',
             meta: "Same primary goal as your top anniversary posts this year." },
-          { label: 'Who',      value: 'Core Swifties + eras-curious lookalikes in your niche',
-            meta: 'Estimated reach 42k · 3.1k saves · 890 comments target.' },
+          { label: 'Who',      value: 'Core Swifties + eras-curious lookalikes',
+            meta: 'Target: 42k reach · 3.1k saves · 890 comments.' },
           { label: 'Angle',    value: '1989 anniversary — countdown + fan memories',
-            meta: 'Your highest-reach theme (anniversary throwbacks).' },
-          { label: 'Format',   value: 'Theory/easter-egg carousel + mid-week fan poll',
+            meta: 'Your highest-reach theme this year.' },
+          { label: 'Format',   value: 'Easter-egg carousel + mid-week fan poll',
             meta: 'Your two highest-engagement post types.' },
           { label: 'Channels', value: 'Instagram + TikTok',
             meta: "Where your account moves fastest." },
@@ -6382,11 +6580,11 @@
 
       let fork = await appendQuickReplies([
         { label: 'Go with this plan',   primary: true, value: 'go',
-          sub: 'Lock this in and drill into the last few details.' },
+          sub: 'Lock it in — I\'ll ask two more questions, then draft the posts.' },
         { label: 'I have my own idea',                 value: 'own',
-          sub: "Tell me your angle and I'll shape it against what's worked." },
+          sub: "Type your angle. I'll build it around what's worked for you before." },
         { label: 'Show me other angles',               value: 'other',
-          sub: 'Two alternative directions from your past data.' },
+          sub: 'Two alternatives from your past data — different tradeoffs.' },
       ]);
 
       // ---------------------------------------------------------------
@@ -6396,22 +6594,22 @@
       // ---------------------------------------------------------------
       if (fork === 'other') {
         await appendScoutMsg(
-          "Two other directions your data supports. Neither pulls the reach of the 1989 anniversary build, but they win on different metrics.",
+          "Two directions your data supports. Neither hits the reach of the 1989 build, but each wins on a different metric.",
           { thinkFor: 260, beatAfter: 260 }
         );
         fork = await appendQuickReplies([
           { label: 'Track-by-track appreciation',     value: 'go',
             primary: true,
-            sub: 'Evergreen · warmer replies, slower on reach. Highest save-rate this year.' },
+            sub: 'Highest save-rate this year. Warmer replies, ~40% less reach.' },
           { label: 'Fan-art + bracelet reposts',      value: 'go',
-            sub: 'Community-first · biggest follower lift, but momentum builds over the week.' },
-          { label: 'Back to the 1989 anniversary plan', value: 'go',
-            sub: 'Return to the original plan.' },
+            sub: 'Biggest follower lift (+180 last time). Slower start, peaks late in the week.' },
+          { label: 'Back to the 1989 anniversary',    value: 'go',
+            sub: 'Return to the original plan — no changes.' },
           { label: "Actually, I have my own idea",    value: 'own',
-            sub: 'Switch to shaping around your angle instead.' },
+            sub: "Type your angle instead — I'll build the plan around it." },
         ]);
         if (fork === 'go') {
-          await appendScoutMsg("Good — that one still leans on the anniversary build underneath. Let me nail the last details.", { thinkFor: 240, beatAfter: 260 });
+          await appendScoutMsg("Good pick — that one still leans on the anniversary build underneath. Two quick things and we're set.", { thinkFor: 240, beatAfter: 260 });
         }
       }
 
@@ -6423,7 +6621,7 @@
       // ---------------------------------------------------------------
       if (fork === 'own') {
         await appendScoutMsg(
-          "Tell me what you've got in mind — an era, a moment, a post type, or just a rough thought. I'll shape it around what's worked for your account before.",
+          "Tell me what you've got in mind — an era, a moment, a post type, or just a rough thought. I'll build the plan around it, backed by what's worked for you before.",
           { thinkFor: 240, beatAfter: 260 }
         );
         const userIdea = await awaitFreeText("Type your angle or idea…");
@@ -6441,7 +6639,7 @@
 
         // Soft flag — honest read, then defer to the user's instinct.
         await appendScoutMsg(
-          'Love it — "' + userIdea + '". Honest read: your anniversary + theory formats have pulled the strongest reach on this list, so a straight appreciation post may land quieter. Happy to run with your angle though. To give it the best shot, here\'s how I\'d frame it against what\'s driven your top engagement:',
+          'Got it — "' + userIdea + '". Honest read: your anniversary and theory posts pull ~2× the reach of straight posts. This can still land, and I\'ll frame it to hit your strongest engagement pattern:',
           { thinkFor: 320, beatAfter: 340 }
         );
 
@@ -6478,89 +6676,94 @@
         plan.readValues = plan2.readValues;
 
         await beat(400);
-        await appendScoutMsg('Want me to work it up into a full plan, or want to adjust it together first?', { thinkFor: 240, beatAfter: 280 });
+        await appendScoutMsg('Run with this plan, or adjust it first?', { thinkFor: 240, beatAfter: 280 });
         const bChoice = await appendQuickReplies([
-          { label: 'Yes, plan it out',       primary: true, value: 'go',
-            sub: "Lock this and I'll drill into the offer and timing." },
-          { label: 'Keep it closer to my idea',              value: 'stay',
-            sub: "Nudge the plan back toward the exact angle I described." },
-          { label: "Let's adjust together",                  value: 'adjust',
-            sub: 'Tell me one specific thing to change.' },
+          { label: 'Run with it',       primary: true, value: 'go',
+            sub: "Two quick questions on hook and timing, then I draft the posts." },
+          { label: 'Keep it closer to my wording',              value: 'stay',
+            sub: "I'll lean harder into your exact angle across every post." },
+          { label: "Change one thing",                  value: 'adjust',
+            sub: 'Tell me the single thing to swap or tighten.' },
         ]);
         if (bChoice === 'stay') {
-          await appendScoutMsg("Got it — I'll keep the plan aligned to your exact wording as I move forward.", { thinkFor: 220, beatAfter: 260 });
+          await appendScoutMsg("Done — I'll keep every post anchored to your exact wording.", { thinkFor: 220, beatAfter: 260 });
         } else if (bChoice === 'adjust') {
           const tweak = await awaitFreeText('What should I change?');
-          await appendScoutMsg("Fair — I'll fold that in. \"" + tweak + "\"", { thinkFor: 220, beatAfter: 280 });
+          await appendScoutMsg("On it — folding in \"" + tweak + "\".", { thinkFor: 220, beatAfter: 280 });
         }
       } else {
         // Path A — user accepted the original plan (or "other angles" landed back).
-        await appendScoutMsg("Good — this is a solid starting point. Let me nail the last two details.", { thinkFor: 240, beatAfter: 280 });
+        await appendScoutMsg("Solid. Two quick questions and we're set to draft.", { thinkFor: 240, beatAfter: 280 });
       }
 
       // ---------------------------------------------------------------
-      // TURN 2 — Confirm the offer.
+      // TURN 2 — Pick the opening hook.
       //
-      // One decision. Data-backed default. Action state pulls the real
-      // signal (past offers) so the pick feels earned, not arbitrary.
+      // For a fan account, the equivalent of "which offer" is "which
+      // specific clue/hook does the carousel open on." Same shape: one
+      // data-backed default, one custom, one broader alternative.
       // ---------------------------------------------------------------
       await appendActionStates([
-        { icon: 'i-tag',       text: 'Pulling your best-performing offers…',
-          short: 'past offers',
-          detail: 'First-treatment 20% off (Jul \'25) — +34% booking rate vs no-offer summer weeks.',
+        { icon: 'i-tag',       text: 'Scanning what the fandom is talking about…',
+          short: 'fandom signal',
+          detail: '"Cornelia Street" theory is the loudest thread this week — 2.1× the volume of the next-highest clue.',
           hold: 1200 },
       ]);
       await appendScoutMsg(
-        "An offer usually lifts your booking rate about 30% on a campaign like this. Your strongest last summer was first treatment 20% off. Run that again?",
+        "Theory carousels do best when you open on one specific clue. \"Cornelia Street\" is the loudest thread in the fandom right now — 2.1× the next-highest. Want to open on that?",
         { thinkFor: 260, beatAfter: 300 }
       );
       const offerChoice = await appendQuickReplies([
-        { label: 'Use 20% off',            primary: true, value: '20',
-          sub: 'Same offer that lifted bookings 34% last summer.' },
-        { label: 'Try a different offer',                 value: 'other',
-          sub: "Tell me the offer you'd like to test." },
-        { label: 'No offer this time',                    value: 'none',
-          sub: "Lean on the angle and timing alone. Expect fewer bookings." },
+        { label: 'Open on "Cornelia Street"',   primary: true, value: '20',
+          sub: 'Ride the thread that\'s already active — highest reach ceiling this week.' },
+        { label: 'Pick a different clue',                     value: 'other',
+          sub: "Type the lyric, era, or theory you want the carousel to open on." },
+        { label: 'Open on a broad question',                  value: 'none',
+          sub: "Slower start, but casts a wider net across the fandom." },
       ]);
-      let offerValue = 'First treatment 20% off';
+      let offerValue = '"Cornelia Street" theory hook';
       if (offerChoice === 'other') {
-        const custom = await awaitFreeText('What offer should we run?');
+        const custom = await awaitFreeText('Which clue should we open on?');
         offerValue = custom;
-        await appendScoutMsg('Got it — I\'ll use "' + custom + '" across the sequence.', { thinkFor: 200, beatAfter: 260 });
+        await appendScoutMsg('Got it — the carousel will open on "' + custom + '" and build from there.', { thinkFor: 200, beatAfter: 260 });
       } else if (offerChoice === 'none') {
-        offerValue = 'No offer';
-        await appendScoutMsg("Understood — the sequence will lead with the angle and let the value carry it.", { thinkFor: 220, beatAfter: 280 });
+        offerValue = 'Broad-question opener';
+        await appendScoutMsg("Understood — I'll open with a fandom-wide question and let the theory build in the swipes.", { thinkFor: 220, beatAfter: 280 });
       }
 
       // ---------------------------------------------------------------
       // TURN 3 — Confirm timing.
+      //
+      // Fan-account timing runs off audience posting windows, not
+      // weather. Scout reads the account's peak engagement slots and
+      // anchors the biggest post to the anniversary itself.
       // ---------------------------------------------------------------
       await appendActionStates([
-        { icon: 'i-cloud-sun', text: 'Watching your local forecast…',
-          short: 'forecast',
-          detail: 'Heat wave lands Thursday — first real spike since the campaign window opened.',
+        { icon: 'i-cloud-sun', text: 'Reading your peak engagement windows…',
+          short: 'peak windows',
+          detail: 'Thu evenings + Sat mornings pull 2.3× your usual saves. Anniversary is Sunday.',
           hold: 1250 },
       ]);
       await appendScoutMsg(
-        "I'd launch touch one the day a heat wave hits and space the rest over 10 days. Looks like one lands this Thursday in your area — want me to build around that?",
+        "Your account moves fastest Thu evenings and Sat mornings. I'd drop the theory carousel Thu, the poll Sat, and land the anniversary post on Sun — Oct 27. Build around that?",
         { thinkFor: 260, beatAfter: 300 }
       );
       const timingChoice = await appendQuickReplies([
-        { label: 'Build around Thursday',   primary: true, value: 'thu',
-          sub: 'First touch lands with the heat wave for maximum urgency.' },
-        { label: 'Pick a fixed date',                      value: 'fixed',
-          sub: "Tell me the day you want touch one to go out." },
-        { label: 'Change the spacing',                     value: 'space',
-          sub: "Same launch, different rhythm across the 10 days." },
+        { label: 'Use these times',   primary: true, value: 'thu',
+          sub: 'Thu 7 PM · Sat 10 AM · Sun 12 PM (anniversary) — your top posting slots.' },
+        { label: 'Pick my own start',                      value: 'fixed',
+          sub: "Type the day and time you want the first post to go live." },
+        { label: 'Tighten the arc',                     value: 'space',
+          sub: "Same posts, all four inside anniversary week (Thu → Sun)." },
       ]);
-      let timingValue = 'Thursday launch, 4 touches over 10 days';
+      let timingValue = 'Thu 7 PM launch, 4 posts across anniversary week';
       if (timingChoice === 'fixed') {
-        const when = await awaitFreeText('When should touch one go out?');
-        timingValue = when + ' launch, 4 touches over 10 days';
-        await appendScoutMsg('Set — touch one on ' + when + ', then three more spaced over the 10 days after.', { thinkFor: 200, beatAfter: 260 });
+        const when = await awaitFreeText('When should the first post go live?');
+        timingValue = when + ' launch, 4 posts across the week';
+        await appendScoutMsg('Set — first post ' + when + ', then three more paced through the week.', { thinkFor: 200, beatAfter: 260 });
       } else if (timingChoice === 'space') {
-        await appendScoutMsg("Fine — I'll tighten it to a 6-day arc: two touches this week, two next.", { thinkFor: 220, beatAfter: 260 });
-        timingValue = 'Thursday launch, 4 touches over 6 days';
+        await appendScoutMsg("Tightening the arc — all four inside anniversary week, one per day Thu to Sun.", { thinkFor: 220, beatAfter: 260 });
+        timingValue = 'Thu–Sun run, one post per day';
       }
 
       // ---------------------------------------------------------------
@@ -6570,8 +6773,8 @@
       // whole thing so the user sees exactly what's about to ship.
       // ---------------------------------------------------------------
       const pv = plan.readValues();
-      const angleShort = (pv['Angle'] || 'Brown-Out Rescue').replace(/["']/g, '');
-      await appendScoutMsg("Here's what I've nailed down with you:", { thinkFor: 300, beatAfter: 260 });
+      const angleShort = (pv['Angle'] || '1989 anniversary — countdown + fan memories').replace(/["']/g, '');
+      await appendScoutMsg("Here's the shape we landed on:", { thinkFor: 300, beatAfter: 260 });
 
       const playback = el('div', 'cc-playback',
         '<strong></strong>' +
@@ -6585,27 +6788,27 @@
         '<span class="cc-playback__part cc-playback__part--timing"></span>'
       );
       playback.querySelector('strong').textContent = angleShort;
-      playback.querySelector('.cc-playback__part--goal').textContent = 'booking-focused';
+      playback.querySelector('.cc-playback__part--goal').textContent = 'reach-focused';
       playback.querySelector('.cc-playback__part--offer').textContent = offerValue;
-      playback.querySelector('.cc-playback__part--channels').textContent = '4 touches (2 Instagram, 2 email)';
+      playback.querySelector('.cc-playback__part--channels').textContent = '4 posts across Instagram + TikTok';
       playback.querySelector('.cc-playback__part--timing').textContent = timingValue.toLowerCase();
       chatlog.appendChild(playback);
       scrollDown();
 
       await beat(500);
-      await appendScoutMsg('Good to generate it?', { thinkFor: 220, beatAfter: 260 });
+      await appendScoutMsg('Ready to draft it?', { thinkFor: 220, beatAfter: 260 });
       const genChoice = await appendQuickReplies([
-        { label: 'Generate the campaign',   primary: true, value: 'go',
-          sub: "I'll draft the 4 touches and stage them for review." },
-        { label: 'Change something',                       value: 'change',
-          sub: 'Tell me what to adjust and I\'ll reshape.' },
+        { label: 'Draft the posts',   primary: true, value: 'go',
+          sub: "I'll write all 4 in your voice and line them up on the right." },
+        { label: 'Change something first',                       value: 'change',
+          sub: 'Tell me what to swap — I\'ll reshape before drafting.' },
       ]);
       if (genChoice === 'change') {
         const tweak = await awaitFreeText('What should I change?');
-        await appendScoutMsg("Fair — folding that in. \"" + tweak + "\"", { thinkFor: 220, beatAfter: 280 });
+        await appendScoutMsg("On it — folding in \"" + tweak + "\".", { thinkFor: 220, beatAfter: 280 });
       }
 
-      await appendScoutMsg('On it.', { thinkFor: 200, beatAfter: 300 });
+      await appendScoutMsg('Drafting now.', { thinkFor: 200, beatAfter: 300 });
       setStatus('drafting');
 
       openPanelLoading();
@@ -6614,9 +6817,9 @@
       // No imagery step during planning — post cards ship without
       // images and let the user choose (upload or generate) per post.
       const steps = [
-        { icon: 'i-book-open',   text: 'Pulling your Craftsperson voice profile' },
-        { icon: 'i-trending',    text: 'Reading local lawn-care search signal' },
-        { icon: 'i-pencil-line', text: 'Drafting four posts around the free check' },
+        { icon: 'i-book-open',   text: 'Pulling your Swiftie voice profile' },
+        { icon: 'i-trending',    text: 'Reading fandom chatter around the 1989 anniversary' },
+        { icon: 'i-pencil-line', text: 'Drafting four posts around the theory + poll build-up' },
         { icon: 'i-check',       text: 'Ready' },
       ];
       for (const s of steps) {
