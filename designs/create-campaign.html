@@ -2341,8 +2341,8 @@
   }
   .cc-qdock__opt--primary .cc-qdock__opt-num {
     /* Match the neutral treatment used for all other option numbers.
-       The "Recommended" pill on the right is the only marker for
-       Scout's pick — the number badge should not double as one. */
+       On multi-option questions, the "Recommended" pill is the only
+       marker for Scout's pick, so the number badge should not double as one. */
     background: var(--camp-surface-hover, #F5F7FA) !important;
     color: var(--camp-text-tertiary) !important;
   }
@@ -4667,7 +4667,7 @@
             body.appendChild(sub);
           }
           btn.appendChild(body);
-          if (opt.primary) {
+          if (opt.primary && options.length > 1) {
             const rec = el('span', 'cc-qdock__opt-rec');
             rec.textContent = 'Recommended';
             btn.appendChild(rec);
