@@ -57,10 +57,10 @@ const DEMO_BRAND = {
   name: 'rasa',
   niche: 'Fashion / Heritage',
   industry: 'Heritage Fashion',
-  products: ['Sindhi-embroidered tops', 'Kashmiri shawls', 'Modern kurtas'],
+  products: ['Sindhi embroidered tops', 'Kashmiri shawls', 'Modern kurtas'],
   positioning: 'Modern Gen Z take on traditional Pakistani crafts',
   themes: ['Heritage', 'Sustainability', 'Local artisanship'],
-  tone: 'Casual, witty, culture-forward',
+  tone: 'Casual, witty, culture forward',
   websiteUrl: 'https://rasa.studio',
   competitorsDefault: ['@generation.pk', '@khaadiofficial', '@sapphirepakistan'],
   // X profile metadata (mirrors what Twitter exposes)
@@ -76,17 +76,17 @@ const DEMO_BRAND = {
   // Performance signals
   topTopics: [
     { name: 'Heritage origin stories',   engagement: 92 },
-    { name: 'Behind-the-scenes artisan', engagement: 67 },
+    { name: 'Behind the scenes artisan', engagement: 67 },
     { name: 'Styling guides',            engagement: 45 },
   ],
-  primaryAudience:   'Women 22–34 · Pakistan & diaspora',
-  secondaryAudience: 'Mothers and gift buyers · 35–50',
-  peakActivity: 'Weekdays 2–4pm PKT',
-  audienceDefault: 'Women 22–34 in Pakistan, the UAE, and the Pakistani diaspora, culturally curious, mobile-first, value heritage with a modern eye.',
+  primaryAudience:   'Women 22 to 34 · Pakistan & diaspora',
+  secondaryAudience: 'Mothers and gift buyers · 35 to 50',
+  peakActivity: 'Weekdays 2 to 4pm PKT',
+  audienceDefault: 'Women 22 to 34 in Pakistan, the UAE, and the Pakistani diaspora, culturally curious, mobile first, value heritage with a modern eye.',
   toneDirections: [
     {
       id: 'warm-story',
-      label: 'Warm, story-led',
+      label: 'Warm, story led',
       icon: 'i-heart',
       sample: "Heritage isn't an aesthetic. It's a postcode and a person who can name the stitch. We learn first, then we make.",
     },
@@ -100,14 +100,14 @@ const DEMO_BRAND = {
       id: 'reverent-grounded',
       label: 'Reverent, grounded',
       icon: 'i-mountain',
-      sample: "Sindhi mirror work. Mid-century origins. Bibi taught us. She's been at it 31 years. Worth knowing whose hands made what you wear.",
+      sample: "Sindhi mirror work. Mid century origins. Bibi taught us. She's been at it 31 years. Worth knowing whose hands made what you wear.",
     },
   ],
   trendGroups: [
     {
       id: 'heritage',
       theme: '#SouthAsianHeritageWeek',
-      tone: 'Warm, story-led',
+      tone: 'Warm, story led',
       format: 'Image + caption',
       signal: '4.2× w/w',
       summary: 'Spiking now. Strong overlap with your themes and audience.',
@@ -122,7 +122,7 @@ const DEMO_BRAND = {
     },
     {
       id: 'craft',
-      theme: 'Behind-the-scenes craft',
+      theme: 'Behind the scenes craft',
       tone: 'Reverent, grounded',
       format: 'Single post + photo',
       signal: 'Saves > likes',
@@ -133,17 +133,17 @@ const DEMO_BRAND = {
     heritage: [
       { id: 'a', angle: 'Personal story', body: "My nani's dupatta has stitches I can't name. This week I'm trying to learn them, properly. If you've got heritage you don't fully know, you're not alone. Pull a thread, see what unspools." },
       { id: 'b', angle: 'Hot take',       body: "Half of what gets called 'heritage' on this app is aesthetics with no postcode. The actual craft has names, regions, and people still doing it for less than it's worth. Worth knowing the difference." },
-      { id: 'c', angle: 'Data-driven',    body: "We pulled the numbers on our last 30 posts. The ones that named the artisan and the region got 3.8× the saves of pure product shots. Audiences want context, not catalog. #SouthAsianHeritageWeek" },
+      { id: 'c', angle: 'Data driven',    body: "We pulled the numbers on our last 30 posts. The ones that named the artisan and the region got 3.8× the saves of pure product shots. Audiences want context, not catalog. #SouthAsianHeritageWeek" },
     ],
     founder: [
       { id: 'a', angle: 'Personal story', body: "Year one of running rasa: I underpaid myself, overpaid for marketing, and learned that the artisans we work with had been waiting twenty years for someone to put their names on the label. That last one is why we keep going." },
       { id: 'b', angle: 'Hot take',       body: "Founder transparency on this app is mostly performance. Real transparency is boring. This is what the cost breakdown looks like, this is what we got wrong last quarter, this is what we're still figuring out." },
-      { id: 'c', angle: 'Data-driven',    body: "Posts where we share an honest founder note get 2.6× more replies than launch posts. Replies turn into customers at 4× the rate of likes. The lesson: stop polishing, start talking." },
+      { id: 'c', angle: 'Data driven',    body: "Posts where we share an honest founder note get 2.6× more replies than launch posts. Replies turn into customers at 4× the rate of likes. The lesson: stop polishing, start talking." },
     ],
     craft: [
       { id: 'a', angle: 'Personal story', body: "Spent the morning at Bibi's workshop in Hyderabad. She's been doing mirror work for 31 years. Her hands move faster than I can take notes. Some of what we sell started here. Felt important to say." },
       { id: 'b', angle: 'Hot take',       body: "If your 'handcrafted' brand can't show you the hands, it isn't. The reason most heritage brands hide the workshop is that the workshop is the asset, not the boutique." },
-      { id: 'c', angle: 'Data-driven',    body: "Workshop reels outperform studio reels 1.8× for us. The comment sentiment is different too. Workshop content gets craft questions, studio content gets price questions. Tells you what your audience actually cares about." },
+      { id: 'c', angle: 'Data driven',    body: "Workshop reels outperform studio reels 1.8× for us. The comment sentiment is different too. Workshop content gets craft questions, studio content gets price questions. Tells you what your audience actually cares about." },
     ],
   },
 };
@@ -152,7 +152,7 @@ const DEMO_INDIVIDUAL = {
   name: 'Abdullah Qamar',
   niche: 'Product design / Design systems',
   industry: 'Product Design',
-  products: ['Practical design writing', 'Design-system templates', 'Office-hours mentoring'],
+  products: ['Practical design writing', 'Design system templates', 'Office hours mentoring'],
   positioning: 'Practical product design, no fluff, no jargon, things you can actually use Monday',
   themes: ['Design systems', 'Career growth', 'Honest critique'],
   tone: 'Direct, generous, lightly opinionated',
@@ -168,20 +168,20 @@ const DEMO_INDIVIDUAL = {
   postCount: '94',
   joinDate: 'January 2023',
   topTopics: [
-    { name: 'Design-system teardowns', engagement: 88 },
+    { name: 'Design system teardowns', engagement: 88 },
     { name: 'Honest takes',            engagement: 64 },
     { name: 'Career advice threads',   engagement: 41 },
   ],
-  primaryAudience:   'Designers · PMs · 25–40',
-  secondaryAudience: 'Founders / heads of product at early-stage startups',
+  primaryAudience:   'Designers · PMs · 25 to 40',
+  secondaryAudience: 'Founders / heads of product at early stage startups',
   peakActivity: 'Weekday mornings PKT',
-  audienceDefault: 'Designers and PMs 25–40, mid-level, building craft and reputation. Mostly North America and South Asia, mobile-first, save things for later.',
+  audienceDefault: 'Designers and PMs 25 to 40, mid level, building craft and reputation. Mostly North America and South Asia, mobile first, save things for later.',
   toneDirections: [
     {
       id: 'direct-generous',
       label: 'Direct, generous',
       icon: 'i-compass',
-      sample: "Most design-system posts skip the part that matters: adoption. Token tables are easy. Getting a PM to ship without DM-ing a designer is hard.",
+      sample: "Most design system posts skip the part that matters: adoption. Token tables are easy. Getting a PM to ship without DMing a designer is hard.",
     },
     {
       id: 'confessional-specific',
@@ -217,7 +217,7 @@ const DEMO_INDIVIDUAL = {
     },
     {
       id: 'system-teardowns',
-      theme: 'Design-system teardowns',
+      theme: 'Design system teardowns',
       tone: 'Direct, generous',
       format: 'Post + screenshot',
       signal: 'Bookmarks 3× niche avg',
@@ -236,17 +236,17 @@ const DEMO_INDIVIDUAL = {
     'ai-tooling': [
       { id: 'a', angle: 'Personal story', body: "I tried replacing my Figma workflow with Cursor for two weeks. Three things broke, two things got faster, one thing made me look stupider than I actually am. Notes below." },
       { id: 'b', angle: 'Hot take',       body: "The 'AI replaces designers' debate is mostly people who don't design talking to people who don't ship. The real question is which 30% of the job goes first, and whether you're already spending 30% of your time on it." },
-      { id: 'c', angle: 'Data-driven',    body: "Looked at engagement on AI-tool posts in our niche over 90 days. Nuanced takes (specific tool, specific task, specific tradeoff) outperform 'AI is great/bad' posts by 5.6× on saves. Specifics win." },
+      { id: 'c', angle: 'Data driven',    body: "Looked at engagement on AI tool posts in our niche over 90 days. Nuanced takes (specific tool, specific task, specific tradeoff) outperform 'AI is great/bad' posts by 5.6× on saves. Specifics win." },
     ],
     'system-teardowns': [
       { id: 'a', angle: 'Personal story', body: "First time I shipped a design system, I optimized the wrong thing for six months. I made the buttons perfect. Nobody used the buttons. The thing engineering needed was a layout primitive I hadn't built. Lesson learned twice." },
-      { id: 'b', angle: 'Hot take',       body: "Most design-system posts on here are screenshots of token tables. Tokens aren't the system. The system is whether a PM can ship a feature without DM'ing a designer at 6pm. Measure that." },
-      { id: 'c', angle: 'Data-driven',    body: "Audit of 12 internal design systems I've worked on: the ones that got adopted shared one trait. They shipped one usable component before they had a doc site. The ones with great docs and no early component sat unused. Component first, doc second." },
+      { id: 'b', angle: 'Hot take',       body: "Most design system posts on here are screenshots of token tables. Tokens aren't the system. The system is whether a PM can ship a feature without DMing a designer at 6pm. Measure that." },
+      { id: 'c', angle: 'Data driven',    body: "Audit of 12 internal design systems I've worked on: the ones that got adopted shared one trait. They shipped one usable component before they had a doc site. The ones with great docs and no early component sat unused. Component first, doc second." },
     ],
     'public-work': [
-      { id: 'a', angle: 'Personal story', body: "Office hours this Friday. Four free 30-minute slots for designers stuck on a system decision. I'll learn something too. Half the time the question reframes how I'd answer it. Reply if you want one." },
+      { id: 'a', angle: 'Personal story', body: "Office hours this Friday. Four free 30 minute slots for designers stuck on a system decision. I'll learn something too. Half the time the question reframes how I'd answer it. Reply if you want one." },
       { id: 'b', angle: 'Hot take',       body: "Building in public on this app has become its own genre, and most of it is the same three updates dressed differently. If you want it to land, share the decision you got wrong, not the dashboard going up and to the right." },
-      { id: 'c', angle: 'Data-driven',    body: "Posts where I share something I got wrong get 2.4× the reply rate of posts where I share what worked. Replies become DMs become consulting calls. The 'wrong' content is the funnel." },
+      { id: 'c', angle: 'Data driven',    body: "Posts where I share something I got wrong get 2.4× the reply rate of posts where I share what worked. Replies become DMs become consulting calls. The 'wrong' content is the funnel." },
     ],
   },
 };
@@ -1226,7 +1226,7 @@ function trendsPreview() {
   const items = state.accountType === 'brand' ? [
     ['i-fire',  'Trending: #SouthAsianHeritageWeek', 'Spiking 4.2× this week. Strong overlap with your audience and brand themes.'],
     ['i-trend', 'Competitor activity',                '@generation.pk posted a craft-origin reel yesterday, 22k views in 18h. @khaadiofficial running a Ramadan capsule teaser.'],
-    ['i-people','Audience pattern',                   'Your demographic bookmarks heritage-explained posts at 3× the niche average. Education plus aesthetic is the unlock.'],
+    ['i-people','Audience pattern',                   'Your demographic bookmarks heritage explained posts at 3× the niche average. Education plus aesthetic is the unlock.'],
   ] : [
     ['i-fire',  'Trending: AI design tooling debate', 'Strong week, designers split on Cursor / Figma AI. High bookmark rate on nuanced takes.'],
     ['i-trend', 'Competitor activity',                '@brian_lovin shipped a craft essay, 9k engagements in 24h. @rauchg on shipping speed, 14k.'],
@@ -1485,7 +1485,7 @@ function buildPostCTA(isBrand) {
     { handle: '@rasa', body: "Bibi taught us mirror work in Hyderabad. 31 years, hands faster than my notes." },
     { handle: '@rasa', body: "Workshop reels outperform studio reels 1.8× for us. Tells you what your audience wants." },
   ] : [
-    { handle: '@aqamar', body: "Most design-system posts skip the part that matters: adoption. Token tables are easy." },
+    { handle: '@aqamar', body: "Most design system posts skip the part that matters: adoption. Token tables are easy." },
     { handle: '@aqamar', body: "First time I shipped a system, optimized the wrong thing for six months. Lesson logged." },
     { handle: '@aqamar', body: "AI replacing designers is a take from people who don't ship. The real question is which 30%." },
   ];
@@ -1524,12 +1524,12 @@ function buildPostCTA(isBrand) {
 function buildCampaignCTA(isBrand) {
   const rows = isBrand ? [
     { icon: 'i-trend',  label: 'Goals',     value: 'Audience growth · Sales' },
-    { icon: 'i-people', label: 'Audience',  value: 'Women 22–34 · Pakistan' },
+    { icon: 'i-people', label: 'Audience',  value: 'Women 22 to 34 · Pakistan' },
     { icon: 'i-cal',    label: 'Duration',  value: '12 days · Heritage Week' },
     { icon: 'i-chat',   label: 'Posts',     value: '9 scheduled · 3 angles' },
   ] : [
     { icon: 'i-trend',  label: 'Goals',     value: 'Thought leadership · Leads' },
-    { icon: 'i-people', label: 'Audience',  value: 'Designers & PMs · 25–40' },
+    { icon: 'i-people', label: 'Audience',  value: 'Designers & PMs · 25 to 40' },
     { icon: 'i-cal',    label: 'Duration',  value: '14 days · Office hours' },
     { icon: 'i-chat',   label: 'Posts',     value: '6 scheduled · 2 angles' },
   ];
@@ -1549,7 +1549,7 @@ function buildCampaignCTA(isBrand) {
   return el('button', { class: 'cta-card cta-card--campaign', type: 'button' }, [
     el('div', { class: 'cta-card__pill' }, [
       el('span', { class: 'cta-card__pill-mark', html: icon('i-logo') }),
-      document.createTextNode('Scout · multi-post planning'),
+      document.createTextNode('Scout · multi post planning'),
     ]),
     el('h2', { class: 'cta-card__title' }, 'Run a campaign'),
     el('p', { class: 'cta-card__sub' },
@@ -1579,8 +1579,8 @@ function buildPulseTrend(isBrand) {
 
 function buildPulseWindow(isBrand) {
   const data = isBrand
-    ? { window: '2–4pm PKT', detail: 'In 3 hours · weekday peak' }
-    : { window: '9–11am PKT', detail: 'Tomorrow morning · global window' };
+    ? { window: '2 to 4pm PKT', detail: 'In 3 hours · weekday peak' }
+    : { window: '9 to 11am PKT', detail: 'Tomorrow morning · global window' };
   return el('div', { class: 'pulse pulse--window' }, [
     el('div', { class: 'pulse__label' }, 'Peak window'),
     el('div', { class: 'pulse__value' }, data.window),
@@ -1678,18 +1678,18 @@ async function step3_product_lines_brand_only() {
   // Demo: stage a scripted reply listing the lines
   await sleep(700);
   userMsg(
-    "Three lines: Heritage Capsule (occasion-wear, women 28–40, formal heritage), " +
-    "Everyday Edit (modern kurtas and tops, women 22–34, casual), " +
-    "Atelier (limited-run statement pieces, collectors and gift buyers, premium)."
+    "Three lines: Heritage Capsule (occasion wear, women 28 to 40, formal heritage), " +
+    "Everyday Edit (modern kurtas and tops, women 22 to 34, casual), " +
+    "Atelier (limited run statement pieces, collectors and gift buyers, premium)."
   );
 
   state.productLines = [
-    { name: 'Heritage Capsule', audience: 'Women 28–40, occasion-led', tone: 'Reverent, refined' },
-    { name: 'Everyday Edit',    audience: 'Women 22–34, daily wear',   tone: 'Casual, witty' },
+    { name: 'Heritage Capsule', audience: 'Women 28 to 40, occasion led', tone: 'Reverent, refined' },
+    { name: 'Everyday Edit',    audience: 'Women 22 to 34, daily wear',   tone: 'Casual, witty' },
     { name: 'Atelier',          audience: 'Collectors, gift buyers',   tone: 'Considered, premium' },
   ];
 
-  await narratedProcess('Building your product-line contexts', [
+  await narratedProcess('Building your product line contexts', [
     { icon: 'i-grid',    text: 'Creating Heritage Capsule context. Separate audience, tone variant.' },
     { icon: 'i-grid',    text: 'Creating Everyday Edit context. Inherits master voice with a casual lift.' },
     { icon: 'i-grid',    text: 'Creating Atelier context. Premium register, lower posting frequency.' },
@@ -1727,10 +1727,10 @@ async function step4_goals() {
   const kpiMap = {
     'Grow audience':            'Follower growth rate · profile visits from posts',
     'Drive traffic to site':    'Outbound link CTR · referral sessions from X',
-    'Build thought leadership': 'Bookmark rate · reply quality · saves-to-likes ratio',
-    'Boost sales':              'Link-in-bio clicks · post-to-conversion path',
-    'Increase brand awareness': 'Impressions · reach lift · share-of-voice in niche',
-    'Generate leads':           'Reply-to-DM rate · profile-to-form conversions',
+    'Build thought leadership': 'Bookmark rate · reply quality · saves to likes ratio',
+    'Boost sales':              'Link in bio clicks · post to conversion path',
+    'Increase brand awareness': 'Impressions · reach lift · share of voice in niche',
+    'Generate leads':           'Reply to DM rate · profile to form conversions',
   };
   renderKpiCard(state.goals, kpiMap);
 
@@ -1885,7 +1885,7 @@ async function step6_profile_scan() {
       { icon: 'i-bookmark', text: 'Bookmarks are your strongest signal. People are saving, not just liking.' },
       { icon: 'i-people',   text: state.accountType === 'brand'
         ? 'Following list confirms positioning in the South Asian fashion creator ecosystem.'
-        : 'Following list confirms positioning in the design-craft community.' },
+        : 'Following list confirms positioning in the design craft community.' },
     ]);
     await scoutMsg("Got a clear picture. Here's what stands out:", { typingFor: 600, beat: 400 });
     xProfilePreview(buildProfileSummary());
@@ -1895,7 +1895,7 @@ async function step6_profile_scan() {
   addKBFact('brand', 'Followers',  state.brand.followers);
   if (!isNew) {
     addKBFact('brand', 'Best format', state.accountType === 'brand' ? 'Image threads' : 'Threads with screenshots');
-    addKBFact('brand', 'Peak activity', state.accountType === 'brand' ? '2–4pm PKT' : '9–11am PKT');
+    addKBFact('brand', 'Peak activity', state.accountType === 'brand' ? '2 to 4pm PKT' : '9 to 11am PKT');
   }
   scrollDown();
   await sleep(1200);
@@ -2338,7 +2338,7 @@ async function step_audience_infer() {
   const proposal = state.brand.audienceDefault || state.audience;
   // Insight pulled from persona/data signals; persona-specific.
   const insight = isBrand
-    ? 'They respond best to heritage-explained posts paired with modern visuals. Saves run 3× the niche average on context-rich posts versus pure product shots.'
+    ? 'They respond best to heritage explained posts paired with modern visuals. Saves run 3× the niche average on context rich posts versus pure product shots.'
     : 'They respond best to specific examples over abstract principles. Bookmark rate is 2.4× higher when posts name the tool, the task, and the tradeoff.';
   await scoutMsg(proposal, { typingFor: 1000, beat: 300 });
   await scoutMsg(insight, { typingFor: 1300, beat: 400 });
@@ -2525,7 +2525,7 @@ async function step7_intel_scan() {
     { icon: 'i-clock',  text: 'Peak engagement window for your niche: weekdays 1 to 4pm PKT.' },
     { icon: 'i-sparkle',text: 'Strong rising signal: heritage explainers paired with modern visuals.' },
   ] : [
-    { icon: 'i-search', text: 'Searching design-craft and product-design conversations on X.' },
+    { icon: 'i-search', text: 'Searching design craft and product design conversations on X.' },
     { icon: 'i-fire',   text: 'AI-tooling debate is the dominant topic this week. High bookmark rate on nuanced takes.' },
     { icon: 'i-trend',  text: 'Competitor @brian_lovin shipped a craft essay. 9k engagements in 24 hours.' },
     { icon: 'i-people', text: 'Detected 4 competitors and 18 niche creators worth tracking.' },
@@ -2539,7 +2539,7 @@ async function step7_intel_scan() {
   if (state.accountType === 'brand') {
     addKBFact('trending', 'Top trend',     '#SouthAsianHeritageWeek (4.2× w/w)');
     addKBFact('trending', 'Competitors',   '@generation.pk · @khaadiofficial · @sapphirepakistan');
-    addKBFact('trending', 'Peak window',   'Weekdays 1–4pm PKT');
+    addKBFact('trending', 'Peak window',   'Weekdays 1 to 4pm PKT');
   } else {
     addKBFact('trending', 'Top trend',     'AI design tooling debate');
     addKBFact('trending', 'Competitors',   '@brian_lovin · @mds · @rauchg');
@@ -2838,7 +2838,7 @@ async function step_profile_score() {
 
   const isBrand = state.accountType === 'brand';
   const items = isBrand ? [
-    { state: 'ok',   text: 'Profile photo reads clear and on-brand.' },
+    { state: 'ok',   text: 'Profile photo reads clear and on brand.' },
     { state: 'ok',   text: 'Bio communicates niche in one line.' },
     { state: 'warn', text: 'No CTA in bio. Add a link to shop or newsletter.' },
     { state: 'bad',  text: 'No pinned post. Your strongest piece should sit at the top.' },
@@ -2847,7 +2847,7 @@ async function step_profile_score() {
   ] : [
     { state: 'ok',   text: 'Profile photo reads clear.' },
     { state: 'ok',   text: 'Bio names the role and the audience.' },
-    { state: 'warn', text: 'No CTA in bio. Your office-hours page deserves a line.' },
+    { state: 'warn', text: 'No CTA in bio. Your office hours page deserves a line.' },
     { state: 'bad',  text: 'Pinned post is from four months ago. Swap in a recent essay.' },
     { state: 'ok',   text: 'Website link present.' },
     { state: 'warn', text: 'Banner is generic. A craft visual would carry your positioning.' },
@@ -2924,16 +2924,9 @@ async function step13_handoff() {
 }
 
 function enterApp() {
-  document.body.classList.remove('mode-onboarding');
-  document.body.classList.add('mode-app');
-  setCrumbs(['Home']);
-
-  // Reflect the captured name in the profile chip, no name = no chip name
-  const chipName = $('.profile-chip__name');
-  if (chipName) chipName.textContent = state.user.name || 'Guest';
-
-  renderDashboard();
-  showView('view-dash');
+  // Onboarding's "Go to dashboard" step lands the user on the new panelized
+  // Home dashboard (which shares its visual language with Campaigns).
+  goToHome();
 }
 
 /* =========================================================================
@@ -3282,7 +3275,7 @@ function splash2BrandSections() {
       eyebrow: 'Top performing topics',
       build: () => el('div', { class: 'brand-drawer__topic-bars' }, [
         topicBarEl('Heritage origin stories', 92),
-        topicBarEl('Behind-the-scenes artisan', 67),
+        topicBarEl('Behind the scenes artisan', 67),
         topicBarEl('Styling guides', 45),
       ]),
     },
@@ -3295,9 +3288,9 @@ function splash2BrandSections() {
             el('span', { class: 'brand-drawer__avatar' }),
             el('span', { class: 'brand-drawer__avatar' }),
           ]),
-          el('p', { class: 'brand-drawer__audience' }, 'Women 22–34 in Pakistan, the UAE, and the Pakistani diaspora, culturally curious, mobile-first, value heritage with a modern eye.'),
+          el('p', { class: 'brand-drawer__audience' }, 'Women 22 to 34 in Pakistan, the UAE, and the Pakistani diaspora, culturally curious, mobile first, value heritage with a modern eye.'),
         ]),
-        el('div', { class: 'brand-drawer__secondary' }, 'Mothers and gift buyers · 35–50'),
+        el('div', { class: 'brand-drawer__secondary' }, 'Mothers and gift buyers · 35 to 50'),
       ]),
     },
     {
@@ -3311,7 +3304,7 @@ function splash2BrandSections() {
             el('span', {}, '12a'), el('span', {}, '6a'), el('span', {}, '12p'), el('span', {}, '6p'), el('span', {}, '12a'),
           ]),
         ]),
-        el('div', { class: 'brand-drawer__peak-text' }, 'Weekdays 2–4pm PKT'),
+        el('div', { class: 'brand-drawer__peak-text' }, 'Weekdays 2 to 4pm PKT'),
       ]),
     },
   ];
@@ -3330,7 +3323,7 @@ function splash2TrendingSections() {
       eyebrow: 'Top trend',
       build: () => el('div', {}, [
         el('div', { class: 'brand-drawer__name' }, '#SouthAsianHeritageWeek'),
-        el('div', { class: 'brand-drawer__sub-line' }, '+4.2× week-on-week · spiking now'),
+        el('div', { class: 'brand-drawer__sub-line' }, '+4.2× week on week · spiking now'),
       ]),
     },
     {
@@ -3360,7 +3353,7 @@ function splash2TrendingSections() {
             el('span', {}, '12a'), el('span', {}, '6a'), el('span', {}, '12p'), el('span', {}, '6p'), el('span', {}, '12a'),
           ]),
         ]),
-        el('div', { class: 'brand-drawer__peak-text' }, 'Weekdays 2–4pm PKT'),
+        el('div', { class: 'brand-drawer__peak-text' }, 'Weekdays 2 to 4pm PKT'),
       ]),
     },
   ];
@@ -3614,32 +3607,1091 @@ async function playSplashScreen2Sequence(root) {
 
 
 /* =========================================================================
+   17.5 CAMPAIGNS DASHBOARD
+   ========================================================================= */
+
+const CAMPAIGN_STATUSES = [
+  { id: 'all',      label: 'All' },
+  { id: 'review',   label: 'In Review' },
+  { id: 'draft',    label: 'In Draft' },
+  { id: 'published',label: 'Published' },
+  { id: 'progress', label: 'In Progress' },
+  { id: 'revision', label: 'Revision Requested' },
+  { id: 'rejected', label: 'Rejected' },
+];
+
+/* Campaigns model — running + upcoming + rest.
+   The dashboard's top rows are pinned to the .live and .upcoming ones; the
+   rest live under the filter tabs like before. `leadAxis` and `whyNow` are
+   the Phase-1 curated fields that carry forward into "up next" cards. */
+const DEMO_CAMPAIGNS = [
+  {
+    id: 'lawn-rush-week',
+    title: 'Lawn Rush Week',
+    description: 'A 7 day sprint hitting the heatwave window. Q&A openers, first person warm. 3 of 4 posts scheduled.',
+    status: 'progress',
+    state:  'live',
+    startDate: '07 May 2026',
+    endDate:   '15 May 2026',
+    postCount: 4,
+    commentCount: 12,
+    author: 'Amira Rehman',
+    createdAt: 'Created 04 May',
+    live: {
+      reach:     '14.2k',
+      replies:   '128',
+      nextPost:  'Tue 10am',
+      nextIn:    'in 3h',
+      lift:      '2.4× baseline',
+    },
+  },
+  {
+    id: 'heatwave-sale',
+    title: 'Heatwave ready Sale Sprint',
+    description: '5 day heatwave forecast starting Mon. Question openers on Tue/Thu, matching your top summer cadence.',
+    status: 'review',
+    state:  'upcoming',
+    leadAxis: 'reactive',
+    source:   'the incoming heatwave on 17 Jun 2026',
+    banner:   'Based on what’s trending right now — the upcoming heatwave on 17 Jun 2026.',
+    fact:     'A 5 day heatwave lands 17 Jun 2026.',
+    move:     'Front runs it in your top summer cadence.',
+    startDate: '15 Jun 2026',
+    endDate:   '22 Jun 2026',
+    postCount: 4,
+    commentCount: 0,
+    author: 'Scout · curated',
+    createdAt: 'Refreshed 4h ago',
+  },
+  {
+    id: 'craftsperson-r2',
+    title: 'Craftsperson Spotlight, round 2',
+    description: 'Your March spotlight hit 2.1× replies. Two artisans in your KB haven’t been featured. Worth a second pass.',
+    status: 'review',
+    state:  'upcoming',
+    leadAxis: 'pattern-echo',
+    source:   'your top performer ‘Craftsperson Spotlight’',
+    banner:   'Based on your top performing campaign, ‘Craftsperson Spotlight.’',
+    fact:     'Your March spotlight hit 2.1× replies.',
+    move:     'Same shape, on the 2 artisans still unfeatured.',
+    startDate: '02 Jun 2026',
+    endDate:   '16 Jun 2026',
+    postCount: 3,
+    commentCount: 0,
+    author: 'Scout · curated',
+    createdAt: 'Refreshed 2d ago',
+  },
+  {
+    id: 'ai-first-saas',
+    title: 'AI First SaaS Design Sprint',
+    description: 'Positioning the launch as "don’t retrofit, rebuild." Thread first, contrarian, one anchor post pulling it together.',
+    status: 'draft',
+    state:  'other',
+    startDate: '20 May 2026',
+    endDate:   '03 Jun 2026',
+    postCount: 6,
+    commentCount: 4,
+    author: 'Kai Malone',
+    createdAt: 'Created 12 May',
+  },
+  {
+    id: 'community-qa',
+    title: 'Community Q&A Fridays',
+    description: 'Weekly cadence, one open question per Friday. Simple, low lift, high reply. Runs on autopilot once approved.',
+    status: 'review',
+    state:  'other',
+    startDate: 'Ongoing',
+    endDate:   '',
+    postCount: 8,
+    commentCount: 6,
+    author: 'Priya Iyer',
+    createdAt: 'Created 02 May',
+  },
+  {
+    id: 'craftsperson-r1',
+    title: 'Craftsperson Spotlight',
+    description: 'Round one of the March pattern that hit 2.1× replies. Two new artisans, longer threads, warm openers.',
+    status: 'published',
+    state:  'other',
+    startDate: '12 Apr 2026',
+    endDate:   '26 Apr 2026',
+    postCount: 3,
+    commentCount: 41,
+    author: 'Amira Rehman',
+    createdAt: 'Created 08 Apr',
+  },
+];
+
+const campaignsState = { filter: 'all' };
+
+function statusMeta(id) {
+  return CAMPAIGN_STATUSES.find(s => s.id === id) || CAMPAIGN_STATUSES[0];
+}
+
+function campaignCard(c, opts) {
+  const status = statusMeta(c.status);
+  const attrs = { class: 'camp-card', 'data-status': c.status };
+  if (opts && opts.onclick) attrs.onclick = opts.onclick;
+  // Range formatting: join with "to" when both bounds exist, otherwise
+  // show the label alone. Avoids the "Ongoing " dangling separator.
+  const dateRange = c.endDate ? (c.startDate + ' to ' + c.endDate) : c.startDate;
+  // Comment count: pluralize, and mute the dot on zero so it doesn't read
+  // as an unread alert.
+  const commentsLabel = c.commentCount + (c.commentCount === 1 ? ' comment' : ' comments');
+  return el('article', attrs, [
+    el('div', { class: 'camp-card__head' }, [
+      el('h3', { class: 'camp-card__title' }, c.title),
+      el('button', {
+        class: 'camp-card__kebab', 'aria-label': 'Campaign actions', type: 'button',
+        html: icon('i-kebab'),
+        onclick: (e) => e.stopPropagation(),
+      }),
+    ]),
+    el('p', { class: 'camp-card__desc' }, c.description),
+    el('div', { class: 'camp-card__meta' }, [
+      el('span', { class: 'camp-card__date', html: icon('i-cal') + '<span>' + dateRange + '</span>' }),
+      el('span', { class: 'camp-card__posts' }, c.postCount + (c.postCount === 1 ? ' post' : ' posts')),
+    ]),
+    el('div', { class: 'camp-card__meta camp-card__meta--tight' }, [
+      el('span', { class: 'camp-status camp-status--' + c.status }, status.label),
+      el('span', {
+        class: 'camp-card__comments' + (c.commentCount === 0 ? ' camp-card__comments--zero' : ''),
+      }, [
+        el('span', { class: 'camp-card__comments-dot', 'aria-hidden': 'true' }),
+        document.createTextNode(commentsLabel),
+      ]),
+    ]),
+    el('div', { class: 'camp-card__divider', 'aria-hidden': 'true' }),
+    el('footer', { class: 'camp-card__foot' }, [
+      el('span', { class: 'camp-card__author' }, [
+        (c.author || '').startsWith('Scout')
+          ? el('span', { class: 'camp-card__avatar camp-card__avatar--scout', 'aria-hidden': 'true', html: icon('i-logo') })
+          : el('span', { class: 'camp-card__avatar', 'aria-hidden': 'true' }),
+        document.createTextNode(c.author),
+      ]),
+      el('span', { class: 'camp-card__timestamp' }, c.createdAt),
+    ]),
+  ]);
+}
+
+function renderCampaignCards() {
+  const grid = $('#campaigns-grid');
+  if (!grid) return;
+  const filter = campaignsState.filter;
+  // Under "All", the dashboard top rows already show `live` + `upcoming`.
+  // Keep the rest here so the grid isn't duplicating them.
+  const list = DEMO_CAMPAIGNS.filter(c => {
+    if (filter === 'all') return c.state === 'other';
+    return c.status === filter;
+  });
+  grid.innerHTML = '';
+  if (list.length === 0) {
+    // Empty state — Peak-End Rule: give the user a next-move instead of a
+    // dead-end string. Nudge them back to Create Campaign.
+    const filterLabel = ({
+      review: 'in review', draft: 'in draft', published: 'published',
+      progress: 'in progress', revision: 'in revision', rejected: 'rejected',
+    })[filter] || 'in this view';
+    const empty = el('div', { class: 'camp-empty' }, [
+      el('div', { class: 'camp-empty__icon', html: icon('i-megaphone') }),
+      el('div', { class: 'camp-empty__title' }, 'No campaigns ' + filterLabel + '.'),
+      el('div', { class: 'camp-empty__body' },
+        filter === 'all'
+          ? 'Once you create a campaign, it will land here.'
+          : 'Try a different filter or start a new campaign.'),
+      el('button', {
+        class: 'btn-create camp-empty__cta',
+        type: 'button',
+        onclick: () => goToScout('p1'),
+      }, [
+        el('span', { class: 'btn-create__icon', html: icon('i-plus') }),
+        el('span', {}, 'Create Campaign'),
+      ]),
+    ]);
+    grid.appendChild(empty);
+    return;
+  }
+  list.forEach(c => grid.appendChild(campaignCard(c, { onclick: () => goToScout('p2') })));
+}
+
+/* Running Now hero + Up Next row — pinned to the top of the dashboard.
+   Only render when the filter is 'all' (the default landing state).
+   Click behaviour on both routes into the two-column detail (Scout p2). */
+function renderRunningHero(parent) {
+  const running = DEMO_CAMPAIGNS.find(c => c.state === 'live');
+  if (!running) return;
+  const live = running.live || {};
+  const stat = (label, value) => el('div', { class: 'camp-hero__stat' }, [
+    el('div', { class: 'camp-hero__stat-label' }, label),
+    el('div', { class: 'camp-hero__stat-value' }, value),
+  ]);
+  const hero = el('article', {
+    class: 'camp-hero',
+    'data-status': running.status,
+    onclick: () => goToScout('p2'),
+  }, [
+    el('div', { class: 'camp-hero__live' }, [
+      el('span', { class: 'camp-hero__pulse', 'aria-hidden': 'true' }),
+      document.createTextNode('LIVE · '),
+      el('b', {}, running.title),
+    ]),
+    el('div', { class: 'camp-hero__body' }, [
+      el('div', { class: 'camp-hero__left' }, [
+        el('p', { class: 'camp-hero__desc' }, running.description),
+        el('div', { class: 'camp-hero__meta' }, [
+          el('span', { class: 'camp-hero__meta-item', html: icon('i-cal') + '<span>' + running.startDate + ' to ' + running.endDate + '</span>' }),
+          el('span', { class: 'camp-hero__meta-item' }, running.postCount + ' posts'),
+          el('span', { class: 'camp-hero__meta-item' }, running.commentCount + ' comments'),
+        ]),
+      ]),
+    ]),
+    el('div', { class: 'camp-hero__stats' }, [
+      stat('Reach',     live.reach    || '—'),
+      stat('Replies',   live.replies  || '—'),
+      stat('Posts',     String(running.postCount || 0)),
+      stat('Comments',  String(running.commentCount || 0)),
+      stat('Next post', live.nextPost || '—'),
+    ]),
+    el('div', { class: 'camp-hero__foot' }, [
+      el('span', { class: 'camp-hero__foot-author' }, running.author),
+      el('span', { class: 'camp-hero__open' }, [document.createTextNode('Open '), el('span', { html: icon('i-arrow-right') })]),
+    ]),
+  ]);
+  parent.appendChild(hero);
+}
+
+/* Word-wrap helper — takes a sentence and returns an array of nodes where
+   each word is wrapped in <span class="w" style="--i:N"> so the CSS can stagger
+   the reveal animation. Punctuation stays attached to the preceding word so
+   commas / dashes don't wrap onto their own line. */
+function scoutWords(sentence, startIdx) {
+  const nodes = [];
+  let i = startIdx || 0;
+  // Split on **...** markers first (alternating: even = plain, odd = bold),
+  // then per-word inside each segment so stagger animation still applies.
+  const segs = sentence.split(/\*\*/);
+  segs.forEach((seg, si) => {
+    const bold = (si % 2) === 1;
+    const cls = bold ? 'w w--bold' : 'w';
+    seg.split(/(\s+)/).forEach(part => {
+      if (/^\s+$/.test(part)) {
+        nodes.push(document.createTextNode(part));
+      } else if (part.length) {
+        nodes.push(el('span', { class: cls, style: '--i:' + i }, part));
+        i++;
+      }
+    });
+  });
+  return { nodes, next: i };
+}
+
+/* Join a list of phrases as "A", "A and B", or "A, B, and C" (Oxford). */
+function joinPhrases(parts) {
+  if (parts.length <= 1) return parts.join('');
+  if (parts.length === 2) return parts[0] + ' and ' + parts[1];
+  return parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
+}
+
+function buildScoutNote() {
+  const upcoming = DEMO_CAMPAIGNS.filter(c => c.state === 'upcoming').slice(0, 3);
+  if (upcoming.length === 0) return null;
+
+  const n = upcoming.length;
+  // Pull each campaign's compact source label (added on the data). Order by
+  // narrative priority: past performer first (grounds trust), then reactive
+  // (what's coming), then experiment (a swing). Campaigns without a source
+  // are skipped so the note stays honest to what Scout can actually cite.
+  const axisOrder = { 'pattern-echo': 0, reactive: 1, experiment: 2 };
+  const sources = upcoming
+    .slice()
+    .sort((a, b) => (axisOrder[a.leadAxis] ?? 9) - (axisOrder[b.leadAxis] ?? 9))
+    .map(c => c.source)
+    .filter(Boolean);
+  const utterance = "I’ve curated " + n + " campaigns based on " + joinPhrases(sources) + ".";
+
+  const line = scoutWords(utterance, 0);
+  // Tag the last word with `w--last` — its ::after caret gets the extended
+  // blink-and-fade lifecycle. Every other word's ::after does a brief pop as
+  // that word arrives, so the caret visually follows the last-spoken word.
+  const wordSpans = line.nodes.filter(n => n.classList && n.classList.contains('w'));
+  const lastWord = wordSpans[wordSpans.length - 1];
+  if (lastWord) lastWord.classList.add('w--last');
+
+  const ctaBtn = el('button', {
+    class: 'scout-note__cta',
+    type: 'button',
+    'aria-label': 'Review Scout drafts',
+    onclick: () => openScoutRationale(upcoming),
+  }, [
+    document.createTextNode('View curated campaigns'),
+    el('span', { class: 'scout-note__cta-arrow', html: icon('i-arrow-right') }),
+  ]);
+
+  return el('div', { class: 'scout-note' }, [
+    el('span', { class: 'scout-note__mark', 'aria-hidden': 'true', html: icon('i-logo') }),
+    el('div', { class: 'scout-note__body' }, [
+      el('p', { class: 'scout-note__line' }, line.nodes),
+      el('div', { class: 'scout-note__action' }, [ctaBtn]),
+    ]),
+  ]);
+}
+
+function leadAxisLabel(axis) {
+  switch (axis) {
+    case 'reactive':     return 'Reactive';
+    case 'pattern-echo': return 'Pattern-echo';
+    case 'experiment':   return 'Experiment';
+    default:             return 'Curated';
+  }
+}
+
+/* Rationale side panel — opened from the Scout note's "Review drafts" CTA.
+   Each card is a fact → move statement: the evidence Scout cited, then what
+   this draft actually does about it. No redundant "PICK THIS IF" register —
+   the panel title already says these are Scout's drafts. */
+function openScoutRationale(campaigns) {
+  // Guard: if it's already mounted, no-op.
+  if (document.getElementById('scout-rationale')) return;
+
+  // Sort by narrative priority so the card order matches the note's ordering
+  // (past performer first — grounds trust — then the reactive signal, then
+  // any experimental swing).
+  const axisOrder = { 'pattern-echo': 0, reactive: 1, experiment: 2 };
+  const sorted = campaigns.slice().sort(
+    (a, b) => (axisOrder[a.leadAxis] ?? 9) - (axisOrder[b.leadAxis] ?? 9)
+  );
+
+  // Intro line cites the actual sources (pulled from each campaign's
+  // `source` field) so the drawer opens with "why," not with generic
+  // copy about "reasoning is under each."
+  const sources = sorted.map(c => c.source).filter(Boolean);
+  const intro = sources.length
+    ? 'Curated from ' + joinPhrases(sources) + '.'
+    : 'Every draft cites the signal it’s built on.';
+
+  const items = sorted.map(c => {
+    const axis = c.leadAxis || 'default';
+    const dateRange = c.endDate ? (c.startDate + ' to ' + c.endDate) : c.startDate;
+    const postsLabel = (c.postCount || 0) + ((c.postCount === 1) ? ' post' : ' posts');
+    // Icon per axis reinforces the source type at a glance — trending = past
+    // pattern, flame = external signal / hot moment.
+    const bannerIcon = axis === 'reactive' ? 'i-flame'
+                    : axis === 'experiment' ? 'i-bolt'
+                    : 'i-trending';
+
+    // Match the dashboard's camp-card structure so the two surfaces read as
+    // the same UI element. .scout-rat__item just adds button-reset niceties.
+    return el('button', {
+      class: 'camp-card scout-rat__item',
+      type: 'button',
+      'aria-label': 'Open ' + c.title + ' — tweak and review',
+      onclick: () => { closeScoutRationale(); goToScout('p2'); },
+    }, [
+      // Banner citing the reasoning source — replaces the axis pill so the
+      // card leads with WHY, not with a label.
+      c.banner ? el('div', { class: 'scout-rat__banner scout-rat__banner--' + axis }, [
+        el('span', { class: 'scout-rat__banner-icon', 'aria-hidden': 'true', html: icon(bannerIcon) }),
+        el('span', { class: 'scout-rat__banner-text' }, c.banner),
+      ]) : null,
+      el('div', { class: 'camp-card__head' }, [
+        el('h3', { class: 'camp-card__title' }, c.title),
+      ]),
+      el('div', { class: 'scout-rat__reasoning' }, [
+        el('p', { class: 'scout-rat__fact' }, c.fact || c.description),
+        c.move ? el('p', { class: 'scout-rat__move' }, c.move) : null,
+      ].filter(Boolean)),
+      el('div', { class: 'camp-card__meta' }, [
+        el('span', { class: 'camp-card__date', html: icon('i-cal') + '<span>' + dateRange + '</span>' }),
+        el('span', { class: 'camp-card__posts' }, postsLabel),
+      ]),
+      el('div', { class: 'camp-card__divider', 'aria-hidden': 'true' }),
+      el('footer', { class: 'camp-card__foot' }, [
+        el('span', { class: 'camp-card__author' }, [
+          ((c.author || 'Scout · curated').startsWith('Scout'))
+            ? el('span', { class: 'camp-card__avatar camp-card__avatar--scout', 'aria-hidden': 'true', html: icon('i-logo') })
+            : el('span', { class: 'camp-card__avatar', 'aria-hidden': 'true' }),
+          document.createTextNode(c.author || 'Scout · curated'),
+        ]),
+        el('span', { class: 'camp-card__timestamp' }, c.createdAt || ''),
+      ]),
+    ].filter(Boolean));
+  });
+
+  const panel = el('aside', {
+    id: 'scout-rationale',
+    class: 'scout-rationale',
+    role: 'complementary',
+    'aria-label': 'Why Scout picked these campaigns',
+  }, [
+    el('header', { class: 'scout-rationale__head' }, [
+      el('h2', { class: 'scout-rationale__title' }, 'Scout’s drafts'),
+      el('button', {
+        class: 'scout-rationale__close',
+        type: 'button',
+        'aria-label': 'Close',
+        onclick: closeScoutRationale,
+        html: icon('i-x-mark'),
+      }),
+    ]),
+    el('p', { class: 'scout-rationale__intro' }, intro),
+    el('div', { class: 'scout-rationale__list' }, items),
+    el('footer', { class: 'scout-rationale__foot' }, [
+      el('span', {}, 'None of these fit?'),
+      el('button', {
+        class: 'scout-rationale__foot-cta',
+        type: 'button',
+        onclick: () => { closeScoutRationale(); goToScout('p1'); },
+      }, [
+        document.createTextNode('Adjust Scout’s brief'),
+        el('span', { html: icon('i-arrow-right') }),
+      ]),
+    ]),
+  ]);
+
+  // Mount as a sibling of .campaigns-panel inside #view-campaigns so the panel
+  // sits at the same visual level. The view flips to row layout via CSS when
+  // this state class is present.
+  const view = document.getElementById('view-campaigns');
+  if (!view) return;
+  view.classList.add('view-campaigns--split');
+  view.appendChild(panel);
+
+  // Force a reflow so the initial collapsed width commits before we add the
+  // open class — that's what gives the slide-in transition somewhere to run.
+  void panel.offsetWidth;
+  panel.classList.add('scout-rationale--open');
+
+  // ESC to close. Torn down once the panel is removed.
+  const onKey = (e) => { if (e.key === 'Escape') closeScoutRationale(); };
+  document.addEventListener('keydown', onKey);
+  panel._onKey = onKey;
+}
+
+function closeScoutRationale() {
+  const panel = document.getElementById('scout-rationale');
+  if (!panel) return;
+  if (panel._onKey) document.removeEventListener('keydown', panel._onKey);
+  panel.classList.remove('scout-rationale--open');
+  // Wait for the exit transition to finish before tearing down.
+  setTimeout(() => {
+    if (panel.parentNode) panel.parentNode.removeChild(panel);
+    const view = document.getElementById('view-campaigns');
+    if (view) view.classList.remove('view-campaigns--split');
+  }, 320);
+}
+
+function buildCampaignsView() {
+  const root = $('#campaigns');
+  if (!root) return;
+  root.innerHTML = '';
+
+  // Header: h4 title + 14/400 subtitle on the left, account chip + filled
+  // indigo Create Campaign on the right. Matches the Figma spec exactly —
+  // Scout's opener sits as its own section below the header, not merged in.
+  const header = el('header', { class: 'campaigns__header' }, [
+    el('div', { class: 'campaigns__heading' }, [
+      el('h1', { class: 'campaigns__title' }, 'Campaigns'),
+      el('p',  { class: 'campaigns__subtitle' },
+        'Manage all your campaigns, whether scheduled, live, or still in draft from one place.'),
+    ]),
+    el('div', { class: 'campaigns__actions' }, [
+      el('button', { class: 'acct-switch', type: 'button' }, [
+        el('span', { class: 'acct-switch__x', html: icon('i-x-logo') }),
+        el('span', { class: 'acct-switch__name' }, 'AbdullahQ420'),
+        el('span', { class: 'acct-switch__chev', html: icon('i-chevron-down') }),
+      ]),
+      el('button', {
+        class: 'btn-create', type: 'button',
+        onclick: () => goToScout('p1'),
+      }, [
+        el('span', { class: 'btn-create__icon', html: icon('i-stars') }),
+        document.createTextNode('Create Campaign'),
+      ]),
+    ]),
+  ]);
+
+  const note = buildScoutNote();
+
+  const tabs = el('nav', { class: 'campaigns__tabs', role: 'tablist' },
+    CAMPAIGN_STATUSES.map(s => {
+      const count = s.id === 'all'
+        ? DEMO_CAMPAIGNS.length
+        : DEMO_CAMPAIGNS.filter(c => c.status === s.id).length;
+      const isActive = s.id === campaignsState.filter;
+      const isReview = s.id === 'review';
+      const btn = el('button', {
+        class: 'camp-tab' + (isActive ? ' camp-tab--active' : ''),
+        type: 'button',
+        role: 'tab',
+        'aria-selected': isActive ? 'true' : 'false',
+        'data-filter': s.id,
+        onclick: () => {
+          campaignsState.filter = s.id;
+          $$('.camp-tab').forEach(t => {
+            const on = t.getAttribute('data-filter') === s.id;
+            t.classList.toggle('camp-tab--active', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+          renderCampaignCards();
+        },
+      }, [
+        document.createTextNode(s.label),
+      ]);
+      if (isReview && count > 0) {
+        btn.appendChild(el('span', { class: 'camp-tab__badge' }, String(count)));
+      }
+      return btn;
+    })
+  );
+
+  const grid = el('div', { class: 'campaigns__grid', id: 'campaigns-grid' });
+
+  root.appendChild(header);
+  if (note) root.appendChild(note);
+  root.appendChild(tabs);
+  root.appendChild(grid);
+  renderCampaignCards();
+}
+
+function setActiveNav(target) {
+  $$('.sidebar__btn[data-nav]').forEach(b => {
+    if (b.getAttribute('data-nav') === target) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  });
+}
+
+function enterPanelMode() {
+  document.body.classList.remove('mode-onboarding');
+  document.body.classList.add('mode-campaigns');
+}
+
+function goToCampaigns() {
+  enterPanelMode();
+  showView('view-campaigns');
+  setCrumbs(['Home', 'Campaigns']);
+  setActiveNav('campaigns');
+  buildCampaignsView();
+}
+
+function goToHome() {
+  enterPanelMode();
+  showView('view-dash');
+  setCrumbs(['Home']);
+  setActiveNav('home');
+  buildHomeView();
+}
+
+/* =========================================================================
+   HOME dashboard — the "main" dashboard reachable via the Home nav.
+   Shares the panelized visual language with Campaigns: same backdrop,
+   same panel wrapper, same header pattern, same card treatment.
+   ========================================================================= */
+
+const HOME_STATS = [
+  { label: 'Active campaigns',   value: '2',    delta: '+1 this week',     tone: 'draft' },
+  { label: 'Posts scheduled',    value: '14',   delta: 'Next: today · 6 PM', tone: 'progress' },
+  { label: 'Pending review',     value: '5',    delta: 'Oldest: 2 days',     tone: 'review' },
+  { label: 'Published (30d)',    value: '31',   delta: '+9 vs. prior 30d',   tone: 'published' },
+];
+
+const HOME_ACTIVITY = [
+  { who: 'Scout',      what: 'drafted 3 new post variants for',   subject: 'AI First SaaS Design Sprint', when: '12 min ago' },
+  { who: 'AbdullahQ420', what: 'moved',                            subject: 'Lawn Rush Week to In Review', when: '2 hr ago' },
+  { who: 'Scout',      what: 'suggested a new campaign angle:',   subject: 'Heritage Week × Youth voices', when: 'Yesterday' },
+  { who: 'AbdullahQ420', what: 'published',                        subject: 'Ramadan pre tease post',      when: '2 days ago' },
+];
+
+const HOME_SUGGESTIONS = [
+  { title: 'Refresh your peak windows',    body: 'Your last 5 posts landed 22% below your usual reach. Scout has 3 window options ready.', cta: 'See options' },
+  { title: 'A campaign brief is stale',    body: '"Lawn Rush Week" was drafted 6 days ago and still awaits review. Reviewers are AbdullahQ420.', cta: 'Open brief' },
+  { title: 'Try a new angle for design leads', body: 'Scout drafted a "day in the life" thread for the Designers & PMs cohort, three variants.', cta: 'Read draft' },
+];
+
+function buildHomeView() {
+  const root = $('#home');
+  root.innerHTML = '';
+
+  // Page header — mirrors the campaigns header pattern (same classes).
+  const header = el('header', { class: 'campaigns__header' }, [
+    el('div', { class: 'campaigns__heading' }, [
+      el('h1', { class: 'campaigns__title' }, 'Home'),
+      el('p',  { class: 'campaigns__subtitle' },
+        'Your workspace at a glance. Scout has been busy — here\'s what\'s moved.'),
+    ]),
+    el('div', { class: 'campaigns__actions' }, [
+      el('button', { class: 'acct-switch', type: 'button' }, [
+        el('span', { class: 'acct-switch__x', html: icon('i-x-logo') }),
+        el('span', { class: 'acct-switch__name' }, 'AbdullahQ420'),
+        el('span', { class: 'acct-switch__chev', html: icon('i-chevron-down') }),
+      ]),
+      el('button', {
+        class: 'btn-create', type: 'button',
+        onclick: () => goToScout('p1'),
+      }, [
+        el('span', { class: 'btn-create__icon', html: icon('i-plus') }),
+        document.createTextNode('Create Campaign'),
+      ]),
+    ]),
+  ]);
+
+  // Stat strip — 4 compact cards, same visual family as campaign cards.
+  const stats = el('div', { class: 'home-stats' },
+    HOME_STATS.map(s => el('div', { class: 'home-stat' }, [
+      el('div', { class: 'home-stat__label' }, s.label),
+      el('div', { class: 'home-stat__value' }, s.value),
+      el('div', { class: `home-stat__delta home-stat__delta--${s.tone}` }, s.delta),
+    ]))
+  );
+
+  // Two-column: Recent activity | Scout's suggestions
+  const activity = el('div', { class: 'home-card' }, [
+    el('div', { class: 'home-card__head' }, [
+      el('h2', { class: 'home-card__title' }, 'Recent activity'),
+      el('button', { class: 'home-card__more', type: 'button' }, 'View all'),
+    ]),
+    el('ul', { class: 'home-activity' },
+      HOME_ACTIVITY.map(a => el('li', { class: 'home-activity__row' }, [
+        a.who === 'Scout'
+          ? el('span', { class: 'home-activity__actor home-activity__actor--scout', 'aria-hidden': 'true', html: icon('i-logo') })
+          : el('span', { class: 'home-activity__actor home-activity__actor--user' }, a.who.slice(0, 1)),
+        el('div', { class: 'home-activity__body' }, [
+          el('div', { class: 'home-activity__line' }, [
+            el('strong', {}, a.who),
+            document.createTextNode(' ' + a.what + ' '),
+            el('span', { class: 'home-activity__subject' }, a.subject),
+          ]),
+          el('div', { class: 'home-activity__when' }, a.when),
+        ]),
+      ]))
+    ),
+  ]);
+
+  const suggestions = el('div', { class: 'home-card' }, [
+    el('div', { class: 'home-card__head' }, [
+      el('h2', { class: 'home-card__title' }, [
+        el('span', { class: 'home-card__title-mark', html: icon('i-stars') }),
+        document.createTextNode('Scout\'s next moves'),
+      ]),
+    ]),
+    el('ul', { class: 'home-suggestions' },
+      HOME_SUGGESTIONS.map(s => el('li', { class: 'home-suggestion' }, [
+        el('div', { class: 'home-suggestion__title' }, s.title),
+        el('div', { class: 'home-suggestion__body' }, s.body),
+        el('button', { class: 'home-suggestion__cta', type: 'button' }, [
+          document.createTextNode(s.cta),
+          el('span', { html: icon('i-arrow-right') }),
+        ]),
+      ]))
+    ),
+  ]);
+
+  const twoCol = el('div', { class: 'home-two-col' }, [activity, suggestions]);
+
+  root.appendChild(header);
+  root.appendChild(stats);
+  root.appendChild(twoCol);
+}
+
+
+function bindSidebarNav() {
+  $$('.sidebar__btn[data-nav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.getAttribute('data-nav');
+      if (target === 'campaigns') goToCampaigns();
+      else if (target === 'home') goToHome();
+    });
+  });
+}
+
+/* =========================================================================
+   Scout campaign flow — fetches designs/{id}.html panels into scout views.
+   ========================================================================= */
+
+const SCOUT_PHASES = {
+  // p1 (New campaign / shape-picker) is inlined directly in poc/index.html
+  // under #view-scout-p1 — no fetch needed. `inline: true` tells goToScout()
+  // to skip loadScoutPanel() for this phase.
+  p1:          { file: 'phase-1-curated',   view: 'view-scout-p1',       crumbs: ['Home', 'Campaigns', 'New'], inline: true },
+  p2:          { file: 'phase-2-review',    view: 'view-scout-p2',       crumbs: ['Home', 'Campaigns', 'Heatwave ready Sale Sprint'] },
+  p25:         { file: 'phase-2-5-inflight',view: 'view-scout-p2-5',     crumbs: ['Home', 'Campaigns', 'Heatwave ready Sale Sprint'] },
+  p3:          { file: 'phase-3-home',      view: 'view-scout-p3',       crumbs: ['Home'] },
+  kb:          { file: 'kb-drawer',         view: 'view-scout-kb',       crumbs: ['Home', 'Campaigns', 'Knowledge base'] },
+  failures:    { file: 'failure-modes',     view: 'view-scout-failures', crumbs: ['Home', 'Campaigns', 'Failure modes'] },
+  composer:    { file: 'composer-hedging',  view: 'view-scout-composer', crumbs: ['Home', 'Scout', 'Composer'] },
+  playground:  { file: 'post-playground',   view: 'view-scout-playground', crumbs: ['Home', 'Post dashboard', 'Post playground'] },
+};
+
+const scoutLoadCache = new Map(); // file → parsed panel HTML
+
+async function loadScoutPanel(file) {
+  if (scoutLoadCache.has(file)) return scoutLoadCache.get(file);
+  const res = await fetch('../designs/' + file + '.html', { cache: 'no-cache' });
+  if (!res.ok) throw new Error('Scout panel fetch failed: ' + file + ' (' + res.status + ')');
+  const text = await res.text();
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+
+  // Prefer the semantic panel; some designs (kb-drawer) wrap content in a section.
+  const panel = doc.querySelector('main .panel')
+             || doc.querySelector('.panel')
+             || doc.querySelector('main')
+             || doc.body;
+
+  // Strip design-doc catalog demos ("Secondary states", "state 2 · Scoped-regen
+  // dialog", etc.) — those are spec-sheet flourishes and shouldn't bleed into
+  // the product surface. Every catalog block uses a consistent class prefix.
+  if (panel) {
+    const catalogSelectors = [
+      '.p1-states', '.p1-state',
+      '.p2-states', '.p2-state', '.p2-legacy',
+      '.p3-states', '.p3-state',
+      '.state-block',
+      '.state-chip',
+      '.state-label',
+      '.state__label',
+      '.state__num',
+      '.spec__section-head', '.spec__section-num',
+      '.designview',
+      '[data-catalog]',
+    ];
+    catalogSelectors.forEach(sel => {
+      panel.querySelectorAll(sel).forEach(node => node.remove());
+    });
+
+    // Phase 3 (and any page structured as a stack of parallel state <section>s)
+    // renders every state in the design doc. In the product, only one state
+    // renders — keep the first, drop the rest. Detected by any container that
+    // holds multiple sibling <section> elements each carrying their own
+    // .panel__header (which is the "primary state" marker). Never applies to
+    // Phase 2 (single-state) or the components sheet.
+    const stateContainers = [panel, ...panel.querySelectorAll('.state-stack, .panel__inner')];
+    stateContainers.forEach(ctr => {
+      const sections = [...ctr.querySelectorAll(':scope > section')];
+      const parallel = sections.filter(s => s.querySelector(':scope > .panel__header'));
+      if (parallel.length > 1) {
+        parallel.slice(1).forEach(s => s.remove());
+      }
+    });
+    // Also drop any home-footnote / catalog footer that only makes sense in
+    // the design doc.
+    panel.querySelectorAll('.home-footnote').forEach(n => n.remove());
+
+    // KB drawer (kb-drawer.html) and any page that arrays parallel .state
+    // examples inside a .stage — keep only the first .state so the product
+    // renders a single surface, not the catalog of variants. Reset the grid
+    // to a single column so the remaining state fills the container.
+    const stages = panel.querySelectorAll('.stage');
+    stages.forEach(stage => {
+      const states = stage.querySelectorAll(':scope > .state, :scope > .state-frame');
+      if (states.length > 1) {
+        [...states].slice(1).forEach(n => n.remove());
+      }
+      if (states.length >= 1) {
+        stage.style.gridTemplateColumns = '1fr';
+      }
+    });
+
+    // Composer-hedging and failure-modes use .spec__section stacks for their
+    // catalog. Keep only the first section.
+    const specSections = panel.querySelectorAll('.spec__section');
+    if (specSections.length > 1) {
+      [...specSections].slice(1).forEach(n => n.remove());
+    }
+
+    // Gate the LIVE stat strip: campaigns.md §3.8 running variant renders it
+    // only when the campaign is live/in-progress. The static design page ships
+    // it as documentation; hide it when the visible badge indicates a
+    // non-live state (draft / review / revision / rejected).
+    const badge = panel.querySelector('.cpanel__badge');
+    const isNonLive = badge && /--draft|--review|--revision|--rejected/.test(badge.className);
+    if (isNonLive) {
+      panel.querySelectorAll('.detail-live').forEach(el => el.remove());
+    }
+  }
+
+  // The design pages carry page-scoped rules inside <head><style>. Extract
+  // those (there's a single <style> per file) so the panel renders correctly.
+  // Scope the rules to `#view-scout-{key}` so they don't leak across phases.
+  const styleTags = Array.from(doc.querySelectorAll('head style')).map(s => s.textContent).join('\n');
+
+  // The inline SVG sprite (icons the panel references via <use>) lives at the
+  // top of body — pull it so the injected panel can resolve its icons.
+  const sprite = doc.querySelector('body > svg[aria-hidden="true"]');
+
+  const parts = [];
+  if (sprite) parts.push(sprite.outerHTML);
+  if (styleTags) parts.push('<style data-scout-scoped>' + styleTags + '</style>');
+  if (panel) parts.push(panel.outerHTML);
+
+  const html = parts.join('\n');
+  scoutLoadCache.set(file, html);
+  return html;
+}
+
+async function goToScout(phaseKey) {
+  const phase = SCOUT_PHASES[phaseKey];
+  if (!phase) { console.warn('[Scout] unknown phase', phaseKey); return; }
+
+  // Phase 1 (create-campaign) now lives fully in designs/create-campaign.html
+  // with the intent-based landing + composer. The POC's inline shape-picker
+  // at #view-scout-p1 is retired — route users straight there.
+  if (phaseKey === 'p1') {
+    location.href = '../designs/create-campaign.html';
+    return;
+  }
+
+  enterPanelMode();
+  setActiveNav('campaigns');
+  setCrumbs(phase.crumbs);
+
+  const view = document.getElementById(phase.view);
+  if (!view) return;
+
+  // Inlined phases (currently p1) ship their markup directly in index.html;
+  // just reveal the view and reset any prior "is-leaving" state so shape
+  // cards animate in cleanly on repeat visits.
+  if (phase.inline) {
+    showView(phase.view);
+    view.scrollTop = 0;
+    const landing = view.querySelector('.cc-landing');
+    if (landing) landing.classList.remove('is-leaving');
+    return;
+  }
+
+  // Skeleton while we fetch
+  if (!view.dataset.loaded) {
+    view.innerHTML = '<div class="scout-skeleton"><span class="dot"></span>Loading Scout · ' + phase.file + '…</div>';
+  }
+  showView(phase.view);
+
+  try {
+    const html = await loadScoutPanel(phase.file);
+    if (!view.dataset.loaded) {
+      view.innerHTML = html;
+      view.dataset.loaded = '1';
+      // Scroll the injected panel to top on first mount
+      view.scrollTop = 0;
+    }
+  } catch (err) {
+    view.innerHTML = '<div class="scout-skeleton" style="color:#B42318">Failed to load ' + phase.file + '.<br><small>' + (err && err.message) + '</small></div>';
+  }
+}
+
+/* Shape-picker click handler for the inlined p1 landing. Phase 1 only wires
+   the entry gesture: pick a shape → landing gracefully leaves and the header
+   acknowledges the choice. The refinement chat / drafts / publish steps come
+   in later phases of the port. */
+function bindCreateCampaignLanding() {
+  const view = document.getElementById('view-scout-p1');
+  if (!view || view.dataset.landingBound) return;
+  view.dataset.landingBound = '1';
+
+  // The POC's inline shape-picker at #view-scout-p1 is superseded by the
+  // intent-based landing that lives in designs/create-campaign.html. Any
+  // click inside the view routes there — clicking a specific card passes
+  // its key so the target can pre-commit that intent; clicking anywhere
+  // else lands on the intent picker itself.
+  view.addEventListener('click', (e) => {
+    const card = e.target.closest('.cc-shape-card');
+    if (card && view.contains(card)) {
+      const shapeKey = card.dataset.shape || '';
+      location.href = '../designs/create-campaign.html' +
+        (shapeKey ? '?shape=' + encodeURIComponent(shapeKey) : '');
+    }
+  });
+}
+
+// Delegated CTA routing inside any injected scout panel.
+// Uses button text + href hints in the designs/ files so we don't have to
+// re-annotate the fetched HTML with data-goto attributes.
+function bindScoutFlowRouting() {
+  document.addEventListener('click', (e) => {
+    const view = e.target.closest('.scout-view');
+    if (!view) return;
+
+    // Postrow kebab → open ddmenu (§3.16). Anchored near the button; items
+    // route to Quick approve (opens .drawer) / Open in playground / Regenerate
+    // this post / Remove from campaign. Handled first so the click doesn't
+    // fall through to the row's data-goto routing.
+    const kebab = e.target.closest('.postrow__kebab');
+    if (kebab) {
+      e.preventDefault();
+      e.stopPropagation();
+      openPostrowKebabMenu(kebab);
+      return;
+    }
+
+    // Phase-2 tabs (Review Posts / Campaign Brief) — swap the active tab and
+    // show the matching data-panel. Scoped to the current view so a click on
+    // one panel's tab can't accidentally affect another view's tab group.
+    const tab = e.target.closest('.p2-tab');
+    if (tab && view.contains(tab)) {
+      e.preventDefault();
+      const key = tab.dataset.tab;
+      if (!key) return;
+      const group = tab.closest('.p2-tabs') || view;
+      group.querySelectorAll('.p2-tab').forEach(t => {
+        const on = t.dataset.tab === key;
+        t.classList.toggle('p2-tab--active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      view.querySelectorAll('[data-panel]').forEach(p => {
+        p.hidden = p.dataset.panel !== key;
+      });
+      return;
+    }
+
+    // Anchor tags with hrefs pointing to another design → intercept and route
+    const a = e.target.closest('a[href]');
+    if (a) {
+      const href = a.getAttribute('href') || '';
+      const m = href.match(/([a-z0-9-]+)\.html$/i);
+      if (m) {
+        const targetFile = m[1];
+        const phaseKey = Object.keys(SCOUT_PHASES).find(k => SCOUT_PHASES[k].file === targetFile);
+        if (phaseKey) { e.preventDefault(); goToScout(phaseKey); return; }
+        if (targetFile === 'index') { e.preventDefault(); goToCampaigns(); return; }
+      }
+    }
+
+    // data-goto="./file.html" (set by scout-flow prototype JS on some CTAs)
+    const goto = e.target.closest('[data-goto]');
+    if (goto) {
+      const href = goto.getAttribute('data-goto') || '';
+      const m = href.match(/([a-z0-9-]+)\.html$/i);
+      if (m) {
+        const targetFile = m[1];
+        const phaseKey = Object.keys(SCOUT_PHASES).find(k => SCOUT_PHASES[k].file === targetFile);
+        if (phaseKey) { e.preventDefault(); goToScout(phaseKey); return; }
+        if (targetFile === 'index') { e.preventDefault(); goToCampaigns(); return; }
+      }
+    }
+  });
+}
+
+// Postrow kebab dropdown — anchored to the button, positioned in fixed coords
+// so it floats above the scroll containers. Uses .ddmenu (§3.16). Single
+// menu instance reused across clicks; outside click / Esc closes.
+function openPostrowKebabMenu(kebab) {
+  closePostrowKebabMenu();
+  const postrow = kebab.closest('.postrow');
+  const rect = kebab.getBoundingClientRect();
+  const MENU_H_EST = 200;
+  const MENU_W = 320;
+
+  const menu = document.createElement('div');
+  menu.className = 'ddmenu postrow-ddmenu';
+  menu.setAttribute('role', 'menu');
+  menu.style.position = 'fixed';
+  // Flip above the kebab if opening below would clip below the viewport
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const openUp = spaceBelow < MENU_H_EST + 12;
+  menu.style.top = (openUp ? (rect.top - MENU_H_EST - 6) : (rect.bottom + 6)) + 'px';
+  menu.style.left = Math.max(8, rect.right - MENU_W) + 'px';
+  menu.style.zIndex = '1000';
+
+  const items = [
+    { label: 'Quick approve',        icon: 'i-file-check',      action: 'approve' },
+    { label: 'Open in playground',   icon: 'i-columns',         action: 'playground' },
+    { label: 'Regenerate this post', icon: 'i-sparkle',         action: 'regen' },
+    { label: 'Remove from campaign', icon: 'i-x-square',        action: 'remove' },
+  ];
+
+  menu.innerHTML = items.map(it => (
+    '<div class="ddmenu__item" data-action="' + it.action + '">' +
+      '<div class="ddmenu__item-inner">' +
+        '<span class="ddmenu__item-icon"><svg><use href="#' + it.icon + '"/></svg></span>' +
+        '<span class="ddmenu__item-label">' + it.label + '</span>' +
+      '</div>' +
+    '</div>'
+  )).join('');
+
+  document.body.appendChild(menu);
+
+  const onItemClick = (evt) => {
+    const item = evt.target.closest('.ddmenu__item');
+    if (!item) return;
+    const action = item.dataset.action;
+    closePostrowKebabMenu();
+    if (action === 'approve') {
+      const drawer = document.querySelector('.scout-view.view--active #approval-drawer, .scout-view .drawer');
+      if (drawer) { drawer.classList.add('is-open'); drawer.setAttribute('aria-hidden', 'false'); }
+      return;
+    }
+    if (action === 'playground') {
+      goToScout('playground');
+      return;
+    }
+    // regen + remove: no-op for the POC (would flash a toast in production)
+  };
+  menu.addEventListener('click', onItemClick);
+
+  const onOutside = (evt) => {
+    if (menu.contains(evt.target) || evt.target === kebab) return;
+    closePostrowKebabMenu();
+  };
+  const onEsc = (evt) => { if (evt.key === 'Escape') closePostrowKebabMenu(); };
+  setTimeout(() => {
+    document.addEventListener('click', onOutside);
+    document.addEventListener('keydown', onEsc);
+  }, 0);
+
+  menu._cleanup = () => {
+    document.removeEventListener('click', onOutside);
+    document.removeEventListener('keydown', onEsc);
+  };
+}
+
+function closePostrowKebabMenu() {
+  const existing = document.querySelector('.postrow-ddmenu');
+  if (existing) {
+    if (existing._cleanup) existing._cleanup();
+    existing.remove();
+  }
+}
+
+/* =========================================================================
    18. BOOT
    ========================================================================= */
 function boot() {
   console.log('[Flagstaff] boot');
   bindDemoControls();
-  setCrumbs(['Home', 'Onboarding', 'Conversation']);
+  bindSidebarNav();
+  bindScoutFlowRouting();
+  bindCreateCampaignLanding();
   setComposerEnabled(false);
 
-  // Splash gating:
-  // - ?nosplash in the URL bypasses (for fast iteration when working on later flow)
-  // - ?splash in the URL forces splash (clears the flag)
-  // - Default: always show the splash. It's a brand moment and is skippable.
+  // Route boot by ?view= (campaigns, home, splash, conv) with campaigns as
+  // the default. Other views remain reachable via the sidebar nav or the
+  // demo controls (skip / restart) — the boot just picks the landing.
   const params = new URLSearchParams(location.search);
-  if (params.has('nosplash')) {
+  const target = params.get('view');
+
+  if (target === 'splash') {
+    try { localStorage.removeItem(SPLASH_FLAG_KEY); } catch (e) {}
+    setCrumbs(['Home', 'Onboarding']);
+    showView('view-splash');
+    setTimeout(() => runSplash(), 100);
+    return;
+  }
+  if (target === 'conv') {
     try { localStorage.setItem(SPLASH_FLAG_KEY, '1'); } catch (e) {}
+    setCrumbs(['Home', 'Onboarding', 'Conversation']);
     showView('view-conv');
     setTimeout(() => runConversation(), 200);
     return;
   }
-  if (params.has('splash')) {
-    try { localStorage.removeItem(SPLASH_FLAG_KEY); } catch (e) {}
+  if (target === 'home') {
+    goToHome();
+    return;
   }
-
-  console.log('[Flagstaff] mounting splash');
-  showView('view-splash');
-  setTimeout(() => runSplash(), 100);
+  if (target === 'create' || target === 'create-campaign') {
+    // Entry point from the standalone campaigns dashboard: land on the
+    // campaign creation flow (Scout · Phase 1 curated).
+    goToScout('p1');
+    return;
+  }
+  // Default: Campaigns dashboard.
+  goToCampaigns();
 }
 
 // The script is at the end of <body> so DOMContentLoaded may have already

@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campaigns · Scout flow prototype</title>
+<link rel="stylesheet" href="./_shared.css" />
+<link rel="stylesheet" href="./_prototype.css" />
+<link rel="stylesheet" href="./_campaigns-components.css?v=7" />
+<style>
+  body.mode-campaigns { background: var(--camp-surface-canvas, #ECECEC); }
+
+  .p0-header { padding: 12px 0 16px; }
+  .p0-header .panel__title { font-size: 22px; font-weight: 500; letter-spacing: 0.25px; color: var(--camp-text-primary); }
+  .p0-header .panel__subtitle { font-size: 14px; color: var(--camp-text-secondary); margin-top: 6px; letter-spacing: 0.15px; }
+  .p0-header .btn { height: 40px; padding: 0 16px; font-size: 14px; }
+  .p0-header .btn svg { width: 14px; height: 14px; }
+  .acct-switch {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 40px; padding: 0 14px;
+    border-radius: var(--camp-radius-btn);
+    background: var(--camp-surface);
+    border: 1px solid var(--camp-border-input);
+    color: var(--camp-text-primary);
+    font-size: 13px; font-weight: 500;
+  }
+  .acct-switch svg { width: 12px; height: 12px; color: var(--camp-text-secondary); }
+
+  .p0-tabs { margin-top: 16px; padding-bottom: 12px; }
+
+  .p0-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px 0 0;
+  }
+  @media (max-width: 640px) {
+    .p0-grid { grid-template-columns: 1fr; }
+  }
+
+  .p0-card { cursor: pointer; }
+  .p0-card:focus-visible {
+    outline: 2px solid var(--camp-primary);
+    outline-offset: 2px;
+  }
+  .p0-card .card__desc { color: var(--camp-text-quiet); }
+  .p0-card .card__meta { font-size: 12px; color: var(--camp-text-secondary); }
+  .p0-card .card__meta .p0-meta__left { display: inline-flex; align-items: center; gap: 6px; }
+  .p0-card .card__meta .p0-meta__left svg { width: 13px; height: 13px; color: var(--camp-text-tertiary); }
+  .p0-card .card__status-row {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .p0-card .card__comments {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--camp-text-secondary);
+  }
+  .p0-card .card__comments .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--status-notification);
+    display: inline-block;
+  }
+  .p0-card .card__comments--zero .dot { background: var(--camp-border-input); }
+  .p0-card .card__comments--zero { color: var(--camp-text-timestamp); }
+  .p0-card .card__author-avatar { background: linear-gradient(135deg, #C5CAFF, #7C82FB); }
+  .p0-card .card__author-avatar--warm { background: linear-gradient(135deg, #FEDF89, #E4A73B); }
+  .p0-card .card__author-avatar--cool { background: linear-gradient(135deg, #B2DDFF, #4A8EDF); }
+</style>
+</head>
+<body class="mode-campaigns">
+
+<!-- Icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 32 32"><circle cx="8" cy="8" r="6" fill="currentColor"/><circle cx="24" cy="8" r="6" fill="currentColor"/><circle cx="8" cy="24" r="6" fill="currentColor"/><circle cx="24" cy="24" r="6" fill="currentColor"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2l11 5V6L3 11z"/><path d="M14 8a4 4 0 0 1 0 8"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-analytics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 4 3 5-6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z"/></symbol>
+    <symbol id="i-x-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
+    <symbol id="i-cal-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></symbol>
+  </defs>
+</svg>
+
+<div class="app mode-campaigns">
+  <div class="atmosphere" aria-hidden="true">
+    <div class="atmosphere__blob atmosphere__blob--violet"></div>
+    <div class="atmosphere__blob atmosphere__blob--indigo"></div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar__logo"><svg width="26" height="26"><use href="#i-logo"/></svg></div>
+    <nav class="sidebar__nav">
+      <button class="sidebar__btn" title="Home"><svg><use href="#i-home"/></svg></button>
+      <button class="sidebar__btn" title="Scout"><svg><use href="#i-chat"/></svg></button>
+      <button class="sidebar__btn is-active" title="Campaigns"><svg><use href="#i-megaphone"/></svg></button>
+      <button class="sidebar__btn" title="Scheduler"><svg><use href="#i-cal"/></svg></button>
+      <button class="sidebar__btn" title="Analytics"><svg><use href="#i-analytics"/></svg></button>
+    </nav>
+    <div class="sidebar__footer">
+      <button class="sidebar__btn" title="Search"><svg><use href="#i-search"/></svg></button>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div class="topbar__breadcrumb">
+        Home <svg width="12" height="12"><use href="#i-chevron-right"/></svg>
+        <b>Campaigns</b>
+      </div>
+      <div class="topbar__right">
+        <button class="topbar__acct-switch">
+          PepsiCo, Inc.
+          <svg><use href="#i-chevron-down"/></svg>
+        </button>
+        <button class="topbar__icon-btn" aria-label="Search"><svg><use href="#i-search"/></svg></button>
+        <button class="topbar__icon-btn" aria-label="Notifications">
+          <svg><use href="#i-bell"/></svg>
+          <span class="topbar__dot"></span>
+        </button>
+        <div class="topbar__avatar">
+          <div class="topbar__avatar-img"></div>
+          <svg width="12" height="12" style="color:#4B5565"><use href="#i-chevron-down"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel__header p0-header">
+        <div class="panel__heading">
+          <h1 class="panel__title">Campaigns</h1>
+          <p class="panel__subtitle">Manage everything scheduled, in review, and live from one place.</p>
+        </div>
+        <div class="panel__actions">
+          <button class="acct-switch">
+            @pepsi.lawnly
+            <svg><use href="#i-chevron-down"/></svg>
+          </button>
+          <button class="btn" data-goto="./create-campaign.html">
+            <svg><use href="#i-plus"/></svg>
+            Create campaign
+          </button>
+        </div>
+      </div>
+
+      <div class="scout-strip" id="scout-strip">
+        <span class="scout-strip__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><use href="#i-sparkle"/></svg>
+        </span>
+        <div class="scout-strip__body">
+          Your <b>Craftsperson Spotlight</b> hit <b>2.1&times; replies</b>.
+          <span class="scout-strip__muted">Want me to generate and schedule the next campaigns based on that?</span>
+        </div>
+        <button class="scout-strip__cta" type="button" data-scout-open>
+          Show me
+          <svg viewBox="0 0 24 24" fill="none"><use href="#i-chevron-right"/></svg>
+        </button>
+        <button class="scout-strip__close" type="button" aria-label="Dismiss" data-scout-dismiss>
+          <svg viewBox="0 0 24 24" fill="none"><use href="#i-x-square"/></svg>
+        </button>
+      </div>
+
+      <div class="tabs p0-tabs">
+        <button type="button" class="tab is-active">All <span class="tab__count">4</span></button>
+        <button type="button" class="tab">In Review <span class="tab__count">1</span></button>
+        <button type="button" class="tab">In Draft <span class="tab__count">1</span></button>
+        <button type="button" class="tab">Published <span class="tab__count">1</span></button>
+        <button type="button" class="tab">In Progress <span class="tab__count">1</span></button>
+      </div>
+
+      <div class="p0-grid">
+
+        <article class="card p0-card" data-goto="./phase-2-review.html" role="button" tabindex="0" aria-labelledby="camp-title-lawn">
+          <header class="card__head">
+            <h3 class="card__title" id="camp-title-lawn">Lawn Rush Week</h3>
+            <button class="card__kebab" aria-label="More options"><svg width="14" height="14"><use href="#i-kebab"/></svg></button>
+          </header>
+          <p class="card__desc">A 7-day sprint hitting the heatwave window. Q&amp;A openers, first-person warm. 3 of 4 posts scheduled.</p>
+          <div class="card__meta">
+            <span class="p0-meta__left"><svg><use href="#i-cal"/></svg>07 May – 15 May 2026</span>
+            <span>4 posts</span>
+          </div>
+          <div class="card__status-row">
+            <span class="status-badge status-badge--progress">In Progress</span>
+            <span class="card__comments"><span class="dot"></span>12 comments</span>
+          </div>
+          <div class="card__divider"></div>
+          <div class="card__foot">
+            <div class="card__author">
+              <span class="card__author-avatar card__author-avatar--warm"></span>
+              Amira Rehman
+            </div>
+            <span class="card__timestamp">Created 04 May</span>
+          </div>
+        </article>
+
+        <article class="card p0-card" data-goto="./phase-2-review.html" role="button" tabindex="0" aria-labelledby="camp-title-ai">
+          <header class="card__head">
+            <h3 class="card__title" id="camp-title-ai">AI-First SaaS Sprint</h3>
+            <button class="card__kebab" aria-label="More options"><svg width="14" height="14"><use href="#i-kebab"/></svg></button>
+          </header>
+          <p class="card__desc">Positioning the launch as "don't retrofit — rebuild." Thread-first, contrarian, one anchor post pulling it together.</p>
+          <div class="card__meta">
+            <span class="p0-meta__left"><svg><use href="#i-cal"/></svg>20 May – 03 Jun 2026</span>
+            <span>6 posts</span>
+          </div>
+          <div class="card__status-row">
+            <span class="status-badge status-badge--draft">In Draft</span>
+            <span class="card__comments"><span class="dot"></span>4 comments</span>
+          </div>
+          <div class="card__divider"></div>
+          <div class="card__foot">
+            <div class="card__author">
+              <span class="card__author-avatar"></span>
+              Kai Malone
+            </div>
+            <span class="card__timestamp">Created 12 May</span>
+          </div>
+        </article>
+
+        <article class="card p0-card" data-goto="./phase-2-review.html" role="button" tabindex="0" aria-labelledby="camp-title-craft">
+          <header class="card__head">
+            <h3 class="card__title" id="camp-title-craft">Craftsperson Spotlight</h3>
+            <button class="card__kebab" aria-label="More options"><svg width="14" height="14"><use href="#i-kebab"/></svg></button>
+          </header>
+          <p class="card__desc">Round two of the March pattern that hit 2.1× replies. Two new artisans, longer threads, same warm opener structure.</p>
+          <div class="card__meta">
+            <span class="p0-meta__left"><svg><use href="#i-cal"/></svg>12 Apr – 26 Apr 2026</span>
+            <span>3 posts</span>
+          </div>
+          <div class="card__status-row">
+            <span class="status-badge status-badge--published">Published</span>
+            <span class="card__comments"><span class="dot"></span>41 comments</span>
+          </div>
+          <div class="card__divider"></div>
+          <div class="card__foot">
+            <div class="card__author">
+              <span class="card__author-avatar card__author-avatar--warm"></span>
+              Amira Rehman
+            </div>
+            <span class="card__timestamp">Created 08 Apr</span>
+          </div>
+        </article>
+
+        <article class="card p0-card" data-goto="./phase-2-review.html" role="button" tabindex="0" aria-labelledby="camp-title-qa">
+          <header class="card__head">
+            <h3 class="card__title" id="camp-title-qa">Community Q&amp;A Fridays</h3>
+            <button class="card__kebab" aria-label="More options"><svg width="14" height="14"><use href="#i-kebab"/></svg></button>
+          </header>
+          <p class="card__desc">Weekly cadence, one open question per Friday. Simple, low-lift, high-reply. Runs on autopilot once approved.</p>
+          <div class="card__meta">
+            <span class="p0-meta__left"><svg><use href="#i-cal"/></svg>Ongoing</span>
+            <span>8 posts</span>
+          </div>
+          <div class="card__status-row">
+            <span class="status-badge status-badge--review">In Review</span>
+            <span class="card__comments"><span class="dot"></span>6 comments</span>
+          </div>
+          <div class="card__divider"></div>
+          <div class="card__foot">
+            <div class="card__author">
+              <span class="card__author-avatar card__author-avatar--cool"></span>
+              Priya Iyer
+            </div>
+            <span class="card__timestamp">Created 02 May</span>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <div class="side-panel__backdrop" id="scout-backdrop" aria-hidden="true"></div>
+    <aside class="side-panel" id="scout-panel" aria-hidden="true" role="dialog" aria-labelledby="scout-panel-title">
+      <div class="side-panel__header">
+        <span class="side-panel__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><use href="#i-sparkle"/></svg>
+        </span>
+        <div class="side-panel__heading">
+          <h2 class="side-panel__title" id="scout-panel-title">Here's what I'd run next</h2>
+          <p class="side-panel__sub">Based on Craftsperson Spotlight, your knowledge base, and this week's trends.</p>
+        </div>
+        <button class="side-panel__close" type="button" aria-label="Close" data-scout-close>
+          <svg viewBox="0 0 24 24" fill="none"><use href="#i-x-square"/></svg>
+        </button>
+      </div>
+      <div class="side-panel__body">
+        <a class="gencard" href="./create-campaign.html?seed=Heatwave%20hydration%20sprint" data-goto="./create-campaign.html?seed=Heatwave%20hydration%20sprint">
+          <div class="gencard__head">
+            <span class="gencard__axis">Reactive</span>
+          </div>
+          <h3 class="gencard__title">Heatwave hydration sprint</h3>
+          <p class="gencard__why">Ninety-degree stretch lands Thursday. Craftsperson tone rides the local angle without pivoting off-brand.</p>
+          <div class="gencard__meta">
+            <span class="gencard__meta-chip">
+              <svg viewBox="0 0 24 24" fill="none"><use href="#i-cal-line"/></svg>
+              4 posts
+            </span>
+            <span class="gencard__meta-sep"></span>
+            <span class="gencard__meta-chip">Runs Thu&ndash;Sun</span>
+          </div>
+        </a>
+
+        <a class="gencard" href="./create-campaign.html?seed=Craftsperson%20Spotlight%2C%20chapter%20two" data-goto="./create-campaign.html?seed=Craftsperson%20Spotlight%2C%20chapter%20two">
+          <div class="gencard__head">
+            <span class="gencard__axis">Echo</span>
+          </div>
+          <h3 class="gencard__title">Craftsperson Spotlight, chapter two</h3>
+          <p class="gencard__why">The format doubled replies. Another five profiles are ready in the KB with matching cadence and voice.</p>
+          <div class="gencard__meta">
+            <span class="gencard__meta-chip">
+              <svg viewBox="0 0 24 24" fill="none"><use href="#i-cal-line"/></svg>
+              5 posts
+            </span>
+            <span class="gencard__meta-sep"></span>
+            <span class="gencard__meta-chip">Weekly cadence</span>
+          </div>
+        </a>
+
+        <a class="gencard" href="./create-campaign.html?seed=Q%26A%20Fridays%3A%20apprentice%20edition" data-goto="./create-campaign.html?seed=Q%26A%20Fridays%3A%20apprentice%20edition">
+          <div class="gencard__head">
+            <span class="gencard__axis">Experiment</span>
+          </div>
+          <h3 class="gencard__title">Q&amp;A Fridays: apprentice edition</h3>
+          <p class="gencard__why">Q&amp;A Fridays is trending upward. Testing an apprentice-led thread targets the 18&ndash;24 slice you're underweight in.</p>
+          <div class="gencard__meta">
+            <span class="gencard__meta-chip">
+              <svg viewBox="0 0 24 24" fill="none"><use href="#i-cal-line"/></svg>
+              3 posts
+            </span>
+            <span class="gencard__meta-sep"></span>
+            <span class="gencard__meta-chip">One-off</span>
+          </div>
+        </a>
+      </div>
+      <div class="side-panel__foot">
+        <form class="chat-composer" id="scout-composer" autocomplete="off">
+          <button class="chat-composer__attach" type="button" aria-label="Attach">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5l-8.5 8.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 1 1 5 5l-9 9a2 2 0 1 1-2.8-2.8L15 9"/></svg>
+          </button>
+          <input class="chat-composer__input" type="text" placeholder="Ask Scout for a different direction..." />
+          <button class="chat-composer__send" type="submit" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+          </button>
+        </form>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+  (function () {
+    const strip = document.getElementById('scout-strip');
+    const panel = document.getElementById('scout-panel');
+    const backdrop = document.getElementById('scout-backdrop');
+    const composer = document.getElementById('scout-composer');
+    if (!panel || !backdrop) return;
+
+    let lastTrigger = null;
+
+    const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const open = () => {
+      lastTrigger = document.activeElement;
+      panel.classList.add('is-open');
+      panel.setAttribute('aria-hidden', 'false');
+      backdrop.classList.add('is-open');
+      backdrop.setAttribute('aria-hidden', 'false');
+      requestAnimationFrame(() => {
+        const first = panel.querySelector('.side-panel__close');
+        if (first) first.focus();
+      });
+    };
+    const close = () => {
+      panel.classList.remove('is-open');
+      panel.setAttribute('aria-hidden', 'true');
+      backdrop.classList.remove('is-open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      if (lastTrigger && typeof lastTrigger.focus === 'function') {
+        lastTrigger.focus();
+      }
+    };
+
+    // Kebab menu stops click from bubbling into card navigation.
+    document.addEventListener('click', (e) => {
+      const kebab = e.target.closest('.card__kebab');
+      if (kebab) { e.preventDefault(); e.stopPropagation(); return; }
+
+      const openBtn = e.target.closest('[data-scout-open]');
+      const closeBtn = e.target.closest('[data-scout-close]');
+      const dismissBtn = e.target.closest('[data-scout-dismiss]');
+      if (openBtn) { e.preventDefault(); e.stopPropagation(); open(); return; }
+      if (closeBtn) { e.preventDefault(); e.stopPropagation(); close(); return; }
+      if (dismissBtn) {
+        e.preventDefault(); e.stopPropagation();
+        if (!strip) return;
+        // Animated collapse before removal.
+        strip.style.maxHeight = strip.scrollHeight + 'px';
+        strip.style.overflow = 'hidden';
+        strip.style.transition =
+          'max-height var(--duration-base) var(--ease-standard),' +
+          ' opacity var(--duration-base) var(--ease-standard),' +
+          ' margin-block var(--duration-base) var(--ease-standard),' +
+          ' padding-block var(--duration-base) var(--ease-standard)';
+        requestAnimationFrame(() => {
+          strip.style.maxHeight = '0px';
+          strip.style.opacity = '0';
+          strip.style.marginBlock = '0';
+          strip.style.paddingBlock = '0';
+        });
+        strip.addEventListener('transitionend', () => { strip.style.display = 'none'; }, { once: true });
+      }
+    });
+    backdrop.addEventListener('click', close);
+
+    // ESC dismiss + tab-trap within the panel.
+    document.addEventListener('keydown', (e) => {
+      if (!panel.classList.contains('is-open')) return;
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key === 'Tab') {
+        const focusables = Array.from(panel.querySelectorAll(FOCUSABLE))
+          .filter(el => el.offsetParent !== null || el === document.activeElement);
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    if (composer) {
+      const cInput = composer.querySelector('.chat-composer__input');
+      const cSend = composer.querySelector('.chat-composer__send');
+      const syncSend = () => { if (cSend) cSend.disabled = !((cInput && cInput.value) || '').trim(); };
+      if (cInput) {
+        cInput.addEventListener('input', syncSend);
+        syncSend();
+      }
+      composer.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const seed = ((cInput && cInput.value) || '').trim();
+        const q = seed ? '?seed=' + encodeURIComponent(seed) : '';
+        window.location.href = './create-campaign.html' + q;
+      });
+    }
+
+    // Gencard routes to create page with the concept as seed.
+    document.querySelectorAll('.gencard').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const title = (card.querySelector('.gencard__title')?.textContent || '').trim();
+        window.location.href = './create-campaign.html' + (title ? '?seed=' + encodeURIComponent(title) : '');
+      });
+    });
+
+    // Keyboard-open for cards (data-goto on non-focusable elements).
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const target = e.target.closest('[data-goto]');
+      if (!target || target.tagName === 'A' || target.tagName === 'BUTTON') return;
+      e.preventDefault();
+      const dest = target.getAttribute('data-goto');
+      if (dest) window.location.href = dest;
+    });
+  })();
+</script>
+
+<script src="./_prototype.js?v=2"></script>
+</body>
+</html>

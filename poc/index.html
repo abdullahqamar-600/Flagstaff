@@ -4,13 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Flagstaff Social — Onboarding POC</title>
-  <link rel="stylesheet" href="./styles.css?v=19" />
+  <link rel="stylesheet" href="./styles.css?v=31" />
+  <!-- Scout campaign flow styles — panel-scoped, safely coexists with styles.css. -->
+  <link rel="stylesheet" href="../designs/_shared.css?v=2" />
+  <link rel="stylesheet" href="../designs/_campaigns-components.css?v=4" />
+  <link rel="stylesheet" href="./scout-flow.css?v=24" />
 </head>
 <body class="mode-onboarding">
   <!-- Reusable SVG sprite (icons referenced by id from JS) -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4L12 3z"/><path d="M19 14l.7 1.8L21 16.5l-1.3.7L19 19l-.7-1.8L17 16.5l1.3-.7L19 14z"/></symbol>
+      <!-- Icons used by injected Scout panels (§3.14 postrow, §3.16 ddmenu, etc.) -->
+      <symbol id="i-arrow-up-right" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="10" x2="10" y2="4"/><polyline points="5 4 10 4 10 9"/></symbol>
+      <symbol id="i-paperclip" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5L5 7.5c-.6.6-.6 1.5 0 2.1.6.6 1.5.6 2.1 0l4.5-4.5c1-1 1-2.6 0-3.6s-2.6-1-3.6 0L3.4 5.9c-1.4 1.4-1.4 3.6 0 5s3.6 1.4 5 0L11.5 8"/></symbol>
+      <symbol id="i-file-check" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 1.7H5A1.7 1.7 0 0 0 3.3 3.3v13.4A1.7 1.7 0 0 0 5 18.3h10a1.7 1.7 0 0 0 1.7-1.7V5.8L12.5 1.7z"/><polyline points="11.7 1.7 11.7 5.8 15.8 5.8"/><polyline points="6.7 11.7 8.3 13.3 12.5 9.2"/></symbol>
+      <symbol id="i-columns" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="15" height="15" rx="2"/><line x1="10" y1="2.5" x2="10" y2="17.5"/></symbol>
+      <symbol id="i-x-square" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="15" height="15" rx="2"/><line x1="7.5" y1="7.5" x2="12.5" y2="12.5"/><line x1="12.5" y1="7.5" x2="7.5" y2="12.5"/></symbol>
+      <symbol id="i-minus-sq" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.25" y="2.25" width="13.5" height="13.5" rx="2"/><line x1="6" y1="9" x2="12" y2="9"/></symbol>
       <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
       <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></symbol>
       <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/></symbol>
@@ -67,10 +78,26 @@
       <symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
       <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></symbol>
       <symbol id="i-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></symbol>
+      <symbol id="i-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></symbol>
+      <symbol id="i-analytics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 4 3 5-6"/></symbol>
+      <symbol id="i-stars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3l1.6 4.4L20 9l-4.4 1.6L14 15l-1.6-4.4L8 9l4.4-1.6L14 3z"/><path d="M6 15l.8 2.2L9 18l-2.2.8L6 21l-.8-2.2L3 18l2.2-.8L6 15z"/></symbol>
+      <symbol id="i-swap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 4 7 20"/><polyline points="4 7 7 4 10 7"/><polyline points="17 20 17 4"/><polyline points="14 17 17 20 20 17"/></symbol>
+      <symbol id="i-question" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/><path d="M9.5 9a2.5 2.5 0 1 1 3 2.5c-.7.2-1 .7-1 1.4V13"/><line x1="11.5" y1="16" x2="11.51" y2="16"/></symbol>
+      <symbol id="i-bold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h6a3.5 3.5 0 0 1 0 7H7z"/><path d="M7 12h7a3.5 3.5 0 0 1 0 7H7z"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></symbol>
+      <symbol id="i-x-mark-solid" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></symbol>
     </defs>
   </svg>
 
   <div class="app">
+    <!-- Ambient atmosphere layer — shown when body.mode-campaigns is set.
+         Lives at the app level so shared dashboards (Campaigns, Home) can
+         both use it without duplicating markup. -->
+    <div class="campaigns-atmosphere" aria-hidden="true">
+      <span class="campaigns-atmosphere__blob campaigns-atmosphere__blob--violet"></span>
+      <span class="campaigns-atmosphere__blob campaigns-atmosphere__blob--indigo"></span>
+    </div>
+
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar__logo" aria-label="Flagstaff Social">
@@ -78,12 +105,18 @@
       </div>
       <nav class="sidebar__nav" aria-label="Primary">
         <button class="sidebar__btn" data-nav="home"     title="Home"><svg><use href="#i-home"/></svg></button>
-        <button class="sidebar__btn" data-nav="profile"  title="Profile"><svg><use href="#i-user"/></svg></button>
         <button class="sidebar__btn" data-nav="posts"    title="Posts" aria-current="page"><svg><use href="#i-chat"/></svg></button>
         <button class="sidebar__btn" data-nav="campaigns" title="Campaigns"><svg><use href="#i-megaphone"/></svg></button>
-        <button class="sidebar__btn" data-nav="calendar" title="Calendar"><svg><use href="#i-cal"/></svg></button>
+        <button class="sidebar__btn" data-nav="calendar" title="Scheduler"><svg><use href="#i-cal"/></svg></button>
+        <button class="sidebar__btn" data-nav="analytics" title="Analytics"><svg><use href="#i-analytics"/></svg></button>
+        <button class="sidebar__btn sidebar__btn--campaigns-only" data-nav="team" title="Team Management"><svg><use href="#i-users"/></svg></button>
+        <button class="sidebar__btn sidebar__btn--campaigns-only" data-nav="content" title="Content"><svg><use href="#i-bold"/></svg></button>
+        <button class="sidebar__btn sidebar__btn--onboarding-only" data-nav="profile"  title="Profile"><svg><use href="#i-user"/></svg></button>
       </nav>
-      <button class="sidebar__btn sidebar__settings" title="Settings"><svg><use href="#i-settings"/></svg></button>
+      <div class="sidebar__footer">
+        <button class="sidebar__btn sidebar__btn--campaigns-only" data-nav="support" title="Support"><svg><use href="#i-question"/></svg></button>
+        <button class="sidebar__btn sidebar__settings" title="Settings"><svg><use href="#i-settings"/></svg></button>
+      </div>
     </aside>
 
     <!-- Main -->
@@ -94,7 +127,20 @@
           <span>Home</span>
         </div>
         <div class="topbar__right">
-          <button class="bell" aria-label="Notifications"><svg><use href="#i-bell"/></svg></button>
+          <button class="topbar-acct" aria-label="Switch account">
+            <span class="topbar-acct__logo"><svg><use href="#i-x-mark-solid"/></svg></span>
+            <span class="topbar-acct__name">PepsiCo, Inc.</span>
+            <span class="topbar-acct__swap"><svg><use href="#i-swap"/></svg></span>
+          </button>
+          <button class="topbar-icon-btn topbar-search" aria-label="Search"><svg><use href="#i-search"/></svg></button>
+          <button class="topbar-icon-btn bell" aria-label="Notifications">
+            <svg><use href="#i-bell"/></svg>
+            <span class="topbar-icon-btn__dot" aria-hidden="true"></span>
+          </button>
+          <button class="topbar-user" aria-label="Account">
+            <span class="topbar-user__avatar"></span>
+            <svg class="topbar-user__chev"><use href="#i-chevron-down"/></svg>
+          </button>
           <button class="profile-chip">
             <span class="profile-chip__avatar"></span>
             <span class="profile-chip__name">Abdullah</span>
@@ -163,10 +209,84 @@
         </div>
       </section>
 
-      <!-- View 3: Dashboard -->
+      <!-- View 3: Home dashboard (post-onboarding, reachable via Home nav) -->
       <section class="view" id="view-dash">
-        <div class="dash" id="dash"></div>
+        <div class="campaigns-panel">
+          <div class="campaigns" id="home"></div>
+        </div>
       </section>
+
+      <!-- View 4: Campaigns dashboard (list) -->
+      <section class="view" id="view-campaigns">
+        <div class="campaigns-panel">
+          <div class="campaigns" id="campaigns"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!--  Scout campaign flow — Phase 1..3, KB drawer, cross-cutting.     -->
+      <!--  Each section is filled by loadScoutFlow(id) in app.js, which    -->
+      <!--  fetches ../designs/{id}.html and injects its <section.panel>.   -->
+      <!--  Panels are self-scoped; they render inside poc's sidebar+topbar. -->
+      <!-- ================================================================ -->
+      <section class="view scout-view" id="view-scout-p1">
+        <!-- Phase 1: create-campaign landing (Scout's shape-picker). Ported
+             inline from designs/create-campaign.html so the flow stays inside
+             poc's sidebar/topbar/breadcrumbs instead of a full-page nav. -->
+        <div class="cc-scope">
+          <header class="cc-header">
+            <h1 class="cc-title" id="cc-title">New campaign</h1>
+            <p class="cc-subtitle" id="cc-subtitle">Tell me what you want to promote, or pick a shape below.</p>
+          </header>
+          <div class="cc-main">
+            <section class="cc-landing" id="cc-landing">
+              <div class="cc-landing__lead">
+                <span class="cc-landing__lead-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-sparkle"/></svg>
+                </span>
+                Scout can start from any of these
+              </div>
+              <div class="cc-shape-grid" id="cc-shape-grid">
+                <button class="cc-shape-card cc-shape-card--rec" type="button" data-shape="reactive" style="--cc-card-i: 0">
+                  <div class="cc-shape-card__head">
+                    <span class="cc-shape-card__kind">Reactive</span>
+                    <span class="cc-shape-card__rec">Recommended</span>
+                  </div>
+                  <h3 class="cc-shape-card__title">Summer lawn revival</h3>
+                  <p class="cc-shape-card__desc">Heat stressed lawns are the top local search this week. Offer a free 10 minute health check, in the warm, patient voice your Craftsperson KB already carries.</p>
+                  <div class="cc-shape-card__meta">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
+                    4 posts, Thu to Sun
+                    <span class="cc-shape-card__meta-sep">·</span>
+                    Book a lawn check CTA
+                  </div>
+                </button>
+
+                <button class="cc-shape-card" type="button" data-shape="evergreen" style="--cc-card-i: 1">
+                  <div class="cc-shape-card__head">
+                    <span class="cc-shape-card__kind">Evergreen</span>
+                  </div>
+                  <h3 class="cc-shape-card__title">Q&amp;A Fridays revival</h3>
+                  <p class="cc-shape-card__desc">A weekly rhythm your audience already looks for. Six posts, one every Friday, easy to sustain.</p>
+                  <div class="cc-shape-card__meta">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
+                    6 posts, weekly Fridays
+                    <span class="cc-shape-card__meta-sep">·</span>
+                    Highest reply rate last quarter
+                  </div>
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+      <section class="view scout-view" id="view-scout-p2"       data-scout-src="phase-2-review"></section>
+      <section class="view scout-view" id="view-scout-p2-5"     data-scout-src="phase-2-5-inflight"></section>
+      <section class="view scout-view" id="view-scout-p3"       data-scout-src="phase-3-home"></section>
+      <section class="view scout-view" id="view-scout-kb"       data-scout-src="kb-drawer"></section>
+      <section class="view scout-view" id="view-scout-failures" data-scout-src="failure-modes"></section>
+      <section class="view scout-view" id="view-scout-composer" data-scout-src="composer-hedging"></section>
+      <section class="view scout-view" id="view-scout-playground" data-scout-src="post-playground"></section>
     </main>
   </div>
 
@@ -180,6 +300,6 @@
     </button>
   </div>
 
-  <script src="./app.js?v=19"></script>
+  <script src="./app.js?v=63"></script>
 </body>
 </html>

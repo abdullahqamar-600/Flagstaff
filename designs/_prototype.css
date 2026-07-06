@@ -1,0 +1,141 @@
+/* =========================================================================
+   Prototype-mode chrome — loaded alongside _shared.css
+   - Hides the per-file design-viewer annotation bar
+   - Styles for the floating "Scout flow" mini-menu (injected by _prototype.js)
+   - Micro-styling so any sidebar / [data-goto] element reads as clickable
+   ========================================================================= */
+
+/* Hide the per-file design-viewer bar in prototype mode */
+.designview { display: none !important; }
+
+/* Sidebar buttons become anchors in prototype mode — mark hover state */
+.sidebar__btn { cursor: pointer; }
+
+/* Any element with data-goto is clickable (falls back to pointer cursor) */
+[data-goto] { cursor: pointer; }
+
+/* -------------------------------------------------------------------------
+   Floating mini-menu (bottom right)
+   Trigger button opens a small panel with links to all 8 flow designs.
+   ------------------------------------------------------------------------- */
+.flow-menu {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  font-family: var(--font-sans);
+}
+.flow-menu__trigger {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px;
+  padding: 0 14px 0 12px;
+  border-radius: 999px;
+  background: #1F2937;
+  color: #FFFFFF;
+  font-size: 13px; font-weight: 500;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.12);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.flow-menu__trigger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22), 0 3px 8px rgba(15, 23, 42, 0.14);
+}
+.flow-menu__trigger svg { width: 14px; height: 14px; }
+.flow-menu__badge {
+  display: inline-grid; place-items: center;
+  min-width: 18px; height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 11px; font-weight: 600;
+  line-height: 1;
+}
+.flow-menu__panel {
+  position: absolute;
+  right: 0;
+  bottom: 52px;
+  width: 320px;
+  background: #FFFFFF;
+  border-radius: 14px;
+  box-shadow:
+    0 20px 40px rgba(15, 23, 42, 0.18),
+    0 4px 12px rgba(15, 23, 42, 0.10),
+    0 0 0 1px rgba(15, 23, 42, 0.04);
+  padding: 10px;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transform-origin: bottom right;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.flow-menu.is-open .flow-menu__panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.flow-menu__header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 8px 8px;
+  border-bottom: 1px solid #EDEEF2;
+  margin-bottom: 6px;
+}
+.flow-menu__title {
+  font-size: 13px; font-weight: 600;
+  color: #263238;
+  letter-spacing: -0.1px;
+}
+.flow-menu__sub { font-size: 11px; color: #919DAE; }
+.flow-menu__group-label {
+  padding: 8px 8px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: #919DAE;
+}
+.flow-menu__link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #263238;
+  font-size: 13px;
+  transition: background 160ms ease;
+}
+.flow-menu__link:hover { background: #F5F6FB; text-decoration: none; }
+.flow-menu__link .num {
+  font-size: 10px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  color: #919DAE;
+  min-width: 28px;
+}
+.flow-menu__link .name { flex: 1; }
+.flow-menu__link .arrow { color: #B0B7C3; display: inline-flex; }
+.flow-menu__link .arrow svg { width: 12px; height: 12px; }
+.flow-menu__link:hover .arrow { color: var(--primary); }
+.flow-menu__link.is-current {
+  background: linear-gradient(180deg, #F4F5FF 0%, #EEF0FF 100%);
+}
+.flow-menu__link.is-current .num { color: var(--primary); }
+
+/* Small pill in the corner that says "Prototype" — reserved for future use */
+.proto-pill {
+  position: fixed;
+  left: calc(var(--sidebar-w, 72px) + 20px);
+  bottom: 20px;
+  z-index: 39;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(31, 41, 55, 0.85);
+  color: #FFFFFF;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.proto-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #ABEFC6;
+  box-shadow: 0 0 0 3px rgba(6, 118, 71, 0.20);
+}

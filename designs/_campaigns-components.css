@@ -1,0 +1,2704 @@
+/* =========================================================================
+   Campaigns — Component styles
+   ─────────────────────────────────────────────────────────────────────────
+   Import this file on any page that needs the Campaigns module components.
+   It defines module-scope tokens on :root, then styles every named component
+   documented in design-system/campaigns.md §3.
+
+     <link rel="stylesheet" href="/designs/_campaigns-components.css" />
+
+   Base tokens (color primitives, typography, spacing, radius, elevation,
+   motion) come from design-system/tokens.css which this file imports.
+
+   The showcase / spec sheet is designs/campaign-components.html.
+   Written spec (naming, do's and don'ts) is design-system/campaigns.md.
+
+   Section index
+     1  Module tokens                 :root
+     2  Approval side drawer          .drawer / .drawer__*
+     3  Generated post — X card       .xpost / .xpost__*
+     4  Post loading skeleton         .xpost--loading, .skeleton
+     5  Campaign detail panel         .cpanel + .cfield
+     6  Post analytics grid           .analytics / .analytics__*
+     7  Horizontal post row           .postrow / .postrow__*
+     8  Date + time picker            .dtp / .dtp__*
+     9  Dropdown options menu         .ddmenu / .ddmenu__*
+    10  Campaign disclaimer           .cfm / .cfm__*
+    11  Rejection feedback modal      .fbmodal / .fbmodal__*
+    12  Read-only mode banner         .robanner / .robanner__*
+
+   Class-naming rules
+     • BEM. `.component__part` for children, `.component--variant` for state.
+     • Never use a status-badge color family for anything other than an
+       approval-state pill. See campaigns.md §3.2 for the trio spec.
+     • Prefer semantic tokens (--camp-*) over raw hex. If you must introduce
+       a new hex, add a token below and reference it — do NOT bury a raw hex
+       in a component.
+
+   ========================================================================= */
+
+@import url("../design-system/tokens.css?v=2");
+
+/* -------------------------------------------------------------------------
+   1) MODULE TOKENS
+   Additive layer on top of tokens.css. Names begin with --camp- so a
+   reader immediately knows the value belongs to the Campaigns module and
+   isn't part of the app-wide primitive/semantic layer.
+   ------------------------------------------------------------------------- */
+:root {
+  /* Brand — the campaigns module uses a slightly cooler indigo than the
+     app-wide --primary. Documented in campaigns.md §2. */
+  --camp-primary:              #545BD1;
+  --camp-primary-hover:        #4848E0;
+  --camp-primary-tint:         #EEEFFA;   /* Analytics tile bg, location chip bg */
+  --camp-primary-tint-cool:    #EEF2F6;   /* Audience chip bg, dtp time cell selected */
+  --camp-primary-tint-hover:   #DFE1F5;
+
+  /* Text — the campaign module's text scale sits at #263238/#4B5565/#697586,
+     one step warmer than the app-wide neutral-900 primary. */
+  --camp-text-primary:         #263238;
+  --camp-text-secondary:       #4B5565;
+  --camp-text-tertiary:        #697586;
+  --camp-text-quiet:           #4E4E5B;   /* Post body copy */
+  --camp-text-support:         #455A64;   /* Confirmation-modal description */
+  --camp-text-code:            #202939;   /* Selected time-cell text */
+  --camp-text-strong:          #282828;   /* X-post author name */
+  --camp-text-modal-title:     #344054;
+
+  /* Surfaces */
+  --camp-surface:              #FFFFFF;
+  --camp-surface-panel:        rgba(255, 255, 255, 0.4);   /* Translucent floating dashboard panel; 24px radius, backdrop-blur */
+  --camp-surface-field:        #F8FAFC;   /* .cfield background */
+  --camp-surface-hover:        #F5F7FA;   /* Icon-button hover, close-X hover */
+  --camp-surface-comment:      #F4F4F4;   /* Comment bubble bg */
+  --camp-surface-canvas:       #ECECEC;   /* Panel-behind canvas */
+  --camp-surface-today:        #F9FAFB;   /* Date-picker "today" pill */
+  --camp-surface-logo-tile:    #000000;   /* Small black logo tile inside .acct-switch; 24×24, 7px radius */
+
+  /* Borders */
+  --camp-border:               #ECEFF1;   /* Modal dividers, dtp column separator */
+  --camp-border-input:         #D0D5DD;   /* Inputs, selects */
+  --camp-border-subtle:        #EBEBEB;   /* Compose input, refine-button outline */
+  --camp-border-quiet:         #EEEEEE;
+  --camp-border-hairline:      #EDEEF2;   /* Card divider inside .camp-card */
+
+  /* Status families (mirror campaigns.md §2 status table).
+     For pills that surface an approval state on cards, drawers, rows. */
+  --camp-status-progress-bg:   #EFF8FF;
+  --camp-status-progress-bd:   #B2DDFF;
+  --camp-status-progress-fg:   #175CD3;
+  --camp-status-progress-solid:#0288D1;   /* .cpanel__badge outline */
+
+  --camp-status-draft-bg:      #F4F3FF;
+  --camp-status-draft-bd:      #D9D6FE;
+  --camp-status-draft-fg:      #5925DC;
+
+  --camp-status-review-bg:     #FFFAEB;
+  --camp-status-review-bd:     #FEDF89;
+  --camp-status-review-fg:     #B54708;
+
+  --camp-status-published-bg:  #ECFDF3;
+  --camp-status-published-bd:  #ABEFC6;
+  --camp-status-published-fg:  #067647;
+
+  --camp-status-revision-bg:   #FEF6EE;
+  --camp-status-revision-bd:   #F9DBAF;
+  --camp-status-revision-fg:   #B93815;
+
+  --camp-status-rejected-bg:   #FEF3F2;
+  --camp-status-rejected-bd:   #FECDCA;
+  --camp-status-rejected-fg:   #B42318;
+
+  /* Ancillary marks */
+  --camp-tag:                  #0077B5;   /* Hashtag color inside .drawer */
+  --camp-verified:             #21C8F2;   /* Blue-check on .drawer__author */
+  --camp-verified-x:           #1D9BF0;   /* Blue-check on .xpost */
+  --camp-x-handle:             #7C7C7C;   /* X handle + date */
+  --camp-x-kebab:              #6D6D6D;
+  --camp-refine-fg:            #605E5E;
+
+  /* Skeleton pulse tile */
+  --camp-skeleton:             rgba(0, 0, 0, 0.08);
+
+  /* Feature-specific — confirmation modal hero.
+     These four colors ONLY live in the .cfm hero. Do not reuse. */
+  --camp-cfm-gradient:         linear-gradient(101.55deg, #5D64D7 -25.49%, #EBECFF 100.82%);
+  --camp-cfm-ring:             rgba(234, 236, 240, 0.5);
+  --camp-cfm-ring-solid:       #EAECF0;
+  --camp-cfm-chip-purple-bg:   #DFCAFF;
+  --camp-cfm-chip-purple-fg:   #2F0591;
+  --camp-cfm-chip-blue-bg:     #C3E5FF;
+  --camp-cfm-chip-blue-fg:     #083583;
+
+  /* Elevation — component-specific shadow recipes.
+     These extend tokens.css --shadow-* with values matched to the
+     production Figma spec. */
+  --camp-shadow-post:          4px 4px 64px rgba(33, 50, 113, 0.08);
+  --camp-shadow-drawer:        -18px 0 40px -14px rgba(38, 50, 56, 0.16);
+  --camp-shadow-dtp:           0 0 72px 4px rgba(0, 0, 0, 0.12);
+  --camp-shadow-dtp-cal:       0 20px 24px -4px rgba(16, 24, 40, 0.08),
+                               0 8px 8px -4px rgba(16, 24, 40, 0.03);
+  --camp-shadow-menu:          0 1px 3px rgba(16, 24, 40, 0.1),
+                               0 1px 2px rgba(16, 24, 40, 0.06);
+  --camp-shadow-modal:         0 12px 16px -4px rgba(16, 24, 40, 0.08),
+                               0 4px 6px -2px rgba(16, 24, 40, 0.03);
+  --camp-shadow-modal-lg:      0 20px 40px -12px rgba(16, 24, 40, 0.16),
+                               0 8px 12px -6px rgba(16, 24, 40, 0.06);
+  --camp-shadow-btn-xs:        0 1px 2px rgba(16, 24, 40, 0.05);
+  --camp-shadow-btn-glow:      0 0 16px rgba(0, 0, 0, 0.06);
+  --camp-shadow-chip:          0 4px 4px rgba(0, 0, 0, 0.06);
+
+  /* AI-authored glow — the indigo halo painted on any Scout-signed surface
+     (badges, avatars, pills). Same hue as --camp-primary at low alpha.
+     Sized by badge diameter: sm (22px), base (28px), lg (32px). */
+  --camp-shadow-ai-glow-sm:    0 2px 6px rgba(84, 91, 209, 0.24);
+  --camp-shadow-ai-glow:       0 2px 8px rgba(84, 91, 209, 0.28);
+  --camp-shadow-ai-glow-lg:    0 2px 10px rgba(84, 91, 209, 0.28);
+
+  /* Campaign-scoped focus ring. Same recipe as --shadow-focus-ring but
+     built on --camp-primary (#545BD1) so it matches the module's indigo
+     rather than the app-wide --primary (#5B5BF5). */
+  --camp-shadow-focus-ring:    0 0 0 3px rgba(84, 91, 209, 0.18);
+
+  /* Radius aliases — components read intent, not primitive size. */
+  --camp-radius-modal:         12px;
+  --camp-radius-modal-round:   18px;
+  --camp-radius-card:          12px;
+  --camp-radius-field:         12px;
+  --camp-radius-panel:         24px;   /* Side-panel / hero shell radius */
+  --camp-radius-btn:           8px;
+  --camp-radius-input:         8px;
+  --camp-radius-pill:          9999px;
+  --camp-radius-chip:          8px;
+  --camp-radius-media:         8px;
+  --camp-radius-menu-item:     6px;
+
+  /* Text — additional aliases surfaced from campaigns.md §2 Type. */
+  --camp-text-timestamp:       #919DAE;  /* Card timestamp, zero-count meta */
+
+  /* Post-preview typography — the .xpost card mimics X (Twitter), which
+     uses Outfit-like weight. Kept as an alias so components read intent. */
+  --font-x-preview:            'Outfit', var(--font-sans);
+}
+
+/* -------------------------------------------------------------------------
+   2) APPROVAL SIDE DRAWER  (.drawer)
+   407×876 right-side drawer opened from any post in a campaign for review.
+   Two variants share the shell:
+     .drawer            — post + comments (§3.8 in campaigns.md)
+     .drawer + analytics tiles — post-publish variant (§3.13)
+   Hashtag row and image grid are opt-in child blocks.
+   ------------------------------------------------------------------------- */
+.drawer {
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+  padding: 24px;
+  gap: 14px;
+  width: 407px;
+  height: 876px;
+  background: var(--camp-surface);
+  border-radius: 0;
+  box-shadow: var(--camp-shadow-drawer);
+  overflow-y: auto;
+}
+.drawer__inner {
+  width: 359px;
+  align-self: center;
+  display: flex; flex-direction: column;
+  gap: 16px;
+}
+
+/* Header ------------------------------------------------------------------ */
+.drawer__titlerow {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  height: 24px;
+}
+.drawer__title-text {
+  font-size: 16px; font-weight: 500; line-height: 24px;
+  color: var(--camp-text-secondary);
+}
+.drawer__title-heavy {
+  font-size: 18px; font-weight: 500; line-height: 160%;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-primary);
+}
+.drawer__close {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  color: var(--camp-text-secondary);
+}
+.drawer__close svg { width: 16px; height: 16px; }
+
+/* Author / body ---------------------------------------------------------- */
+.drawer__body { display: flex; flex-direction: column; gap: 12px; }
+.drawer__author-row { display: flex; align-items: center; gap: 10px; }
+.drawer__avatar {
+  width: 32px; height: 32px; border-radius: var(--camp-radius-pill);
+  background: linear-gradient(135deg, #FEDF89, #E4A73B);
+  flex-shrink: 0;
+}
+.drawer__author { display: flex; align-items: flex-start; gap: 2px; }
+.drawer__author-name {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 16px; font-weight: 500; line-height: 19px;
+  color: var(--camp-text-strong);
+}
+.drawer__verified {
+  width: 14px; height: 14px;
+  display: grid; place-items: center;
+  color: var(--camp-verified);
+}
+.drawer__author-handle {
+  margin-left: 2px;
+  font-size: 14px; font-weight: 400; line-height: 17px;
+  color: #000000;
+}
+.drawer__copy {
+  font-size: 14px; font-weight: 400; line-height: 17px;
+  color: var(--camp-text-quiet);
+}
+.drawer__copy--darker { color: rgba(0, 0, 0, 0.87); }
+
+/* Media / hashtag row ---------------------------------------------------- */
+.drawer__image {
+  width: 359px; height: 224px;
+  border-radius: var(--camp-radius-media);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.15)),
+    linear-gradient(45deg, #FFB74D, #E65100);
+}
+.drawer__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.drawer__tag {
+  font-size: 14px; font-weight: 400; line-height: 17px;
+  color: var(--camp-tag);
+}
+
+/* Author meta strip ------------------------------------------------------ */
+.drawer__meta {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 4px;
+  font-size: 14px; font-weight: 500; line-height: 17px;
+  color: var(--camp-text-secondary);
+}
+.drawer__meta-chip { display: inline-flex; align-items: center; gap: 4px; }
+.drawer__meta-avatar {
+  width: 24px; height: 24px;
+  border-radius: var(--camp-radius-pill);
+  background: linear-gradient(135deg, #B2DDFF, #4A8EDF);
+  flex-shrink: 0;
+}
+.drawer__meta-dot { color: #C6CBD3; margin: 0 4px; }
+
+/* Refine action ---------------------------------------------------------- */
+.drawer__refine {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  width: 100%; height: 40px;
+  padding: 8px 16px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-quiet);
+  border-radius: var(--camp-radius-btn);
+  font-size: 16px; font-weight: 500; letter-spacing: 0.1px;
+  color: var(--camp-text-strong);
+}
+.drawer__refine:hover { background: #FAFAFA; }
+.drawer__refine svg { width: 14px; height: 14px; }
+
+/* Comments block --------------------------------------------------------- */
+.drawer__comments {
+  padding-top: 8px;
+  border-top: 1px solid var(--camp-border-subtle);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.drawer__comment { display: flex; gap: 8px; align-items: flex-start; }
+.drawer__comment-avatar {
+  width: 32px; height: 32px; border-radius: var(--camp-radius-pill);
+  background: linear-gradient(135deg, #C5CAFF, #7C82FB);
+  flex-shrink: 0;
+}
+.drawer__comment-bubble {
+  flex: 1;
+  padding: 6px;
+  background: var(--camp-surface-comment);
+  border-radius: var(--camp-radius-btn);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.drawer__comment-head {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.drawer__comment-name { font-size: 14px; font-weight: 500; color: var(--camp-text-strong); }
+.drawer__comment-role,
+.drawer__comment-time { font-size: 12px; color: var(--camp-text-quiet); }
+.drawer__comment-body { font-size: 14px; line-height: 17px; color: var(--camp-text-quiet); }
+
+/* Compose row */
+.drawer__compose { display: flex; align-items: flex-start; gap: 8px; }
+.drawer__compose-input {
+  flex: 1;
+  height: 36px;
+  padding: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-subtle);
+  border-radius: var(--camp-radius-field);
+  color: #8C8C9E;
+  font-size: 12px; font-weight: 500;
+}
+.drawer__compose-tools { display: flex; align-items: center; gap: 6px; color: var(--camp-refine-fg); }
+.drawer__compose-tools svg { width: 14px; height: 14px; }
+
+/* Image grid (drawer v2) */
+.drawer__grid {
+  display: flex; align-items: stretch;
+  gap: 4px;
+  width: 359px; height: 198px;
+  border-radius: var(--camp-radius-field);
+  overflow: hidden;
+}
+.drawer__grid-lg {
+  width: 226px; height: 100%;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.15)),
+    linear-gradient(180deg, #C6E7FF, #4EA6D6);
+}
+.drawer__grid-col {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.drawer__grid-sm {
+  flex: 1;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.15)),
+    linear-gradient(135deg, #FFCFA9, #F97316);
+}
+.drawer__grid-sm--alt {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.15)),
+    linear-gradient(135deg, #F9A8D4, #DB2777);
+}
+
+/* -------------------------------------------------------------------------
+   3) GENERATED POST — X-STYLE CARD  (.xpost)
+   Preview surface for a scheduled X post inside a campaign detail view.
+   The layout mirrors X so authors preview what actually publishes.
+   Optional footer with Draft / Schedule / Post actions.
+   ------------------------------------------------------------------------- */
+.xpost {
+  display: flex; flex-direction: column;
+  padding: 18px; gap: 1px;
+  width: 421px;
+  background: var(--camp-surface);
+  border-radius: 24px;
+  box-shadow: var(--camp-shadow-post);
+}
+.xpost__body { display: flex; align-items: flex-start; gap: 12px; }
+.xpost__avatar {
+  width: 40px; height: 40px; border-radius: var(--camp-radius-pill);
+  background: linear-gradient(135deg, #FEDF89, #E4A73B);
+  flex-shrink: 0;
+}
+.xpost__main {
+  flex: 1;
+  min-width: 0;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.xpost__head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.xpost__idrow {
+  display: flex; align-items: center; gap: 4px;
+  min-width: 0;
+}
+.xpost__name {
+  font-family: var(--font-x-preview);
+  font-size: 16px; font-weight: 600; line-height: 20px;
+  color: var(--camp-text-strong);
+}
+.xpost__verified {
+  width: 17px; height: 17px;
+  display: grid; place-items: center;
+  color: var(--camp-verified-x);
+}
+.xpost__handle,
+.xpost__date {
+  font-family: var(--font-x-preview);
+  font-size: 14px; font-weight: 400; line-height: 18px;
+  color: var(--camp-x-handle);
+}
+.xpost__dot { color: var(--camp-x-handle); }
+.xpost__kebab {
+  display: flex; align-items: center; gap: 2px;
+  color: var(--camp-x-kebab);
+  flex-shrink: 0;
+}
+.xpost__kebab span {
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--camp-x-kebab);
+}
+.xpost__text {
+  font-family: var(--font-x-preview);
+  font-size: 14px; font-weight: 400; line-height: 22px;
+  color: var(--camp-text-strong);
+}
+.xpost__image {
+  width: 100%;
+  aspect-ratio: 325 / 202.89;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.18)),
+    linear-gradient(45deg, #F2C94C, #EB5757);
+  border-radius: var(--camp-radius-media);
+}
+.xpost__footer {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px;
+  padding: 12px 16px 0;
+  margin-top: 8px;
+  border-top: 1px solid var(--camp-border-hairline);
+}
+.xpost__action {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-x-preview);
+  font-size: 14px; font-weight: 400; line-height: 18px;
+  letter-spacing: 0.1px;
+  color: var(--camp-refine-fg);
+}
+.xpost__action svg { width: 14px; height: 14px; }
+
+/* -------------------------------------------------------------------------
+   4) POST LOADING SKELETON  (.xpost--loading, .skeleton)
+   Reuses the .xpost shell; the avatar hides, header collapses to a small
+   skeleton chip + kebab, and the body renders three pulsing lines.
+   ------------------------------------------------------------------------- */
+.xpost--loading { min-height: 124px; }
+.xpost__head--loading {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.skeleton {
+  background: var(--camp-skeleton);
+  border-radius: 3px;
+  animation: camp-skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes camp-skeleton-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.85; }
+}
+.xpost__skeleton-lines {
+  margin-top: 4px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.xpost__skeleton-lines .skeleton { height: 16px; }
+.xpost__skeleton-lines .skeleton:nth-child(1) { width: 100%; }
+.xpost__skeleton-lines .skeleton:nth-child(2) { width: 81%; }
+.xpost__skeleton-lines .skeleton:nth-child(3) { width: 50%; }
+
+/* -------------------------------------------------------------------------
+   5) CAMPAIGN DETAIL PANEL  (.cpanel + .cfield)
+   Plan-and-configure surface. Title + status badge, six field cards,
+   sticky action footer.
+   ------------------------------------------------------------------------- */
+.cpanel {
+  display: flex; flex-direction: column;
+  align-items: flex-end; justify-content: space-between;
+  padding: 16px;
+  gap: 32px;
+  width: 421px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-card);
+}
+.cpanel__inner {
+  width: 100%;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.cpanel__head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.cpanel__title {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 28px; font-weight: 500; line-height: 116.7%;
+  color: var(--camp-text-primary);
+}
+.cpanel__head-right { display: flex; align-items: center; gap: 6px; }
+.cpanel__badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px;
+  background: var(--camp-status-progress-bg);
+  border: 1px solid var(--camp-status-progress-solid);
+  border-radius: var(--camp-radius-pill);
+  font-size: 12px; font-weight: 500; line-height: 18px;
+  letter-spacing: 0.1px;
+  color: var(--camp-status-progress-fg);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cpanel__badge--draft     { background: var(--camp-status-draft-bg);     border-color: var(--camp-status-draft-bd);     color: var(--camp-status-draft-fg); }
+.cpanel__badge--review    { background: var(--camp-status-review-bg);    border-color: var(--camp-status-review-bd);    color: var(--camp-status-review-fg); }
+.cpanel__badge--published { background: var(--camp-status-published-bg); border-color: var(--camp-status-published-bd); color: var(--camp-status-published-fg); }
+.cpanel__badge--revision  { background: var(--camp-status-revision-bg);  border-color: var(--camp-status-revision-bd);  color: var(--camp-status-revision-fg); }
+.cpanel__badge--rejected  { background: var(--camp-status-rejected-bg);  border-color: var(--camp-status-rejected-bd);  color: var(--camp-status-rejected-fg); }
+.cpanel__kebab {
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  color: var(--neutral-400);
+}
+.cpanel__kebab svg { width: 14px; height: 14px; }
+
+.cpanel__fields { display: flex; flex-direction: column; gap: 16px; }
+
+.cfield {
+  display: flex; align-items: flex-start; gap: 6px;
+  padding: 12px;
+  background: var(--camp-surface-field);
+  border-radius: var(--camp-radius-field);
+}
+.cfield__icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  color: var(--camp-text-secondary);
+  margin-top: 1px;
+  display: grid; place-items: center;
+}
+.cfield__icon svg { width: 18px; height: 18px; }
+.cfield__body {
+  flex: 1;
+  min-width: 0;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.cfield__label {
+  font-size: 14px; font-weight: 500; line-height: 20px;
+  color: var(--camp-text-secondary);
+}
+.cfield__value {
+  font-size: 14px; font-weight: 400; line-height: 20px;
+  color: var(--camp-text-tertiary);
+}
+.cfield__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cfield__chip {
+  display: inline-flex; align-items: center;
+  padding: 0 8px; height: 28px;
+  background: var(--camp-primary-tint-cool);
+  border-radius: 30px;
+  font-size: 14px; line-height: 20px;
+  color: var(--camp-text-tertiary);
+}
+.cfield__cat { display: inline-flex; align-items: center; gap: 4px; }
+.cfield__cat-logo {
+  width: 16px; height: 16px;
+  display: grid; place-items: center;
+  background: #000000;
+  border-radius: 3.2px;
+  color: var(--camp-surface);
+  font-family: var(--font-x-preview);
+  font-size: 11px; font-weight: 700;
+}
+.cfield__value-loc { display: flex; flex-wrap: wrap; gap: 6px; }
+.cfield__loc {
+  display: inline-flex; align-items: center;
+  padding: 4px 8px;
+  background: var(--camp-primary-tint);
+  border-radius: 60px;
+  font-size: 14px; line-height: 20px;
+  color: var(--camp-primary);
+}
+.cfield--split {
+  display: flex; gap: 12px;
+  padding: 0; background: transparent;
+}
+.cfield--split > .cfield { flex: 1; }
+
+.cpanel__foot {
+  width: 100%;
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 12px;
+}
+.cpanel__btn-draft {
+  display: inline-flex; align-items: center;
+  padding: 6px 8px; gap: 8px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-btn);
+  font-size: 16px; font-weight: 500; letter-spacing: 0.1px;
+  color: #212121;
+}
+.cpanel__btn-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 12px 16px; gap: 4px;
+  background: var(--camp-primary);
+  border-radius: var(--camp-radius-btn);
+  font-size: 16px; font-weight: 500; letter-spacing: 0.1px;
+  color: var(--camp-surface);
+}
+.cpanel__btn-primary:hover { background: var(--camp-primary-hover); }
+
+/* -------------------------------------------------------------------------
+   6) POST ANALYTICS GRID  (.analytics)
+   Six tiles rendered inside a drawer or detail panel to show published-post
+   performance. Tile bg is --camp-primary-tint.
+   ------------------------------------------------------------------------- */
+.analytics__title {
+  font-size: 16px; font-weight: 500; line-height: 150%;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-primary);
+}
+.analytics__grid { display: flex; flex-direction: column; gap: 6px; }
+.analytics__tile {
+  padding: 6px 8px;
+  background: var(--camp-primary-tint);
+  border-radius: var(--camp-radius-btn);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.analytics__tile-label {
+  font-size: 13px; line-height: 143%;
+  letter-spacing: 0.17px;
+  color: rgba(0, 0, 0, 0.6);
+}
+.analytics__tile-value {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 16px; font-weight: 500;
+  letter-spacing: 0.15px;
+  color: rgba(0, 0, 0, 0.87);
+}
+.analytics__tile-delta {
+  display: inline-flex; align-items: center; gap: 2px;
+  font-size: 13px;
+  color: var(--success-main);
+}
+.analytics__tile-delta svg { width: 14px; height: 14px; }
+
+/* -------------------------------------------------------------------------
+   7) HORIZONTAL POST ROW  (.postrow)
+   Compact list row for text-only scheduled posts. Drag grip on the left,
+   pagination + AI signal in the header, quick actions on the right.
+   ------------------------------------------------------------------------- */
+.postrow {
+  display: flex; align-items: center;
+  width: 842px; height: 135px;
+  padding: 0 0 0 24px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-card);
+  cursor: pointer;
+  transition: box-shadow var(--duration-fast, 140ms) var(--ease-standard, ease),
+              transform var(--duration-fast, 140ms) var(--ease-standard, ease);
+}
+.postrow:hover {
+  box-shadow: 0 4px 12px rgba(17, 17, 20, 0.06), 0 1px 3px rgba(17, 17, 20, 0.04);
+  transform: translateY(-1px);
+}
+.postrow:focus-visible {
+  outline: 2px solid var(--camp-primary);
+  outline-offset: 2px;
+}
+.postrow__grip {
+  width: 18px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0;
+}
+.postrow__grip-row {
+  display: flex; align-items: center; gap: 2px;
+  margin: -2px 0;
+}
+.postrow__grip-row:last-child { margin: 0; }
+.postrow__grip-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: #CDD5DF;
+}
+.postrow__cell {
+  flex: 1;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-card);
+}
+.postrow__row { display: flex; align-items: flex-start; }
+.postrow__main {
+  flex: 1;
+  min-width: 0;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.postrow__label {
+  display: flex; align-items: center; gap: 8px;
+  height: 20px;
+}
+.postrow__label-text {
+  font-size: 12px; line-height: 20px;
+  color: var(--camp-text-secondary);
+}
+.postrow__ai-badge {
+  display: grid; place-items: center;
+  width: 20px; height: 20px;
+  border-radius: var(--camp-radius-pill);
+  background: linear-gradient(295.57deg, #A448F9 2.63%, #3944FF 79.1%);
+  color: var(--camp-surface);
+}
+.postrow__ai-badge svg { width: 11px; height: 11px; }
+.postrow__copy {
+  font-size: 14px; line-height: 18px;
+  color: var(--camp-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.postrow__right {
+  display: flex; align-items: center; gap: 4px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding-left: 12px;
+}
+.postrow__status {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px;
+  background: var(--camp-status-progress-bg);
+  border: 1px solid var(--camp-status-progress-bd);
+  border-radius: var(--camp-radius-pill);
+  font-size: 12px; font-weight: 500; line-height: 18px;
+  letter-spacing: 0.1px;
+  color: var(--camp-status-progress-fg);
+  white-space: nowrap;
+}
+.postrow__status--draft     { background: var(--camp-status-draft-bg);     border-color: var(--camp-status-draft-bd);     color: var(--camp-status-draft-fg); }
+.postrow__status--review    { background: var(--camp-status-review-bg);    border-color: var(--camp-status-review-bd);    color: var(--camp-status-review-fg); }
+.postrow__status--published { background: var(--camp-status-published-bg); border-color: var(--camp-status-published-bd); color: var(--camp-status-published-fg); }
+.postrow__status--revision  { background: var(--camp-status-revision-bg);  border-color: var(--camp-status-revision-bd);  color: var(--camp-status-revision-fg); }
+.postrow__status--rejected  { background: var(--camp-status-rejected-bg);  border-color: var(--camp-status-rejected-bd);  color: var(--camp-status-rejected-fg); }
+
+/* Per-post flags — Locked, Hedged. These are NOT approval states (§2 table).
+   Neutral chip with a leading icon so a scanner reads them as annotations,
+   not workflow. Locked keeps a padlock; Hedged pairs with the voice-fit
+   warning in the foot row so we don't repaint the alarm here. */
+.postrow__flag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  background: var(--camp-surface-hover);
+  border: 1px solid var(--camp-border-quiet);
+  border-radius: var(--camp-radius-pill);
+  font-size: 12px; font-weight: 500; line-height: 18px;
+  letter-spacing: 0.1px;
+  color: var(--camp-text-secondary);
+  white-space: nowrap;
+}
+.postrow__flag svg { width: 10px; height: 10px; }
+
+.postrow__kebab {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border-radius: 6px;
+  color: var(--camp-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast);
+}
+.postrow__kebab:hover { background: var(--camp-surface-hover); color: var(--camp-text-primary); }
+.postrow__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+.postrow__attach {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 8px; height: 24px;
+  background: var(--camp-surface-hover);
+  border-radius: var(--camp-radius-pill);
+  font-size: 12px; line-height: 20px;
+  color: var(--camp-text-secondary);
+}
+.postrow__attach svg { width: 12px; height: 12px; color: var(--camp-text-primary); }
+.postrow__go {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  background: var(--camp-primary-tint);
+  border-radius: var(--camp-radius-pill);
+  color: var(--camp-text-primary);
+}
+.postrow__go:hover { background: var(--camp-primary-tint-hover); }
+.postrow__go svg { width: 14px; height: 14px; }
+
+/* -------------------------------------------------------------------------
+   8) DATE + TIME PICKER  (.dtp)
+   516×588 modal — header, calendar left, three-column time picker right,
+   footer. Selected day pill is --camp-primary; today is a soft gray disc;
+   events show a small dot below.
+   ------------------------------------------------------------------------- */
+.dtp {
+  display: flex; flex-direction: column;
+  width: 516px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-modal);
+  box-shadow: var(--camp-shadow-dtp);
+  overflow: hidden;
+}
+.dtp__head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--camp-border);
+}
+.dtp__head-text { display: flex; flex-direction: column; }
+.dtp__title {
+  font-size: 18px; font-weight: 500; line-height: 24px;
+  color: var(--camp-text-primary);
+}
+.dtp__sub {
+  font-size: 14px; line-height: 28px; letter-spacing: 0.1px;
+  color: var(--camp-text-secondary);
+}
+.dtp__close {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-btn);
+  color: var(--neutral-400);
+}
+.dtp__close:hover { background: var(--camp-surface-hover); }
+.dtp__close svg { width: 20px; height: 20px; }
+
+.dtp__body { display: flex; align-items: stretch; background: var(--camp-surface); }
+.dtp__cal {
+  width: 328px;
+  padding: 12px 24px 20px;
+  background: var(--camp-surface);
+  box-shadow: var(--camp-shadow-dtp-cal);
+  z-index: 1;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.dtp__month {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.dtp__nav-btn {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-btn);
+  color: var(--camp-text-primary);
+}
+.dtp__nav-btn:hover { background: var(--camp-surface-hover); }
+.dtp__nav-btn svg { width: 20px; height: 20px; }
+.dtp__month-label {
+  font-size: 16px; font-weight: 500; line-height: 24px;
+  color: var(--camp-text-primary);
+}
+.dtp__actions { display: flex; gap: 12px; }
+.dtp__input {
+  flex: 1; height: 40px;
+  padding: 8px 14px;
+  display: flex; align-items: center;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-input);
+  border-radius: var(--camp-radius-input);
+  font-size: 16px; line-height: 24px;
+  color: var(--camp-text-primary);
+}
+.dtp__today {
+  height: 40px;
+  padding: 10px 14px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border);
+  border-radius: var(--camp-radius-btn);
+  font-size: 14px; font-weight: 500;
+  color: var(--camp-text-primary);
+}
+.dtp__today:hover { background: var(--camp-surface-hover); }
+
+.dtp__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 40px);
+  row-gap: 4px;
+}
+.dtp__dow {
+  height: 40px;
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.2px;
+  color: #98A2B3;
+}
+.dtp__day {
+  position: relative;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-pill);
+  font-size: 14px; font-weight: 400; line-height: 20px;
+  color: var(--camp-text-primary);
+  cursor: pointer;
+}
+.dtp__day:hover { background: var(--camp-surface-hover); }
+.dtp__day--muted { color: var(--camp-text-tertiary); }
+.dtp__day--selected {
+  background: var(--camp-primary);
+  color: var(--camp-surface);
+  font-weight: 500;
+  font-family: var(--font-x-preview);
+}
+.dtp__day--selected:hover { background: var(--camp-primary-hover); }
+.dtp__day--today { background: var(--camp-surface-today); }
+.dtp__day-dot {
+  position: absolute; left: 50%; bottom: 4px;
+  transform: translateX(-50%);
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #98A2B3;
+}
+.dtp__day--has-event .dtp__day-dot { background: var(--camp-primary); }
+
+.dtp__time { display: flex; flex: 1; background: var(--camp-surface); }
+.dtp__time-col {
+  width: 60px;
+  padding: 12px 8px 0;
+  max-height: 440px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center;
+  border-left: 1px solid var(--camp-border);
+}
+.dtp__time-col:last-child { overflow: hidden; }
+.dtp__time-col::-webkit-scrollbar { width: 4px; }
+.dtp__time-col::-webkit-scrollbar-thumb { background: #E4E6EA; border-radius: 4px; }
+
+.dtp__time-cell {
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  font-family: var(--font-x-preview);
+  font-size: 16px; line-height: 28px;
+  color: var(--camp-text-secondary);
+  border-radius: 4px;
+}
+.dtp__time-cell.is-selected {
+  background: var(--camp-primary-tint-cool);
+  color: var(--camp-text-code);
+  font-weight: 500;
+}
+
+.dtp__foot {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid var(--camp-border);
+}
+.dtp__btn-cancel {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 40px;
+  padding: 10px 14px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-btn);
+  font-size: 14px; font-weight: 500;
+  color: var(--camp-text-primary);
+}
+.dtp__btn-cancel:hover { background: var(--camp-surface-hover); }
+.dtp__btn-save {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 40px;
+  padding: 10px 14px;
+  background: var(--camp-primary);
+  border-radius: var(--camp-radius-btn);
+  box-shadow: var(--camp-shadow-btn-xs);
+  font-size: 14px; font-weight: 500;
+  color: var(--camp-surface);
+}
+.dtp__btn-save:hover { background: var(--camp-primary-hover); }
+
+/* -------------------------------------------------------------------------
+   9) DROPDOWN OPTIONS MENU  (.ddmenu)
+   Anchored options menu. 20×20 line icon + label per row.
+   ------------------------------------------------------------------------- */
+.ddmenu {
+  width: 320px;
+  padding: 4px 0;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-modal);
+  box-shadow: var(--camp-shadow-menu);
+  display: flex; flex-direction: column;
+}
+.ddmenu__item { padding: 1px 6px; }
+.ddmenu__item-inner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 10px 10px 8px;
+  border-radius: var(--camp-radius-menu-item);
+}
+.ddmenu__item:hover .ddmenu__item-inner { background: #F5F6FA; }
+.ddmenu__item-icon {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  color: var(--camp-text-secondary);
+  display: grid; place-items: center;
+}
+.ddmenu__item-icon svg { width: 20px; height: 20px; }
+.ddmenu__item-label {
+  font-size: 14px; font-weight: 500; line-height: 24px;
+  color: var(--camp-text-primary);
+}
+
+/* -------------------------------------------------------------------------
+   10) CAMPAIGN DISCLAIMER  (.cfm)
+   Pre-launch confirmation modal. Indigo gradient hero with concentric
+   rings + floating example post chips.
+   The hero colors (--camp-cfm-*) are used ONLY here. Do not reuse.
+   ------------------------------------------------------------------------- */
+.cfm {
+  position: relative;
+  width: 469px;
+  padding: 0 0 16px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-modal);
+  box-shadow: var(--camp-shadow-modal);
+  overflow: hidden;
+}
+.cfm__hero {
+  position: relative;
+  width: 100%; height: 204px;
+  background: var(--camp-cfm-gradient);
+  overflow: hidden;
+}
+.cfm__rings {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  -webkit-mask-image: radial-gradient(circle at center, #000 0%, transparent 65%);
+          mask-image: radial-gradient(circle at center, #000 0%, transparent 65%);
+}
+.cfm__rings-inner { position: relative; width: 336px; height: 336px; }
+.cfm__ring {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid var(--camp-cfm-ring);
+}
+.cfm__ring--1 { width: 96px;  height: 96px;  }
+.cfm__ring--2 { width: 144px; height: 144px; border-color: rgba(234, 236, 240, 0.45); }
+.cfm__ring--3 { width: 192px; height: 192px; border-color: rgba(234, 236, 240, 0.6); }
+.cfm__ring--4 { width: 240px; height: 240px; border-color: rgba(234, 236, 240, 0.4); }
+.cfm__ring--5 { width: 288px; height: 288px; border-color: rgba(234, 236, 240, 0.4); }
+.cfm__ring--6 { width: 336px; height: 336px; border-color: var(--camp-cfm-ring-solid); }
+.cfm__logo {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  background: #000000;
+  border-radius: 4px;
+  font-family: var(--font-x-preview);
+  font-weight: 700; font-size: 14px;
+  color: var(--camp-surface);
+}
+
+.cfm__chip {
+  position: absolute;
+  width: 155px;
+  padding: 8px;
+  display: flex; align-items: center; gap: 6px;
+  border-radius: var(--camp-radius-chip);
+  font-family: var(--font-x-preview);
+  font-size: 12px; line-height: 15px;
+  z-index: 2;
+}
+.cfm__chip--purple {
+  background: var(--camp-cfm-chip-purple-bg);
+  color: var(--camp-cfm-chip-purple-fg);
+  box-shadow: var(--camp-shadow-chip);
+}
+.cfm__chip--blue {
+  background: var(--camp-cfm-chip-blue-bg);
+  color: var(--camp-cfm-chip-blue-fg);
+}
+.cfm__chip-text {
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cfm__chip-icon {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  background: #000000;
+  border-radius: 3px;
+  box-shadow: var(--camp-shadow-btn-xs);
+  color: var(--camp-surface);
+  font-family: var(--font-x-preview);
+  font-weight: 700; font-size: 10px;
+}
+.cfm__chip--1 { top: 16px;  right: 24px; }
+.cfm__chip--2 { top: 74px;  left: 20px;  }
+.cfm__chip--3 { top: 148px; right: 32px; }
+
+.cfm__close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-btn);
+  color: var(--camp-text-secondary);
+  z-index: 3;
+}
+.cfm__close:hover { background: rgba(255, 255, 255, 0.4); }
+.cfm__close svg { width: 20px; height: 20px; }
+
+.cfm__content {
+  padding: 6px 16px 0;
+  display: flex; flex-direction: column; gap: 24px;
+}
+.cfm__title {
+  padding-top: 6px;
+  text-align: center;
+  font-size: 18px; font-weight: 500; line-height: 160%;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-primary);
+}
+.cfm__desc {
+  text-align: center;
+  font-size: 14px; line-height: 143%;
+  letter-spacing: 0.17px;
+  color: var(--camp-text-support);
+}
+.cfm__fields { display: flex; flex-direction: column; gap: 16px; }
+.cfm__field {
+  display: flex; align-items: center;
+  gap: 8px;
+  height: 40px;
+}
+.cfm__field-icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  color: var(--camp-text-secondary);
+}
+.cfm__field-icon svg { width: 18px; height: 18px; }
+.cfm__field-body { display: flex; flex-direction: column; gap: 4px; }
+.cfm__field-label {
+  font-size: 14px; font-weight: 500; line-height: 16px;
+  color: var(--camp-text-secondary);
+}
+.cfm__field-value {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 14px; line-height: 20px;
+  color: #475467;
+}
+.cfm__cat-logo {
+  width: 16px; height: 16px;
+  display: grid; place-items: center;
+  background: #000000;
+  border-radius: 3.2px;
+  color: var(--camp-surface);
+  font-family: var(--font-x-preview);
+  font-weight: 700; font-size: 10px;
+}
+.cfm__field-row { display: flex; gap: 12px; }
+.cfm__field-row > .cfm__field {
+  flex: 1;
+  height: 44px;
+  align-items: flex-start;
+}
+.cfm__field-row .cfm__field-icon { margin-top: 1px; }
+.cfm__field-row .cfm__field-value { color: var(--camp-text-tertiary); }
+
+.cfm__divider {
+  height: 1px;
+  background: var(--camp-primary-tint-cool);
+}
+.cfm__duration {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 14px; line-height: 20px;
+  color: var(--camp-text-secondary);
+}
+.cfm__foot { display: flex; gap: 8px; padding: 8px 16px 0; }
+.cfm__btn-cancel {
+  flex: 1; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 14px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-btn);
+  font-size: 14px; font-weight: 500;
+  color: var(--camp-text-modal-title);
+}
+.cfm__btn-cancel:hover { background: var(--camp-surface-hover); }
+.cfm__btn-confirm {
+  flex: 1; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 16px;
+  background: var(--camp-primary);
+  border-radius: var(--camp-radius-btn);
+  box-shadow: var(--camp-shadow-btn-xs);
+  font-size: 16px; font-weight: 500; letter-spacing: 0.17px;
+  color: var(--camp-surface);
+}
+.cfm__btn-confirm:hover { background: var(--camp-primary-hover); }
+
+/* -------------------------------------------------------------------------
+   11) REJECTION FEEDBACK MODAL  (.fbmodal)
+   Small single-field feedback modal shown when a reviewer rejects.
+   Larger radius (18px) than the standard modal to signal "quick action."
+   ------------------------------------------------------------------------- */
+.fbmodal {
+  position: relative;
+  width: 469px;
+  padding: 0 0 16px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-modal-round);
+  box-shadow: var(--camp-shadow-modal-lg);
+}
+.fbmodal__head {
+  position: relative;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(238, 238, 238, 0.933);
+  display: flex; flex-direction: column;
+}
+.fbmodal__title {
+  padding-right: 60px;
+  font-size: 18px; font-weight: 500; line-height: 28px;
+  color: var(--camp-text-primary);
+}
+.fbmodal__sub {
+  padding-right: 60px;
+  font-size: 14px; line-height: 20px;
+  color: var(--camp-text-secondary);
+}
+.fbmodal__close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-btn);
+  color: var(--neutral-400);
+}
+.fbmodal__close:hover { background: var(--camp-surface-hover); }
+.fbmodal__close svg { width: 24px; height: 24px; }
+
+.fbmodal__body {
+  padding: 8px 16px 0;
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 16px;
+}
+.fbmodal__field {
+  width: 100%;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.fbmodal__label {
+  font-size: 14px; font-weight: 500; line-height: 20px;
+  color: var(--camp-text-primary);
+}
+.fbmodal__select {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  height: 44px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-input);
+  border-radius: var(--camp-radius-btn);
+  font-size: 16px; line-height: 24px;
+  color: var(--camp-text-primary);
+}
+.fbmodal__select--placeholder { color: var(--neutral-400); }
+.fbmodal__select svg { width: 20px; height: 20px; color: var(--neutral-400); }
+
+.fbmodal__foot { display: flex; align-items: center; gap: 8px; }
+.fbmodal__btn-cancel {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 40px;
+  padding: 8px 16px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-btn);
+  box-shadow: var(--camp-shadow-btn-glow);
+  font-size: 16px; letter-spacing: 0.1px;
+  color: var(--camp-text-primary);
+}
+.fbmodal__btn-cancel:hover { background: var(--camp-surface-hover); }
+.fbmodal__btn-submit {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 40px;
+  padding: 8px 16px;
+  background: var(--camp-primary);
+  border-radius: var(--camp-radius-btn);
+  font-size: 16px; font-weight: 500; letter-spacing: 0.1px;
+  color: var(--camp-surface);
+}
+.fbmodal__btn-submit:hover { background: var(--camp-primary-hover); }
+
+/* -------------------------------------------------------------------------
+   12) READ-ONLY MODE BANNER  (.robanner)
+   Full-width bar shown above a campaign or post surface when the current
+   user has view-only access. Eye icon + explanation on the left, primary
+   action + dismiss X on the right.
+     .robanner        — 1336×48 shell (stretches to container width)
+     .robanner__body  — icon + copy
+     .robanner__btn   — primary indigo action (e.g. "Request Edit")
+     .robanner__close — dismiss for the session
+   ------------------------------------------------------------------------- */
+.robanner {
+  box-sizing: border-box;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  max-width: 1336px;
+  min-height: 48px;
+  padding: 4px 12px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-modal);
+}
+.robanner__body {
+  flex: 1;
+  min-width: 0;
+  display: flex; align-items: center;
+  gap: 16px;
+}
+.robanner__icon {
+  width: 24px; height: 24px;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+  color: var(--camp-text-primary);
+}
+.robanner__icon svg { width: 24px; height: 24px; }
+.robanner__text {
+  min-width: 0;
+  font-size: 16px; font-weight: 500; line-height: 150%;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-secondary);
+}
+.robanner__actions {
+  display: flex; align-items: center;
+  flex-shrink: 0;
+}
+.robanner__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 34px;
+  padding: 8px;
+  gap: 6px;
+  background: var(--camp-primary);
+  box-shadow: var(--camp-shadow-btn-xs);
+  border-radius: var(--camp-radius-btn);
+  color: var(--camp-surface);
+  font-size: 13px; font-weight: 500; line-height: 24px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+.robanner__btn:hover { background: var(--camp-primary-hover); }
+.robanner__close {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-btn);
+  color: var(--camp-text-primary);
+}
+.robanner__close:hover { background: var(--camp-surface-hover); }
+.robanner__close svg { width: 20px; height: 20px; }
+
+/* =========================================================================
+   Scout co-pilot shared components (orchestrator, 2026-07-05)
+   Used by:
+     - designs/index.html          (dashboard: strip + side panel)
+     - designs/create-campaign.html (create flow: chat + panel + footer)
+   Do not redefine these in page-scoped <style> blocks.
+   ========================================================================= */
+
+/* ---- Scout message strip (dashboard, between panel__header and tabs) ---- */
+.scout-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px 14px 14px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-hairline);
+  border-radius: var(--camp-radius-modal);
+  box-shadow: var(--shadow-xs);
+  position: relative;
+  isolation: isolate;
+}
+.scout-strip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--ai-gradient);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.35;
+  pointer-events: none;
+}
+.scout-strip__badge {
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  border-radius: var(--camp-radius-pill);
+  display: grid; place-items: center;
+  background: var(--ai-gradient);
+  color: var(--text-on-primary);
+  box-shadow: var(--camp-shadow-ai-glow);
+}
+.scout-strip__badge svg { width: 16px; height: 16px; }
+.scout-strip__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-size: 14px; line-height: 20px; font-weight: 400;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-primary);
+}
+.scout-strip__body b {
+  font-weight: 600;
+  color: var(--camp-text-primary);
+}
+.scout-strip__body .scout-strip__muted {
+  color: var(--camp-text-secondary);
+  font-weight: 400;
+}
+.scout-strip__cta {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--camp-radius-btn);
+  background: var(--camp-primary);
+  color: var(--text-on-primary);
+  font-size: 13px; font-weight: 500; line-height: 1;
+  letter-spacing: 0.1px;
+  box-shadow: var(--camp-shadow-btn-xs);
+  cursor: pointer;
+  transition: background 180ms var(--ease-standard),
+              transform 160ms var(--ease-standard),
+              box-shadow 160ms var(--ease-standard);
+}
+.scout-strip__cta:hover { background: var(--camp-primary-hover); }
+.scout-strip__cta:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.scout-strip__cta:focus-visible {
+  outline: 2px solid var(--camp-primary);
+  outline-offset: 2px;
+}
+.scout-strip__cta svg { width: 14px; height: 14px; }
+.scout-strip__close {
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-pill);
+  color: var(--camp-text-tertiary);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.scout-strip__close:hover {
+  background: var(--camp-surface-hover);
+  color: var(--camp-text-secondary);
+}
+.scout-strip__close:focus-visible {
+  outline: 2px solid var(--camp-primary);
+  outline-offset: 2px;
+}
+.scout-strip__close svg { width: 14px; height: 14px; }
+
+/* ---- Chat composer pill (dashboard side-panel foot + create page) ---- */
+.chat-composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 12px 12px 20px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-subtle);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+}
+.chat-composer:focus-within {
+  border-color: var(--camp-primary);
+  box-shadow: var(--camp-shadow-focus-ring);
+}
+.chat-composer__attach {
+  flex: 0 0 auto;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-pill);
+  background: transparent;
+  color: var(--camp-text-tertiary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.chat-composer__attach:hover {
+  background: var(--camp-surface-hover);
+  color: var(--camp-text-secondary);
+}
+.chat-composer__attach:focus-visible {
+  outline: 2px solid var(--camp-primary);
+  outline-offset: 2px;
+}
+.chat-composer__attach svg { width: 18px; height: 18px; }
+.chat-composer__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: 22px; font-weight: 400;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-primary);
+  padding: 6px 4px;
+}
+.chat-composer__input::placeholder {
+  color: var(--camp-text-tertiary);
+}
+.chat-composer__send {
+  flex: 0 0 auto;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-pill);
+  background: var(--camp-primary);
+  color: var(--text-on-primary);
+  cursor: pointer;
+  box-shadow: var(--camp-shadow-btn-xs);
+  transition: background var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+}
+.chat-composer__send:hover { background: var(--camp-primary-hover); }
+.chat-composer__send:active { transform: scale(0.96); }
+.chat-composer__send:focus-visible {
+  outline: 2px solid var(--camp-primary);
+  outline-offset: 2px;
+}
+.chat-composer__send svg { width: 16px; height: 16px; }
+.chat-composer__send:disabled {
+  background: var(--camp-surface-hover);
+  color: var(--camp-text-tertiary);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ---- Side panel (right-edge slide-in, shared) ----
+   Flat by design: no drop-shadow, no elevation. Reads as a bordered
+   canvas region that sits alongside the chat, not a raised drawer.
+   Border is a single hairline on the left edge; the rest of the frame
+   is defined by the surrounding page background. */
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 520px;
+  max-width: calc(100vw - 120px);
+  background: var(--camp-surface);
+  border-left: 1px solid var(--camp-border-hairline);
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  z-index: 45;
+  transform: translateX(calc(100% + 20px));
+  transition: transform 360ms var(--ease-emphasized);
+  overflow: hidden;
+}
+.side-panel.is-open { transform: translateX(0); }
+.side-panel__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 50, 56, 0.20);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 44;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+.side-panel__backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.side-panel__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 28px 28px 20px 28px;
+  border-bottom: 1px solid var(--camp-border-hairline);
+}
+/* Flat sparkle badge — no gradient fill, no glow. Just the indigo mark
+   on a tint chip, consistent with reference chip tokens. */
+.side-panel__badge {
+  flex: 0 0 auto;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  background: var(--camp-primary-tint);
+  color: var(--indigo-500, #5B5BF5);
+  box-shadow: none;
+}
+.side-panel__badge svg { width: 16px; height: 16px; }
+.side-panel__heading {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.side-panel__title {
+  font-family: var(--font-sans);
+  font-size: 20px; line-height: 26px; font-weight: 600;
+  color: var(--camp-text-primary);
+  letter-spacing: -0.1px;
+  margin: 0 0 6px 0;
+}
+.side-panel__sub {
+  font-family: var(--font-sans);
+  font-size: 14px; line-height: 21px; font-weight: 400;
+  color: var(--camp-text-secondary);
+  letter-spacing: 0.15px;
+  margin: 0;
+}
+.side-panel__close {
+  flex: 0 0 auto;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: var(--camp-radius-pill);
+  background: transparent;
+  color: var(--camp-text-tertiary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.side-panel__close:hover {
+  background: var(--camp-surface-hover);
+  color: var(--camp-text-secondary);
+}
+.side-panel__close:focus-visible {
+  outline: 2px solid var(--camp-primary);
+  outline-offset: 2px;
+}
+.side-panel__close svg { width: 16px; height: 16px; }
+.side-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 28px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.side-panel__foot {
+  flex: 0 0 auto;
+  padding: 16px 28px 24px 28px;
+  border-top: 1px solid var(--camp-border-hairline);
+  background: var(--camp-surface);
+}
+
+/* ---- Generated campaign card (dashboard side panel) ---- */
+.gencard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--camp-surface);
+  border-radius: var(--camp-radius-modal);
+  cursor: pointer;
+  transition: box-shadow var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+  position: relative;
+  isolation: isolate;
+}
+.gencard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--camp-border-hairline);
+  pointer-events: none;
+}
+.gencard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.gencard:focus-visible {
+  box-shadow: var(--shadow-focus-ring), 0 4px 12px rgba(17,17,20,0.06);
+  outline: none;
+}
+.gencard__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gencard__axis {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--camp-radius-pill);
+  background: var(--camp-primary-tint-cool);
+  color: var(--camp-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 11px; font-weight: 500; line-height: 1;
+  letter-spacing: 0.4px;
+}
+.gencard__axis svg { width: 10px; height: 10px; }
+.gencard__title {
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: 20px; font-weight: 600;
+  color: var(--camp-text-primary);
+  letter-spacing: 0.1px;
+  margin: 2px 0 0 0;
+}
+.gencard__why {
+  font-family: var(--font-sans);
+  font-size: 13px; line-height: 19px; font-weight: 400;
+  color: var(--camp-text-quiet);
+  letter-spacing: 0.15px;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.gencard__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--camp-text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 12px; font-weight: 400; letter-spacing: 0.17px;
+}
+.gencard__meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.gencard__meta-chip svg { width: 12px; height: 12px; }
+.gencard__meta-sep {
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--camp-text-tertiary);
+  opacity: 0.5;
+}
+
+/* ---- Chat message bubbles (create-campaign) ---- */
+.chatlog {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+/* Onboarding parity: Scout turns render as [avatar + "Scout" name] head row
+   above plain-text body, no bubble. User turns render as a right-aligned
+   white bubble, no avatar. Only the most-recent Scout turn shows its head
+   (see .chatmsg--past below). Mirrors poc/styles.css §Messages exactly. */
+.chatmsg {
+  display: flex; flex-direction: column;
+  gap: 8px;
+  max-width: 720px;
+  width: fit-content;
+}
+.chatmsg--scout { align-self: flex-start; }
+.chatmsg--user {
+  align-self: flex-end;
+  width: fit-content;
+  max-width: 560px;
+}
+
+/* Head row: 22px avatar sitting inline with the "Scout" name. */
+.chatmsg__head {
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* Avatar geometry matches onboarding (.msg__avatar) exactly: 22×22,
+   transparent background, indigo currentColor so the 4-circle logo shows
+   through. No pill, no gradient, no glow. */
+.chatmsg__avatar {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: var(--text-xs, 12px);
+  font-weight: 600;
+}
+/* Uses --indigo-500 directly, not --primary. _shared.css remaps --primary
+   to the lighter --camp-primary (#545BD1) in campaign contexts, but
+   onboarding's Scout avatar is the deeper indigo-500 (#3C4194). We want
+   the exact onboarding indigo here, so we sidestep the remap. */
+.chatmsg--scout .chatmsg__avatar {
+  background: transparent;
+  color: var(--indigo-500, #3C4194);
+  box-shadow: none;
+}
+.chatmsg--scout .chatmsg__avatar svg { width: 22px; height: 22px; }
+.chatmsg--user .chatmsg__avatar {
+  background: var(--camp-primary-tint-cool);
+  color: var(--camp-text-secondary);
+}
+
+/* "Scout" name — same indigo/semibold as onboarding's .msg__name. Uses
+   --indigo-500 directly for the same reason as the avatar above:
+   _shared.css remaps --text-scout to the lighter --camp-primary. */
+.chatmsg__author {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--indigo-500, #3C4194);
+  margin: 0;
+}
+.chatmsg--user .chatmsg__author { display: none; }
+
+/* Plain-text Scout body — no bubble. 16px/1.6 secondary text, matching
+   onboarding's .msg__text. */
+.chatmsg__text {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--camp-text-secondary);
+  white-space: pre-wrap;
+  max-width: 100%;
+}
+
+/* Only the most-recent Scout turn shows its head. Previous turns hide it
+   so the log reads as one live speaker instead of a wall of repeated
+   avatars. Mirrors .msg--scout.msg--past in onboarding. */
+.chatmsg--scout.chatmsg--past .chatmsg__head { display: none; }
+
+/* User bubble — right-aligned white pill, matches onboarding .msg--user. */
+.chatmsg__bubble {
+  min-width: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg, 16px);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--camp-text-primary);
+  background: var(--camp-surface, #FFFFFF);
+  border: 1px solid var(--camp-border-hairline);
+  border-top-right-radius: var(--radius-xs, 4px);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+/* ---- Post row in create-campaign side-panel -------------------------
+   Follows the "Generated Post Content" reference: no per-card border or
+   shadow — posts are rows in a list separated by hairlines. Left rail
+   holds the sparkle-tag "Post XX out of YY" chip; the body flows below
+   in a spacious column. Chips at the bottom carry meta (tone + time). */
+.postdraft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--camp-border-hairline);
+  border-radius: 0;
+}
+.postdraft:first-child { padding-top: 4px; }
+.postdraft:last-child { border-bottom: none; padding-bottom: 4px; }
+
+.postdraft__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.postdraft__num {
+  font-family: var(--font-sans);
+  font-size: 13px; font-weight: 500; letter-spacing: 0.15px;
+  color: var(--camp-text-secondary);
+  text-transform: none;
+}
+/* Flat sparkle chip — indigo mark on tint, no gradient, no glow. */
+.postdraft__ai {
+  width: 22px; height: 22px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  background: var(--camp-primary-tint);
+  color: var(--indigo-500, #5B5BF5);
+  box-shadow: none;
+}
+.postdraft__ai svg { width: 12px; height: 12px; }
+.postdraft__image {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  border-radius: 12px;
+  background: var(--camp-surface-field);
+  overflow: hidden;
+  position: relative;
+}
+.postdraft__image img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.postdraft__hook {
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: 22px; font-weight: 600;
+  color: var(--camp-text-primary);
+  letter-spacing: 0.1px;
+  margin: 0;
+}
+.postdraft__body {
+  font-family: var(--font-sans);
+  font-size: 14px; line-height: 22px; font-weight: 400;
+  color: var(--camp-text-quiet);
+  letter-spacing: 0.15px;
+  margin: 0;
+}
+.postdraft__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.postdraft__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: var(--camp-radius-pill);
+  background: var(--camp-primary-tint-cool);
+  color: var(--camp-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12px; font-weight: 500; line-height: 1;
+  letter-spacing: 0.15px;
+}
+.postdraft__chip svg { width: 12px; height: 12px; }
+.postdraft__chip--tone svg { color: var(--indigo-500, #5B5BF5); }
+
+/* ---- Skeleton loading state for postdraft ---------------------------
+   Rendered while Scout is "drafting" (side-panel open, proc-line running
+   in the chat). Each text/image slot becomes a shimmering bar. The whole
+   card also breathes with a soft pulse; per-card animation-delay makes
+   the four cards feel like they're streaming in rather than blinking in
+   unison.
+
+   When drafts land, JS replaces the .postdraft--loading cards with
+   .postdraft--fill-in ones which fade+lift into place. */
+.postdraft--loading {
+  animation: ccSkeletonPulse 1.6s ease-in-out infinite;
+}
+.postdraft--fill-in {
+  animation: ccFadeUp 480ms var(--ease-emphasized) both;
+}
+.postdraft__num--sk,
+.postdraft__hook--sk,
+.postdraft__body--sk,
+.postdraft__image--sk,
+.postdraft__chip--sk {
+  background: linear-gradient(
+    90deg,
+    var(--camp-skeleton, rgba(0, 0, 0, 0.06)) 0%,
+    rgba(0, 0, 0, 0.03) 50%,
+    var(--camp-skeleton, rgba(0, 0, 0, 0.06)) 100%
+  );
+  background-size: 200% 100%;
+  animation: ccShimmer 1.4s linear infinite;
+  border-radius: 6px;
+  color: transparent;
+}
+.postdraft__num--sk { display: inline-block; width: 72px; height: 12px; }
+.postdraft__hook--sk { height: 18px; width: 82%; }
+.postdraft__body--sk { height: 12px; width: 100%; }
+.postdraft__body--sk-short { width: 62%; }
+.postdraft__image--sk { border-radius: var(--camp-radius-modal); }
+.postdraft__chip--sk {
+  height: 24px;
+  width: 96px;
+  border-radius: var(--camp-radius-pill);
+}
+.postdraft__chip--sk-narrow { width: 70px; }
+@keyframes ccShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes ccSkeletonPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.85; }
+}
+
+/* Side-panel header while drafting — softer feel, no strong "Heatwave"
+   title yet. The badge glow shifts to a spinning aura so it reads as an
+   active/streaming state. */
+.side-panel--loading .side-panel__badge {
+  animation: ccBadgePulse 1.8s ease-in-out infinite;
+}
+@keyframes ccBadgePulse {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(1.08); opacity: 0.9; }
+}
+
+/* ---- Buttons (shared, Scout flow) ---- */
+.sbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--camp-radius-btn);
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500; line-height: 1;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  transition: background 160ms var(--ease-standard),
+              color 160ms var(--ease-standard),
+              box-shadow 160ms var(--ease-standard),
+              transform 160ms var(--ease-standard);
+  white-space: nowrap;
+}
+.sbtn:active { transform: translateY(1px); }
+.sbtn:focus-visible {
+  outline: 2px solid var(--camp-primary);
+  outline-offset: 2px;
+}
+.sbtn--primary {
+  background: var(--camp-primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--camp-shadow-btn-xs);
+}
+.sbtn--primary:hover { background: var(--camp-primary-hover); }
+.sbtn--ghost {
+  background: transparent;
+  color: var(--camp-text-secondary);
+}
+.sbtn--ghost:hover {
+  background: var(--camp-surface-hover);
+  color: var(--camp-text-primary);
+}
+.sbtn--sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.sbtn svg { width: 14px; height: 14px; }
+
+/* ---- Footer bar (create-campaign "Not quite / Looks good") ---- */
+.footbar {
+  position: fixed;
+  left: var(--cc-gutter-left, calc(var(--sidebar-w, 80px) + 48px));
+  right: var(--cc-gutter-right, 48px);
+  bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-hairline);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  z-index: 30;
+  transition: right 360ms var(--ease-emphasized);
+}
+.footbar[hidden] { display: none; }
+.footbar__hint {
+  margin-right: auto;
+  font-family: var(--font-sans);
+  font-size: 13px; line-height: 19px; font-weight: 400;
+  color: var(--camp-text-tertiary);
+  letter-spacing: 0.15px;
+}
+
+/* =========================================================================
+   CONVERSATIONAL PRIMITIVES (borrowed from the onboarding flow)
+   Onboarding at poc/styles.css defines these as .chip / .qreply /
+   .proc-line / .conf. We use a cc-* prefix here so they stay scoped to
+   the campaign-create surface and don't collide with future work.
+   ========================================================================= */
+
+/* ---- Scout avatar: animated 4-circle pulse while Scout is "thinking" ---
+   Exact parity with onboarding (poc/styles.css §Scout-branded "thinking"
+   indicator): the avatar IS the loader. Its four circles pulse
+   counter-clockwise (TL → BL → BR → TR) with 350ms phase offsets over a
+   1.4s cycle, so a small "spot" travels anti-clockwise around the 2×2
+   grid. Each circle dips to scale(0.25) opacity 0.4 at 25% of its cycle,
+   then rests at full scale for the remainder.
+
+   The avatar is transparent with indigo currentColor, so both the loading
+   circles and the static logo (once JS swaps in <use href="#i-logo"/>)
+   render in the same indigo — no gradient, no pill, no glow. */
+.chatmsg--scout .chatmsg__avatar svg { color: currentColor; }
+.chatmsg__avatar--loading svg { width: 100%; height: 100%; display: block; }
+.chatmsg__avatar--loading .scout-loader__c {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ccScoutLoaderPulse 1.4s ease-in-out infinite;
+}
+.chatmsg__avatar--loading .scout-loader__c--1 { animation-delay: 0ms;   }  /* TL */
+.chatmsg__avatar--loading .scout-loader__c--2 { animation-delay: 350ms; }  /* BL */
+.chatmsg__avatar--loading .scout-loader__c--3 { animation-delay: 700ms; }  /* BR */
+.chatmsg__avatar--loading .scout-loader__c--4 { animation-delay: 1050ms; } /* TR */
+@keyframes ccScoutLoaderPulse {
+  0%, 60%, 100% { transform: scale(1);    opacity: 1;   }
+  25%           { transform: scale(0.25); opacity: 0.4; }
+}
+
+/* Composer disabled during Scout turns / structured input */
+.chat-composer.is-disabled,
+.chat-composer[aria-disabled="true"] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.chat-composer.is-disabled .chat-composer__input { color: var(--camp-text-tertiary); }
+
+/* =========================================================================
+   QDock — question overlay that docks at the bottom during Scout's asks.
+   Structure mirrors Claude Code's AskUserQuestion widget: header row with
+   step badge + question + skip; numbered option rows below; composer
+   input embedded at the foot so users can EITHER click an option OR type
+   their own reply. Replaces the normal .cc-composer-dock while open.
+   ========================================================================= */
+.cc-qdock {
+  position: fixed;
+  left: var(--cc-gutter-left, calc(var(--sidebar-w, 80px) + 48px));
+  right: var(--cc-gutter-right, 48px);
+  bottom: 28px;
+  z-index: 34;
+  pointer-events: none;
+  transition: right 360ms var(--ease-emphasized), bottom 260ms var(--ease-standard);
+}
+.cc-qdock[aria-hidden="false"] { pointer-events: auto; }
+.cc-qdock[hidden] { display: none; }
+/* Track the composer's shifting geometry — flush against the panel edge
+   and left-anchored when the side-panel is open. */
+body.has-side-panel .cc-qdock { right: var(--cc-panel-w, 520px); }
+body.has-drafts .cc-qdock { bottom: 108px; }
+
+.cc-qdock__card {
+  max-width: var(--cc-chat-max, 760px);
+  margin: 0 auto;
+  background: var(--camp-surface, #FFFFFF);
+  border: 1px solid var(--camp-border-hairline);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  animation: ccQDockIn 420ms var(--ease-emphasized) both;
+}
+body.has-side-panel .cc-qdock__card { margin: 0; }
+@keyframes ccQDockIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header — step badge, question title, skip (×). */
+.cc-qdock__head {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 16px 14px 12px 16px;
+}
+.cc-qdock__step {
+  flex: 0 0 auto;
+  font-family: var(--font-sans);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  color: var(--indigo-500, #5B5BF5);
+  background: var(--camp-primary-tint);
+  padding: 4px 8px;
+  border-radius: var(--camp-radius-pill);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.cc-qdock__step[hidden] { display: none; }
+.cc-qdock__title {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: 15px; font-weight: 600; line-height: 22px;
+  color: var(--camp-text-primary);
+  letter-spacing: 0.1px;
+  min-width: 0;
+}
+.cc-qdock__close {
+  all: unset;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  cursor: pointer;
+  color: var(--camp-text-tertiary);
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+.cc-qdock__close svg { width: 16px; height: 16px; }
+.cc-qdock__close:hover {
+  background: var(--camp-surface-hover);
+  color: var(--camp-text-primary);
+}
+.cc-qdock__close:focus-visible {
+  outline: 2px solid var(--indigo-500, #5B5BF5);
+  outline-offset: -2px;
+}
+
+/* Options list — full-width numbered rows. */
+.cc-qdock__list {
+  padding: 0 8px 8px 8px;
+  display: flex; flex-direction: column;
+  gap: 2px;
+}
+.cc-qdock__opt {
+  all: unset;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+.cc-qdock__opt:hover { background: var(--camp-primary-tint); }
+.cc-qdock__opt:focus-visible {
+  outline: 2px solid var(--indigo-500, #5B5BF5);
+  outline-offset: -2px;
+}
+.cc-qdock__opt-body {
+  display: flex; flex-direction: column; gap: 3px;
+  min-width: 0;
+}
+.cc-qdock__opt-label {
+  font-family: var(--font-sans);
+  font-size: 15px; font-weight: 500; line-height: 20px;
+  color: var(--camp-text-primary);
+  letter-spacing: 0.1px;
+}
+.cc-qdock__opt-sub {
+  font-family: var(--font-sans);
+  font-size: 13px; font-weight: 400; line-height: 18px;
+  color: var(--camp-text-tertiary);
+  letter-spacing: 0.1px;
+}
+.cc-qdock__opt-rec {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--indigo-500, #5B5BF5);
+  padding: 3px 8px;
+  border-radius: var(--camp-radius-pill);
+  background: var(--camp-primary-tint);
+  line-height: 1;
+  white-space: nowrap;
+}
+.cc-qdock__opt-num {
+  display: grid; place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  background: var(--camp-surface-hover, #F5F7FA);
+  color: var(--camp-text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 12px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.cc-qdock__opt--primary .cc-qdock__opt-num {
+  background: var(--indigo-500, #5B5BF5);
+  color: #FFF;
+}
+.cc-qdock__opt:hover .cc-qdock__opt-num {
+  background: var(--camp-surface, #FFF);
+  color: var(--indigo-500, #5B5BF5);
+}
+.cc-qdock__opt--primary:hover .cc-qdock__opt-num {
+  background: var(--indigo-500, #5B5BF5);
+  color: #FFF;
+}
+
+/* Composer at the foot — shares the input pill treatment with .chat-composer
+   but sits inside the card, separated by a hairline. */
+.cc-qdock__composer {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px 12px 12px;
+  border-top: 1px solid var(--camp-border-hairline);
+  background: var(--camp-surface-field, #F8FAFC);
+}
+.cc-qdock__attach,
+.cc-qdock__send {
+  all: unset;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  color: var(--camp-text-tertiary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.cc-qdock__attach svg,
+.cc-qdock__send svg { width: 16px; height: 16px; }
+.cc-qdock__attach:hover { background: var(--camp-surface-hover); color: var(--camp-text-primary); }
+.cc-qdock__send {
+  background: var(--camp-primary-tint);
+  color: var(--indigo-500, #5B5BF5);
+}
+.cc-qdock__send:not(:disabled):hover { background: var(--indigo-500, #5B5BF5); color: #FFF; }
+.cc-qdock__send:disabled { opacity: 0.4; cursor: not-allowed; }
+.cc-qdock__input {
+  flex: 1;
+  border: none; outline: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: 22px;
+  color: var(--camp-text-primary);
+  min-width: 0;
+  padding: 0 4px;
+}
+.cc-qdock__input::placeholder { color: var(--camp-text-tertiary); }
+
+/* Hide the normal composer while the qdock is open — they occupy the
+   same slot. */
+body.has-qdock .cc-composer-dock { display: none; }
+
+/* ---- Question card — Claude Code AskUserQuestion parity ---------------
+   Vertical numbered list inside a hairline-bordered card. Each row is a
+   full-width button with a number badge on the left, label in the middle,
+   and an optional "Recommended" tag on the right. On hover the row tints
+   with primary-tint. On chosen: the row locks in primary tint and the
+   other rows hide (--settled) so the log shows the picked answer inline.
+
+   Reused for BOTH quick replies (single-select, auto-commit) AND chips
+   (multi-select with Done button). The .cc-chips variant just adds a Done
+   button pinned to the bottom-right of the card. */
+.cc-qreplies,
+.cc-chips {
+  align-self: flex-start;
+  width: 100%;
+  max-width: 480px;
+  padding: 6px;
+  margin-left: 32px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-hairline);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  display: flex; flex-direction: column;
+  gap: 2px;
+  animation: ccFadeUp 380ms var(--ease-emphasized) both;
+}
+
+.cc-qreply,
+.cc-chip {
+  all: unset;
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  min-height: 40px;
+  border-radius: 10px;
+  color: var(--camp-text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+/* Number badge on the left — subtle mono digit that reads as a keyboard hint. */
+.cc-qreply__num,
+.cc-chip__num {
+  display: grid; place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  background: var(--camp-surface-hover, #F5F7FA);
+  color: var(--camp-text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 12px; font-weight: 600; line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.cc-qreply__label,
+.cc-chip__label { min-width: 0; }
+
+/* "Recommended" tag on the right of the primary option — mirrors
+   Claude Code's convention of tagging the default choice. */
+.cc-qreply__rec,
+.cc-chip__rec {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--indigo-500, #5B5BF5);
+  padding: 3px 8px;
+  border-radius: var(--camp-radius-pill);
+  background: var(--camp-primary-tint);
+  line-height: 1;
+}
+
+.cc-qreply:hover,
+.cc-chip:hover {
+  background: var(--camp-primary-tint);
+  color: var(--indigo-500, #5B5BF5);
+}
+.cc-qreply:hover .cc-qreply__num,
+.cc-chip:hover .cc-chip__num {
+  background: var(--camp-surface);
+  color: var(--indigo-500, #5B5BF5);
+}
+
+.cc-qreply:focus-visible,
+.cc-chip:focus-visible {
+  outline: 2px solid var(--indigo-500, #5B5BF5);
+  outline-offset: -2px;
+}
+
+/* Primary/recommended option — the "Enter to accept" default. Subtle
+   left indicator (a filled indigo dot in the num slot) plus the
+   Recommended tag on the right. No heavy fill on the whole row — the
+   card style leaves the row understated by default so the recommendation
+   feels like a tag, not a shove. */
+.cc-qreply--primary .cc-qreply__num {
+  background: var(--indigo-500, #5B5BF5);
+  color: #FFF;
+}
+
+/* Chosen state — a locked-in confirmation for the picked row. */
+.cc-qreply--chosen,
+.cc-chip--chosen {
+  background: var(--camp-primary-tint);
+  color: var(--indigo-500, #5B5BF5);
+  cursor: default;
+  pointer-events: none;
+}
+.cc-qreply--chosen .cc-qreply__num,
+.cc-chip--chosen .cc-chip__num {
+  background: var(--indigo-500, #5B5BF5);
+  color: #FFF;
+}
+
+/* Settled — non-chosen rows collapse out; the picked row stands alone.
+   The card border also drops so it reads as a quiet, past decision. */
+.cc-qreplies--settled,
+.cc-chips--settled {
+  border-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+}
+.cc-qreplies--settled .cc-qreply:not(.cc-qreply--chosen),
+.cc-chips--settled .cc-chip:not(.cc-chip--chosen) { display: none; }
+.cc-qreplies--settled .cc-qreply--chosen,
+.cc-chips--settled .cc-chip--chosen {
+  margin: 0;
+}
+
+/* ---- Chips multi-select — Done button pinned to card foot ------------- */
+.cc-chip[aria-pressed="true"] {
+  background: var(--camp-primary-tint);
+  color: var(--indigo-500, #5B5BF5);
+}
+.cc-chip[aria-pressed="true"] .cc-chip__num {
+  background: var(--indigo-500, #5B5BF5);
+  color: #FFF;
+}
+.cc-chips__done {
+  margin: 6px 6px 2px 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--indigo-500, #5B5BF5);
+  color: #FFF;
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 600; line-height: 1;
+  letter-spacing: 0.1px;
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard), opacity var(--duration-fast);
+}
+.cc-chips__done:hover { background: var(--camp-primary-hover); }
+.cc-chips__done:disabled { opacity: 0.45; cursor: not-allowed; }
+.cc-chips--settled .cc-chips__done { display: none; }
+
+/* ---- Proc-line — narrated processing ----------------------------------- */
+.cc-proc-line {
+  align-self: flex-start;
+  padding-left: 40px;
+  width: 100%;
+  max-width: 720px;
+  min-height: 24px;
+  position: relative;
+}
+.cc-proc-line__pointer {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #7c3aed;
+  animation: ccProcPointerIn 520ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+.cc-proc-line__pointer--exit {
+  animation: ccProcPointerOut 400ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+.cc-proc-line__icon {
+  position: relative;
+  display: inline-grid; place-items: center;
+  width: 22px; height: 22px;
+  flex-shrink: 0;
+  color: #7c3aed;
+}
+.cc-proc-line__icon svg { width: 18px; height: 18px; display: block; }
+.cc-proc-line__icon-glyph {
+  position: relative;
+  width: 18px; height: 18px;
+  display: grid; place-items: center;
+}
+.cc-proc-line__icon-frame {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  opacity: 0;
+  transform: scale(0.94);
+  transition:
+    opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cc-proc-line__icon-frame--in    { opacity: 1; transform: scale(1); }
+.cc-proc-line__icon-frame--out   {
+  opacity: 0; transform: scale(0.94);
+  transition:
+    opacity 260ms cubic-bezier(0.4, 0, 1, 1),
+    transform 260ms cubic-bezier(0.4, 0, 1, 1);
+}
+.cc-proc-line__icon-pulse {
+  display: block;
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.18), transparent 70%);
+  opacity: 0;
+  animation: ccProcIconBreathe 2800ms ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+@keyframes ccProcIconBreathe {
+  0%, 100% { opacity: 0;    transform: scale(0.88); }
+  50%      { opacity: 0.45; transform: scale(1.08); }
+}
+.cc-proc-line__text-slot {
+  flex: 1;
+  position: relative;
+  display: inline-block;
+  min-height: 1.5em;
+  color: #6d28d9;
+  font-weight: 500;
+}
+.cc-proc-line__text-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 440ms cubic-bezier(0.4, 0, 0.2, 1) 120ms,
+    transform 440ms cubic-bezier(0.4, 0, 0.2, 1) 120ms;
+}
+.cc-proc-line__text-line--in  { opacity: 1; transform: translateY(0); }
+.cc-proc-line__text-line--out {
+  position: absolute; left: 0; right: 0; top: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 280ms cubic-bezier(0.4, 0, 1, 1),
+    transform 280ms cubic-bezier(0.4, 0, 1, 1);
+}
+@keyframes ccProcPointerIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ccProcPointerOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-12px); }
+}
+
+/* ---- Confirmation card — the plan document ----------------------------
+   Reads like a lightweight planning doc, not a form. Header is a hero
+   section with the Scout mark + title + subtitle; body is a two-column
+   grid of label → value/meta rows; footer holds Save-and-review + primary.
+   No gradient tint so the card sits calmly in the chat column. */
+.cc-conf {
+  margin-left: 0;
+  align-self: stretch;
+  width: 100%;
+  max-width: 680px;
+  background: var(--camp-surface);
+  border: 1px solid var(--camp-border-hairline);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: ccFadeUp 480ms var(--ease-emphasized) both;
+}
+.cc-conf__head {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--camp-border-hairline);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.cc-conf__mark {
+  flex: 0 0 36px;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--ai-gradient, linear-gradient(135deg, #5B5BF5 0%, #A448F9 100%));
+  color: #FFFFFF;
+  display: grid; place-items: center;
+}
+.cc-conf__mark svg { width: 18px; height: 18px; }
+.cc-conf__head-body { flex: 1; min-width: 0; }
+.cc-conf__title {
+  display: block;
+  font-size: 17px; font-weight: 600;
+  color: var(--camp-text-primary);
+  letter-spacing: -0.2px;
+  margin: 0 0 4px 0;
+  line-height: 1.35;
+}
+.cc-conf__title svg { display: none; }
+.cc-conf__subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--camp-text-secondary);
+  letter-spacing: 0.1px;
+  line-height: 1.5;
+}
+.cc-conf__rows { padding: 4px 0; }
+.cc-conf__row {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  gap: 16px;
+  padding: 14px 24px;
+  align-items: start;
+  border-bottom: 1px solid var(--camp-border-hairline);
+}
+.cc-conf__row:last-child { border-bottom: none; }
+.cc-conf__row:hover { background: rgba(84, 91, 209, 0.025); }
+.cc-conf__label {
+  font-size: 11px;
+  color: var(--camp-text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding-top: 4px;
+}
+.cc-conf__val-wrap {
+  display: flex; flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.cc-conf__val {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--camp-text-primary);
+  line-height: 1.4;
+  letter-spacing: 0.05px;
+}
+.cc-conf__meta {
+  font-size: 12.5px;
+  color: var(--camp-text-tertiary);
+  line-height: 1.5;
+  letter-spacing: 0.1px;
+}
+.cc-conf__edit {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--camp-text-tertiary);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.cc-conf__edit:hover { background: var(--camp-surface-hover); color: var(--camp-primary); }
+.cc-conf__edit svg { width: 12px; height: 12px; }
+.cc-conf__actions {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 12px 22px 18px;
+  border-top: 1px solid var(--camp-border-hairline);
+}
+.cc-conf__btn {
+  padding: 9px 16px;
+  border-radius: var(--camp-radius-btn);
+  font-size: 13px; font-weight: 500;
+  letter-spacing: 0.15px;
+  cursor: pointer;
+  transition: background var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast);
+}
+.cc-conf__btn--ghost {
+  background: transparent;
+  border: 1px solid var(--camp-border-input);
+  color: var(--camp-text-secondary);
+}
+.cc-conf__btn--ghost:hover { background: var(--camp-surface-hover); color: var(--camp-text-primary); }
+.cc-conf__btn--primary {
+  background: var(--camp-primary);
+  border: 1px solid var(--camp-primary);
+  color: #FFF;
+}
+.cc-conf__btn--primary:hover {
+  background: var(--camp-primary-hover);
+  border-color: var(--camp-primary-hover);
+}

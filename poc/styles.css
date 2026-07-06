@@ -31,6 +31,7 @@ a { color: var(--text-link); text-decoration: none; }
   grid-template-columns: var(--sidebar-width) 1fr;
   height: 100vh;
   overflow: hidden;
+  position: relative; /* anchor for the app-level atmosphere layer */
 }
 
 /* ------------------- Sidebar ------------------- */
@@ -1969,16 +1970,17 @@ body.mode-onboarding .topbar__right { display: none; }
   flex: 1; min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-8) var(--space-6) var(--space-4);
+  /* No horizontal padding — messages should visually align with the composer
+     pill below, which is 720px flush. The composer's outer wrapper carries
+     its own 24px h-padding but the pill sits at max-width 720; if we padded
+     the stream too, messages would render 48px narrower than the composer. */
+  padding: var(--space-8) 0 var(--space-4);
   display: flex; flex-direction: column;
   gap: var(--space-6);
   scroll-behavior: smooth;
   background: transparent;
   width: 100%;
   max-width: 720px;
-  /* Centered, slightly left of center: equal margin both sides on narrow
-     screens, but the floating Knowledge widget sits in the top-right gutter
-     on wider screens, which gives the visual "slightly to the left" feel. */
   margin-left: auto;
   margin-right: auto;
   /* Hide scrollbars, keep functionality. */
@@ -6373,6 +6375,886 @@ body.mode-hero .conv__stream {
 }
 
 /* =========================================================================
+   Campaigns module — atmospheric shell + list view
+   Reference: /Campaigns Dashboartd.png + Figma CSS spec (1440px screen).
+   The whole module is scoped under body.mode-campaigns so it doesn't
+   contaminate the onboarding shell.
+   ========================================================================= */
+
+/* Canvas + ambient blob backdrop --------------------------------------- */
+body.mode-campaigns {
+  background: #ECECEC;
+}
+body.mode-campaigns .main {
+  background: transparent;
+  position: relative;
+}
+
+/* Atmosphere lives at the .app level so both Campaigns and Home dashboards
+   can share it. Hidden by default; shown only in mode-campaigns
+   (the shared "panelized dashboard" mode). */
+.campaigns-atmosphere {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  display: none;
+}
+body.mode-campaigns .campaigns-atmosphere { display: block; }
+.campaigns-atmosphere__blob {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+}
+.campaigns-atmosphere__blob--violet {
+  width: 464px; height: 752px;
+  left: -30px;
+  top: 320px;
+  background: #E0E1FF;
+  filter: blur(160px);
+  transform: rotate(73deg);
+  opacity: 0.95;
+}
+.campaigns-atmosphere__blob--indigo {
+  width: 563px; height: 563px;
+  left: -240px;
+  bottom: -432px;
+  background: #545BD1;
+  filter: blur(140px);
+  opacity: 0.30;
+}
+
+/* Sidebar override — soft pill nav buttons, indigo active. The app is a
+   CSS grid; widen the sidebar column so the 80px sidebar actually gets 80px. */
+body.mode-campaigns .app {
+  grid-template-columns: 80px 1fr;
+}
+body.mode-campaigns .sidebar {
+  width: 80px;
+  background: transparent;
+  border-right: none;
+  padding: 16px 0 24px;
+  gap: 28px;
+  position: relative; /* activate z-index so we sit above the atmosphere */
+  z-index: 2;
+}
+body.mode-campaigns .sidebar__logo {
+  width: 44px; height: 32px;
+  display: grid;
+  place-items: center;
+  color: #545BD1;
+}
+body.mode-campaigns .sidebar__logo svg { width: 36px; height: 32px; }
+body.mode-campaigns .sidebar__nav {
+  gap: 12px;
+  padding: 0 16px;
+}
+body.mode-campaigns .sidebar__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  margin-top: auto;
+}
+body.mode-campaigns .sidebar__btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 32px;
+  background: #F5F5F5;
+  color: #263238;
+}
+body.mode-campaigns .sidebar__btn:hover { background: #EDEDED; color: #263238; }
+body.mode-campaigns .sidebar__btn[aria-current="page"] {
+  background: #545BD1;
+  color: #FFFFFF;
+}
+body.mode-campaigns .sidebar__btn[aria-current="page"]:hover { background: #4848E0; }
+body.mode-campaigns .sidebar__btn svg { width: 20px; height: 20px; }
+body.mode-campaigns .sidebar__settings { margin-top: 0; }
+body.mode-campaigns .sidebar__btn--onboarding-only { display: none; }
+.sidebar__btn--campaigns-only { display: none; }
+body.mode-campaigns .sidebar__btn--campaigns-only { display: grid; }
+
+/* Topbar: campaigns-mode reveals the rich right rail (acct, search, bell,
+   avatar+chev) and hides the default onboarding profile chip. */
+body.mode-campaigns .topbar {
+  padding: 12px 24px;
+  height: 66px;
+  position: relative;
+  z-index: 2;
+}
+body.mode-campaigns .topbar__right { gap: 14px; }
+body.mode-campaigns .profile-chip { display: none; }
+
+.topbar-acct,
+.topbar-icon-btn,
+.topbar-user { display: none; }
+body.mode-campaigns .topbar-acct,
+body.mode-campaigns .topbar-icon-btn,
+body.mode-campaigns .topbar-user { display: inline-flex; }
+
+/* Breadcrumbs — bump size to 16/500 SF Pro to match spec */
+body.mode-campaigns .crumbs {
+  font-size: 16px;
+  font-weight: 500;
+  gap: 4px;
+  color: #4B5565;
+}
+body.mode-campaigns .crumbs__sep { color: #4E4E50; font-weight: 400; }
+body.mode-campaigns .crumbs__current { color: #545BD1; }
+
+/* Account switcher (name of currently-selected account) */
+.topbar-acct {
+  align-items: center;
+  gap: 12px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #263238;
+}
+.topbar-acct__logo {
+  width: 38px; height: 24px;
+  display: inline-grid;
+  place-items: center;
+  color: #263238;
+}
+.topbar-acct__logo svg { width: 22px; height: 22px; }
+.topbar-acct__name {
+  font-family: var(--font-sans);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  color: #263238;
+  line-height: 28px;
+}
+.topbar-acct__swap {
+  width: 18px; height: 18px;
+  display: inline-grid; place-items: center;
+  color: #263238;
+  transform: rotate(-90deg);
+}
+.topbar-acct__swap svg { width: 18px; height: 18px; }
+
+/* 42px round translucent buttons for search + bell */
+.topbar-icon-btn {
+  width: 42px; height: 42px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  color: #263238;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+.topbar-icon-btn:hover { background: rgba(255, 255, 255, 0.7); }
+.topbar-icon-btn svg { width: 17px; height: 17px; }
+.topbar-icon-btn__dot {
+  position: absolute;
+  top: 11px; right: 13px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #F44336;
+}
+
+/* Avatar + chevron chip */
+.topbar-user {
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #4B5565;
+}
+.topbar-user__avatar {
+  width: 42px; height: 42px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #A3A9FF 0%, #B98FFF 100%);
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 0 0 1px rgba(17, 17, 20, 0.04);
+}
+.topbar-user__chev { width: 20px; height: 20px; color: #4B5565; }
+
+/* View / content panel ------------------------------------------------ */
+body.mode-campaigns #view-campaigns {
+  position: relative;
+  padding: 0 25px 25px 0;
+  overflow: hidden;
+}
+
+.campaigns-panel {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  background: var(--camp-surface-panel);
+  border-radius: var(--camp-radius-panel);
+  padding: 16px 24px 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.campaigns {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0;
+  background: transparent;
+  animation: fadeUp var(--duration-slow) var(--ease-emphasized) both;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.campaigns > * { flex-shrink: 0; }
+
+/* =========================================================================
+   HOME dashboard — shares the panelized visual language with Campaigns.
+   Only the content is home-specific; chrome comes from body.mode-campaigns.
+   ========================================================================= */
+
+/* Stat strip — 4 stat cards in a row on wide screens. */
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.home-stat {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.home-stat__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #697586;
+  letter-spacing: 0.1px;
+  text-transform: uppercase;
+}
+.home-stat__value {
+  font-family: var(--font-sans);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  color: #263238;
+  letter-spacing: -0.25px;
+  margin-top: 2px;
+}
+.home-stat__delta {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4B5565;
+}
+/* Delta tone follows the campaign status color families. */
+.home-stat__delta--draft     { color: #5925DC; }
+.home-stat__delta--progress  { color: #175CD3; }
+.home-stat__delta--review    { color: #B54708; }
+.home-stat__delta--published { color: #067647; }
+
+/* Two-column layout for the wider cards. */
+.home-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.home-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 320px;
+}
+.home-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.home-card__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  color: #263238;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.home-card__title-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--ai-gradient);
+  color: #FFFFFF;
+}
+.home-card__title-mark svg { width: 14px; height: 14px; }
+.home-card__more {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: #545BD1;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.home-card__more:hover { background: rgba(84, 91, 209, 0.08); }
+
+/* Recent activity list */
+.home-activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-activity__row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #EDEEF2;
+}
+.home-activity__row:last-child { border-bottom: none; }
+.home-activity__actor {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+.home-activity__actor--scout {
+  background: transparent;
+  color: var(--primary);
+}
+.home-activity__actor--scout svg { width: 22px; height: 22px; }
+.home-activity__actor--user {
+  background: #263238;
+}
+.home-activity__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-activity__line {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 18px;
+  color: #4B5565;
+}
+.home-activity__line strong { color: #263238; font-weight: 600; }
+.home-activity__subject { color: #263238; font-weight: 500; }
+.home-activity__when {
+  font-size: 12px;
+  color: #919DAE;
+}
+
+/* Scout suggestions list */
+.home-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.home-suggestion {
+  padding: 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(224, 231, 255, 0.55) 0%, rgba(248, 246, 254, 0.6) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.home-suggestion__title {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #263238;
+}
+.home-suggestion__body {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 18px;
+  color: #4B5565;
+}
+.home-suggestion__cta {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: #545BD1;
+}
+.home-suggestion__cta svg { width: 14px; height: 14px; }
+.home-suggestion__cta:hover { color: #4848E0; }
+
+/* Home responsive fallback for narrower widths. */
+@media (max-width: 1200px) {
+  .home-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .home-two-col { grid-template-columns: 1fr; }
+}
+
+/* Legacy campaigns block — retained for reference below;
+   the older ruleset is overridden by the spec-matched rules that follow. */
+/* =========================================================================
+   Campaigns dashboard (list view) — LEGACY (replaced by rules above)
+   Reference: /Campaigns Dashboartd.png
+   ========================================================================= */
+.campaigns {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-8) var(--space-10);
+  background: var(--surface-canvas);
+  animation: fadeUp var(--duration-slow) var(--ease-emphasized) both;
+}
+
+/* — Page header (spec: 22/500 title, 14/400 subtitle, 44px chip + button) — */
+.campaigns__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0;
+}
+.campaigns__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+.campaigns__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 22px;
+  line-height: 27px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  color: var(--camp-text-primary);
+}
+.campaigns__subtitle {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 400;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-secondary);
+}
+.campaigns__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Account chip (white pill w/ black X box + name + chevron) */
+.acct-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  width: 220px;
+  padding: 6px 16px;
+  border-radius: var(--camp-radius-btn);
+  background: var(--camp-surface);
+  border: none;
+  color: var(--camp-text-primary);
+  cursor: pointer;
+  transition: box-shadow var(--duration-fast) var(--ease-standard);
+}
+.acct-switch:hover { box-shadow: 0 1px 2px rgba(17, 17, 20, 0.06); }
+.acct-switch__x {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  background: var(--camp-surface-logo-tile);
+  color: var(--camp-surface);
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+.acct-switch__x svg { width: 12px; height: 12px; }
+.acct-switch__name {
+  flex: 1;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 28px;
+  letter-spacing: 0.1px;
+  color: var(--camp-text-primary);
+}
+.acct-switch__chev {
+  width: 18px; height: 18px;
+  display: inline-grid; place-items: center;
+  color: var(--camp-text-primary);
+}
+.acct-switch__chev svg { width: 18px; height: 18px; }
+
+/* Create Campaign — 138px indigo pill with stars-02 icon */
+.btn-create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 44px;
+  padding: 12px 16px;
+  border-radius: var(--camp-radius-btn);
+  background: var(--camp-primary);
+  color: var(--camp-surface);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+  letter-spacing: 0.1px;
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+.btn-create:hover { background: var(--camp-primary-hover); box-shadow: 0 2px 6px rgba(84, 91, 209, 0.32); }
+.btn-create:active { transform: translateY(1px); }
+.btn-create__icon { display: inline-grid; place-items: center; color: var(--camp-surface); }
+.btn-create__icon svg { width: 20px; height: 20px; }
+
+/* — Filter tabs (spec: 16/500, 2px indigo underline, dark-gray badge) —— */
+.campaigns__tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  border-bottom: none;
+  margin-bottom: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.campaigns__tabs::-webkit-scrollbar { display: none; }
+.camp-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 4px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--camp-text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  white-space: nowrap;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.camp-tab:hover { color: var(--camp-text-primary); }
+.camp-tab--active {
+  color: var(--camp-primary);
+  border-bottom: 2px solid var(--camp-primary);
+  padding-bottom: 10px;
+}
+.camp-tab__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 8px;
+  border-radius: var(--camp-radius-pill);
+  background: var(--camp-text-secondary);
+  color: var(--camp-surface);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 14px;
+}
+
+/* — Grid ————————————————————————————————————————— */
+.campaigns__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding-bottom: 24px;
+}
+@media (max-width: 1200px) {
+  .campaigns__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .campaigns__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.camp-empty {
+  grid-column: 1 / -1;
+  padding: 40px 24px 32px;
+  text-align: center;
+  color: #4B5565;
+  font-size: 14px;
+  border: 1px dashed rgba(75, 85, 101, 0.2);
+  border-radius: 12px;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.camp-empty__icon {
+  width: 48px; height: 48px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: #F5F5F7;
+  color: #4B5565;
+  margin-bottom: 4px;
+}
+.camp-empty__icon svg { width: 22px; height: 22px; }
+.camp-empty__title {
+  font-size: 16px; font-weight: 600;
+  color: #263238;
+  letter-spacing: 0.1px;
+}
+.camp-empty__body {
+  font-size: 13px; color: #697586;
+  max-width: 44ch;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.camp-empty__cta { margin-top: 8px; }
+
+/* ---- Focus visibility — keyboard reachability across campaigns chrome ----
+   Match rings to --camp-primary; radius adapts per component so they read
+   natively. No ring on mouse focus. */
+.campaigns :focus-visible,
+.scout-view :focus-visible,
+.camp-tab:focus-visible,
+.btn-create:focus-visible,
+.camp-hero:focus-visible,
+.camp-upnext:focus-visible {
+  outline: 2px solid var(--primary, #545BD1);
+  outline-offset: 2px;
+}
+.camp-tab:focus-visible { outline-offset: 4px; border-radius: 2px; }
+
+/* — Card (spec: 12px radius, no border, 16px padding) ——————— */
+.camp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--camp-surface);
+  border: none;
+  border-radius: var(--camp-radius-card);
+  cursor: pointer;
+  transition: box-shadow var(--duration-base) var(--ease-standard),
+              transform var(--duration-base) var(--ease-emphasized);
+}
+.camp-card:hover {
+  box-shadow: 0 4px 16px rgba(17, 17, 20, 0.06), 0 1px 3px rgba(17, 17, 20, 0.04);
+  transform: translateY(-1px);
+}
+.camp-card:focus-visible {
+  outline: 2px solid var(--camp-primary, #545BD1);
+  outline-offset: 2px;
+}
+.camp-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.camp-card__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--camp-text-primary);
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.camp-card__kebab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--camp-text-timestamp);
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 6px;
+  padding: 0;
+  transition: color var(--duration-fast) var(--ease-standard),
+              background var(--duration-fast) var(--ease-standard);
+}
+.camp-card__kebab svg { width: 16px; height: 16px; }
+.camp-card__kebab:hover { color: var(--camp-text-primary); background: #F5F5F5; }
+.camp-card__desc {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 17px;
+  color: var(--camp-text-quiet);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.camp-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--camp-text-secondary);
+}
+.camp-card__meta--tight { padding-top: 0; }
+.camp-card__date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.camp-card__date svg { width: 14px; height: 14px; color: var(--camp-text-timestamp); }
+.camp-card__posts {
+  font-size: 12px;
+  color: var(--camp-text-secondary);
+  font-weight: 500;
+}
+.camp-card__comments {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--camp-text-secondary);
+}
+.camp-card__comments-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--status-notification);
+  display: inline-block;
+}
+/* Zero state: quiet dot, quiet text. No red alert on a card with nothing
+   waiting on the reviewer. */
+.camp-card__comments--zero { color: var(--camp-text-timestamp); }
+.camp-card__comments--zero .camp-card__comments-dot { background: var(--camp-border-input); }
+.camp-card__divider {
+  height: 1px;
+  background: var(--camp-border-hairline);
+  margin: 4px 0 0;
+}
+.camp-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+.camp-card__author {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--camp-text-primary);
+  font-weight: 400;
+}
+.camp-card__avatar {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #C7D2FE;
+  flex-shrink: 0;
+}
+.camp-card__avatar--scout {
+  background: transparent;
+  color: var(--primary);
+  display: inline-grid;
+  place-items: center;
+}
+.camp-card__avatar--scout svg { width: 18px; height: 18px; }
+.camp-card__timestamp {
+  font-size: 12px;
+  color: var(--camp-text-timestamp);
+}
+
+/* Status badge families — bg + border + text per spec.
+   Trios are defined as --camp-status-<name>-{bg,bd,fg} in _campaigns-components.css. */
+.camp-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--camp-radius-pill);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  border: 1px solid transparent;
+  text-align: center;
+}
+.camp-status--draft {
+  background: var(--camp-status-draft-bg);
+  border-color: var(--camp-status-draft-bd);
+  color: var(--camp-status-draft-fg);
+}
+.camp-status--review {
+  background: var(--camp-status-review-bg);
+  border-color: var(--camp-status-review-bd);
+  color: var(--camp-status-review-fg);
+}
+.camp-status--published {
+  background: var(--camp-status-published-bg);
+  border-color: var(--camp-status-published-bd);
+  color: var(--camp-status-published-fg);
+}
+.camp-status--progress {
+  background: var(--camp-status-progress-bg);
+  border-color: var(--camp-status-progress-bd);
+  color: var(--camp-status-progress-fg);
+}
+.camp-status--revision {
+  background: var(--camp-status-revision-bg);
+  border-color: var(--camp-status-revision-bd);
+  color: var(--camp-status-revision-fg);
+}
+.camp-status--rejected {
+  background: var(--camp-status-rejected-bg);
+  border-color: var(--camp-status-rejected-bd);
+  color: var(--camp-status-rejected-fg);
+}
+
+/* =========================================================================
    Responsive (basic — POC targets desktop demo)
    ========================================================================= */
 @media (max-width: 980px) {
@@ -6380,4 +7262,7 @@ body.mode-hero .conv__stream {
   .actions-card { grid-template-columns: 1fr; }
   .dash__grid { grid-template-columns: 1fr; }
   .splash__blocks { grid-template-columns: 1fr; }
+  .campaigns__grid { grid-template-columns: 1fr; }
+  .campaigns__header { flex-direction: column; align-items: stretch; }
+  .campaigns__actions { justify-content: flex-end; }
 }

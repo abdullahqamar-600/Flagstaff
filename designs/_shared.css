@@ -1,0 +1,892 @@
+/* =========================================================================
+   Scout Campaign AI — Shared design stylesheet
+   Imports design tokens; provides Scout-flow-specific components.
+   Every design agent's HTML file imports this via
+     <link rel="stylesheet" href="./_shared.css" />
+   ========================================================================= */
+
+@import url("../design-system/tokens.css");
+/* Font stack lives in tokens.css (--font-sans). SF Pro Display is preferred
+   via -apple-system on macOS; other systems fall through to Inter (loaded by
+   poc/index.html) and finally system-ui. Do NOT re-import a webfont here. */
+
+/* -------- Reset -------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background: var(--surface-canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; color: inherit; }
+input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
+a { color: var(--text-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, h4, h5, h6, p { margin: 0; }
+img, svg { display: block; max-width: 100%; }
+
+/* -------- Sizes -------- */
+:root {
+  /* Sidebar is 80px in campaigns/dashboard mode per campaigns.md §2 (widened
+     from the 72px onboarding sidebar). Keep this local; don't override
+     tokens.css's global --sidebar-width (72px) which onboarding depends on. */
+  --sidebar-w: 80px;
+  --topbar-h: 66px;
+  --panel-offset: 25px;
+  /* Campaigns-scoped nav pill sizes */
+  --nav-pill-size: 44px;
+  --nav-pill-radius: 32px;
+
+}
+
+/* Campaigns-scope primary override — only inside the panelized mode.
+   Everything in _shared.css that references var(--primary) resolves to the
+   campaign-canonical #545BD1 (--camp-primary from _campaigns-components.css)
+   for anything under .app.mode-campaigns. Onboarding stays untouched. */
+.app.mode-campaigns {
+  --primary:       var(--camp-primary, #545BD1);
+  --primary-hover: var(--camp-primary-hover, #4848E0);
+  --text-link:     var(--camp-primary, #545BD1);
+  --text-scout:    var(--camp-primary, #545BD1);
+  --border-focus:  var(--camp-primary, #545BD1);
+}
+
+/* -------- App shell -------- */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+  position: relative;
+}
+.app.mode-campaigns { background: #ECECEC; }
+
+/* -------- Atmosphere blobs -------- */
+.atmosphere {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.atmosphere__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  transform: rotate(73deg);
+}
+.atmosphere__blob--violet {
+  background: #E0E1FF;
+  width: 620px; height: 620px;
+  left: -180px; bottom: -220px;
+  filter: blur(160px);
+}
+.atmosphere__blob--indigo {
+  background: #545BD1;
+  opacity: 0.3;
+  width: 480px; height: 480px;
+  left: 40px; bottom: -180px;
+}
+
+/* -------- Sidebar -------- */
+.sidebar {
+  position: relative; z-index: 2;
+  padding: 16px 0 24px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px;
+}
+.sidebar__logo {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  color: var(--primary);
+  margin-bottom: 16px;
+}
+.sidebar__nav, .sidebar__footer {
+  display: flex; flex-direction: column; gap: 12px; align-items: center;
+}
+.sidebar__footer { margin-top: auto; }
+.sidebar__btn {
+  width: var(--nav-pill-size); height: var(--nav-pill-size);
+  border-radius: var(--nav-pill-radius);
+  background: #F5F5F5;
+  color: #263238;
+  display: grid; place-items: center;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+.sidebar__btn:hover { background: #EBEBEB; }
+.sidebar__btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.sidebar__btn.is-active {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+.sidebar__btn svg { width: 20px; height: 20px; }
+
+/* -------- Topbar (Campaigns mode) -------- */
+.topbar {
+  position: relative; z-index: 2;
+  height: var(--topbar-h);
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar__breadcrumb {
+  font-size: 16px; font-weight: 500;
+  color: #4B5565;
+  display: flex; align-items: center; gap: 6px;
+}
+.topbar__breadcrumb b { color: var(--primary); font-weight: 500; }
+.topbar__right { display: flex; align-items: center; gap: 14px; }
+.topbar__icon-btn {
+  width: 42px; height: 42px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.4);
+  display: grid; place-items: center;
+  color: #4B5565;
+  position: relative;
+}
+.topbar__icon-btn:hover { background: rgba(255,255,255,0.7); }
+.topbar__icon-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.topbar__icon-btn svg { width: 18px; height: 18px; }
+.topbar__dot {
+  position: absolute; top: 10px; right: 10px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--status-notification);
+}
+.topbar__avatar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px 6px 6px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.4);
+}
+.topbar__avatar-img {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, #C5CAFF, #7C82FB);
+}
+.topbar__acct-switch {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.4);
+  font-size: 13px; color: #263238;
+}
+.topbar__acct-switch svg { width: 14px; height: 14px; color: #4B5565; }
+
+/* -------- Panel (solid white per component sheet §Legend) --------
+   Earlier drafts used rgba(255,255,255,0.4) + backdrop-filter blur — the
+   canonical spec is a solid white surface. The atmosphere blobs still
+   provide ambient colour on the canvas *behind* the panel. */
+.panel {
+  position: relative; z-index: 1;
+  background: var(--camp-surface, #FFFFFF);
+  border-radius: 24px;
+  padding: 16px 24px 0;
+  margin: 0 var(--panel-offset) var(--panel-offset) 0;
+  min-height: calc(100vh - var(--topbar-h) - var(--panel-offset));
+  box-shadow: var(--camp-shadow-post, 4px 4px 64px rgba(33, 50, 113, 0.08));
+}
+
+/* -------- Panel header (Campaigns / Home shared) -------- */
+.panel__header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 16px 0 8px;
+}
+.panel__heading .panel__title {
+  font-size: 22px; font-weight: 500; letter-spacing: 0.25px;
+  color: #263238;
+}
+.panel__heading .panel__subtitle {
+  font-size: 14px; color: #4B5565;
+  margin-top: 6px; letter-spacing: 0.15px;
+}
+.panel__actions { display: flex; align-items: center; gap: 12px; }
+
+/* -------- Buttons -------- */
+.btn {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 14px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+.btn:hover { background: var(--primary-hover); }
+.btn--ghost {
+  background: #FFFFFF;
+  color: #263238;
+  border: 1px solid #D9D9DE;
+}
+.btn--ghost:hover { background: #F5F5F5; }
+.btn--sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.btn--warm { background: #B54708; }
+.btn--warm:hover { background: #9A3B06; }
+.btn svg { width: 16px; height: 16px; }
+
+/* -------- Filter tabs -------- */
+.tabs {
+  display: flex; gap: 16px; align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #EDEEF2;
+  overflow-x: auto; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  display: flex; align-items: center; gap: 6px;
+  font: inherit; font-size: 16px; font-weight: 500;
+  color: #697586;
+  padding: 8px 0;
+  position: relative;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.tab:not(.is-active):hover { color: #263238; }
+.tab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.tab.is-active { color: var(--primary); }
+.tab.is-active::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 2px; background: var(--primary);
+}
+.tab__count {
+  min-width: 20px; padding: 0 6px; height: 20px;
+  border-radius: 9999px;
+  background: #4B5565; color: #FFFFFF;
+  font-size: 12px; font-weight: 500;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* -------- Card (campaign / generic surface) -------- */
+.card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: box-shadow var(--duration-fast) var(--ease-standard);
+}
+.card:hover { box-shadow: var(--shadow-md); }
+.card__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.card__title {
+  font-size: 16px; font-weight: 600;
+  color: #263238;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.card__kebab {
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  color: #697586;
+  border-radius: 6px;
+}
+.card__kebab:hover { background: #F5F5F5; }
+.card__kebab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.card__desc {
+  font-size: 14px; color: #4E4E5B;
+  line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card__meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: #4B5565;
+}
+.card__meta svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+.card__divider { height: 1px; background: #EDEEF2; margin: 4px 0; }
+.card__foot {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px;
+}
+.card__author { display: flex; align-items: center; gap: 8px; color: #263238; }
+.card__author-avatar { width: 20px; height: 20px; border-radius: 50%; background: #C5CAFF; }
+.card__timestamp { color: #919DAE; }
+
+/* -------- Status badges -------- */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; height: 20px;
+  border-radius: 9999px;
+  font-size: 12px; font-weight: 500; line-height: 1;
+  border: 1px solid;
+}
+.status-badge--draft    { background: #F4F3FF; border-color: #D9D6FE; color: #5925DC; }
+.status-badge--review   { background: #FFFAEB; border-color: #FEDF89; color: #B54708; }
+.status-badge--progress { background: #EFF8FF; border-color: #B2DDFF; color: #175CD3; }
+.status-badge--published{ background: #ECFDF3; border-color: #ABEFC6; color: #067647; }
+.status-badge--rejected { background: #FEF3F2; border-color: #FECDCA; color: #B42318; }
+.status-badge--held     { background: #FFFAEB; border-color: #FEDF89; color: #B54708; }
+.status-badge--locked   { background: #ECFDF3; border-color: #ABEFC6; color: #067647; }
+
+/* =========================================================================
+   Live summary strip — campaigns.md §3.8
+   Sits above the plan block on the right canvas of the two-column detail
+   view when the campaign is live. Read-only, ~32px tall.
+   ========================================================================= */
+.detail-live {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #ECFDF3;
+  border: 1px solid #ABEFC6;
+  color: #067647;
+  font-size: 12px;
+  letter-spacing: 0.1px;
+  margin-bottom: 12px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.detail-live::-webkit-scrollbar { display: none; }
+.detail-live__pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #067647;
+  animation: detailLivePulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes detailLivePulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+.detail-live__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: #067647;
+}
+.detail-live__sep { color: #ABEFC6; }
+.detail-live__stat {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  white-space: nowrap;
+}
+.detail-live__stat-label {
+  color: #4B5565;
+  font-size: 11px;
+}
+.detail-live__stat b {
+  color: #263238;
+  font-weight: 600;
+}
+.detail-live__stat em {
+  color: #067647;
+  font-style: normal;
+  font-size: 11px;
+}
+
+/* =========================================================================
+   Option primitive — campaigns.md §3.9
+   Ambiguity resolver. Two densities: inline (chat) and canvas (side-by-side).
+   ========================================================================= */
+.opt-group {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+.opt-group--inline {
+  grid-template-columns: 1fr;
+  max-width: 380px;
+}
+.opt-group--canvas {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.opt-card {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid #E4E4E8;
+  border-radius: 12px;
+  padding: 12px 14px 14px;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--duration-fast, 140ms) var(--ease-standard, ease),
+    transform var(--duration-fast, 140ms) var(--ease-standard, ease);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.opt-card:hover {
+  border-color: #C5CAFF;
+  box-shadow: 0 4px 12px rgba(17, 17, 20, 0.06);
+}
+.opt-card--recommended {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, #FAFAFF 0%, #F5F5FF 100%);
+}
+.opt-card--recommended::before {
+  content: "Recommended by Scout";
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+}
+.opt-card--blocked {
+  border-color: #FECDCA;
+  background: #FEF3F2;
+  cursor: not-allowed;
+}
+.opt-card--blocked:hover { box-shadow: none; transform: none; border-color: #FECDCA; }
+
+.opt-card__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #263238;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
+}
+.opt-card__preview {
+  font-size: 13px;
+  color: #4E4E5B;
+  line-height: 1.5;
+}
+.opt-card__why,
+.opt-card__then,
+.opt-card__blocked {
+  font-size: 12px;
+  color: #4B5565;
+  line-height: 1.5;
+  padding-top: 4px;
+  border-top: 1px dashed #EDEEF2;
+  margin-top: 2px;
+}
+.opt-card__why b,
+.opt-card__then b,
+.opt-card__blocked b {
+  color: #263238;
+  font-weight: 600;
+}
+.opt-card__blocked { color: #B42318; border-top-color: #FECDCA; }
+.opt-card__blocked b { color: #B42318; }
+.opt-card--canvas .opt-card__label { font-size: 15px; }
+.opt-card--canvas .opt-card__preview { font-size: 14px; }
+
+/* Small "custom" hint below an inline group — the composer itself is the
+   custom affordance, but this line reminds the user. Optional. */
+.opt-group__hint {
+  font-size: 11px;
+  color: #919DAE;
+  padding-left: 4px;
+  margin-top: -4px;
+}
+
+/* -------- Scout brand mark -------- */
+.scout-mark {
+  width: 16px; height: 16px;
+  border-radius: 5px;
+  background: var(--ai-gradient);
+  box-shadow: 0 0 0 3px rgba(91,91,245,0.12);
+  flex-shrink: 0;
+}
+.scout-mark--lg {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px rgba(91,91,245,0.10);
+}
+.scout-mark--sparkle {
+  display: grid; place-items: center;
+  color: #FFFFFF;
+}
+.scout-mark--sparkle svg { width: 12px; height: 12px; }
+
+/* -------- Scout strip (contextual dashboard message) -------- */
+.scout-strip {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #EEF0FF 0%, #E0E3FF 100%);
+  border: 1px solid #C5CAFF;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #263238;
+}
+.scout-strip__msg { flex: 1; line-height: 1.4; }
+.scout-strip__msg b { color: var(--primary); font-weight: 600; }
+.scout-strip__more {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: grid; place-items: center;
+  color: #697586;
+}
+.scout-strip__more:hover { background: rgba(255,255,255,0.5); }
+.scout-strip--warn {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FEDF89 100%);
+  border-color: #FEDF89;
+}
+.scout-strip--warn .scout-mark { background: #B54708; box-shadow: 0 0 0 3px rgba(181,71,8,0.15); }
+
+/* -------- Scout suggestion card (used on Home) -------- */
+.scout-suggest {
+  background: var(--ai-gradient-soft, linear-gradient(135deg, #EEF0FF 0%, #F1ECFF 100%));
+  border-radius: 12px;
+  padding: 16px;
+  color: #263238;
+}
+.scout-suggest__head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px; color: var(--primary); font-weight: 500;
+}
+.scout-suggest__body { font-size: 14px; line-height: 1.5; }
+.scout-suggest__actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* -------- Chips (plan tokens, filters) -------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  height: 24px;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  border: 1px solid #E4E4E8;
+  font-size: 12px; color: #4B5565;
+  transition: background var(--duration-fast);
+}
+.chip:hover { background: #F5F5F7; }
+.chip--edit { padding-right: 6px; }
+.chip--edit::after { content: "×"; color: #9AA4B2; margin-left: 2px; font-size: 14px; }
+.chip--lock { background: #ECFDF3; border-color: #ABEFC6; color: #067647; }
+.chip--lock svg { width: 10px; height: 10px; }
+.chip--scout {
+  background: #EEF0FF;
+  border-color: transparent;
+  color: var(--primary);
+}
+.chip--verify {
+  background: #FFFAEB;
+  border-color: #FEDF89;
+  color: #B54708;
+}
+.chip--source {
+  text-decoration: underline dotted;
+  color: #4B5565;
+}
+
+/* -------- Composer -------- */
+.composer {
+  display: flex; align-items: center; gap: 12px;
+  background: #FFFFFF;
+  border: 1px solid #E4E4E8;
+  border-radius: 9999px;
+  padding: 6px 6px 6px 16px;
+  box-shadow: var(--shadow-xs);
+}
+.composer__input {
+  flex: 1;
+  border: 0; outline: 0;
+  font-size: 14px;
+  background: transparent;
+  color: #263238;
+}
+.composer__input::placeholder { color: #9AA4B2; }
+.composer__ghost {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #EEF0FF;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 500;
+}
+.composer__send {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--ai-gradient);
+  color: #FFFFFF;
+  display: grid; place-items: center;
+}
+.composer__send svg { width: 14px; height: 14px; }
+.composer__attach {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  color: #697586;
+  display: grid; place-items: center;
+}
+
+/* -------- Plan block (editable pre-draft shape) -------- */
+.plan-block {
+  background: #FFFFFF;
+  border: 1px solid #E7E8FF;
+  border-left: 3px solid var(--primary);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.plan-block__row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #E4E4E8;
+  align-items: center;
+}
+.plan-block__row:last-child { border-bottom: 0; }
+.plan-block__key {
+  font-size: 12px; color: #697586;
+  font-weight: 500;
+}
+.plan-block__val {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+
+/* -------- Post card (draft in Phase 2 / detail view) -------- */
+.post-card {
+  background: #FFFFFF;
+  border: 1px solid #E4E4E8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.post-card__head {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 10px;
+}
+.post-card__meta {
+  font-size: 12px; color: #697586;
+  display: flex; align-items: center; gap: 8px;
+}
+.post-card__meta svg { width: 12px; height: 12px; }
+.post-card__title {
+  font-size: 15px; font-weight: 600;
+  color: #263238;
+}
+.post-card__body {
+  font-size: 14px; color: #263238;
+  line-height: 1.55;
+}
+.post-card__actions {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px dashed #EDEEF2;
+}
+.post-card__action {
+  height: 28px; padding: 0 10px;
+  border-radius: 8px;
+  background: #F5F5F7;
+  color: #4B5565;
+  font-size: 12px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.post-card__action:hover { background: #EBEBEB; }
+.post-card__action svg { width: 12px; height: 12px; }
+.post-card__version {
+  background: #EEF0FF;
+  color: var(--primary);
+}
+
+/* -------- Proposal / curation card -------- */
+.proposal-card {
+  background: #FFFFFF;
+  border-radius: 14px;
+  padding: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: transform var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+  position: relative;
+  overflow: hidden;
+}
+.proposal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.proposal-card__axis {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--primary);
+  font-weight: 500;
+}
+.proposal-card__title {
+  font-size: 18px; font-weight: 600;
+  color: #263238;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
+}
+.proposal-card__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.proposal-card__why {
+  font-size: 13px; color: #4E4E5B;
+  line-height: 1.5;
+}
+.proposal-card__why b { color: #263238; }
+.proposal-card__preview {
+  padding: 10px 12px;
+  background: #F5F5F7;
+  border-left: 2px solid #E7E8FF;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #4E4E5B;
+  font-style: italic;
+  line-height: 1.5;
+}
+.proposal-card__foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 8px;
+  border-top: 1px dashed #EDEEF2;
+}
+.proposal-card__freshness {
+  font-size: 12px; color: #919DAE;
+  display: flex; align-items: center; gap: 6px;
+}
+.proposal-card__freshness svg { width: 12px; height: 12px; }
+
+/* -------- KB drawer -------- */
+.kb-drawer {
+  background: #FFFFFF;
+  border-radius: 16px 0 0 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  max-width: 440px;
+  min-height: 480px;
+}
+.kb-drawer__head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #EDEEF2;
+}
+.kb-drawer__title {
+  font-size: 18px; font-weight: 600;
+  color: #263238;
+}
+.kb-drawer__snap {
+  font-size: 12px; color: #697586;
+  margin-top: 4px;
+}
+.kb-drawer__section {
+  padding: 12px 0;
+  border-bottom: 1px dashed #EDEEF2;
+}
+.kb-drawer__section:last-child { border-bottom: 0; }
+.kb-drawer__section-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.kb-drawer__section-title {
+  font-size: 14px; font-weight: 600;
+  color: #263238;
+}
+.kb-drawer__section-meta {
+  font-size: 12px; color: #697586;
+}
+.kb-entry {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #263238;
+  border-bottom: 1px dashed transparent;
+}
+.kb-entry:hover { background: #F5F5F7; margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 6px; }
+.kb-entry__watching { color: #697586; font-style: italic; }
+.kb-entry__meta {
+  font-size: 12px; color: #919DAE;
+  display: flex; align-items: center; gap: 8px;
+}
+.kb-entry__actions { display: flex; gap: 6px; }
+.kb-entry__action {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #4B5565;
+}
+.kb-entry__action:hover { background: #EEF0FF; color: var(--primary); }
+
+/* -------- Stat strip (Home dashboard) -------- */
+.stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px;
+}
+.stat__label {
+  font-size: 12px; font-weight: 500;
+  color: #4B5565;
+  margin-bottom: 4px;
+  /* NOTE: sentence case only — no uppercase text-transform */
+}
+.stat__value {
+  font-size: 28px; font-weight: 600;
+  color: #263238;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat__delta {
+  font-size: 12px; color: #067647;
+}
+.stat__delta--down { color: #B42318; }
+
+/* -------- Modals / overlays -------- */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(17,17,20,0.55);
+  z-index: 100;
+  display: grid; place-items: center;
+}
+.modal {
+  background: #FFFFFF;
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 480px;
+  width: calc(100% - 48px);
+  box-shadow: var(--shadow-xl);
+}
+.modal__title {
+  font-size: 18px; font-weight: 600;
+  color: #263238;
+  margin-bottom: 8px;
+}
+.modal__body {
+  font-size: 14px; color: #4B5565;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+.modal__actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* -------- Utility -------- */
+.mono { font-family: var(--font-mono); }
+.stack-1 > * + * { margin-top: 4px; }
+.stack-2 > * + * { margin-top: 8px; }
+.stack-3 > * + * { margin-top: 12px; }
+.stack-4 > * + * { margin-top: 16px; }
+.stack-6 > * + * { margin-top: 24px; }
+.row { display: flex; align-items: center; gap: 8px; }
+.row--between { justify-content: space-between; }
+.row--wrap { flex-wrap: wrap; }
+.muted { color: #697586; }
+.tiny { font-size: 12px; }
+
+/* -------- Design-viewer chrome (used by all agents at top of file) -------- */
+.designview {
+  position: sticky; top: 0; z-index: 50;
+  background: #1E2431; color: #FFFFFF;
+  padding: 8px 16px;
+  font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-sans);
+}
+.designview__title { font-weight: 500; }
+.designview__desc { color: #A3A9FF; font-size: 12px; }
+.designview a { color: #A3A9FF; }
+.designview a:hover { color: #FFFFFF; text-decoration: underline; }

@@ -1,0 +1,962 @@
+/* =========================================================================
+   Scout Campaign flow — POC integration
+   Loaded ONLY into poc/index.html (alongside styles.css + designs/_shared.css).
+   Purpose: make the panels from designs/*.html render cleanly inside the poc
+   view container without duplicating chrome.
+   ========================================================================= */
+
+/* Scout views inherit the standard .view flex behaviour so their panel fills
+   the main area. Each section is empty until app.js.loadScoutFlow() fills it. */
+.scout-view {
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* When the injected panel arrives, it's a direct child <section class="panel">.
+   In designs/*.html it lived under <main>; here we want it to size the same. */
+.scout-view > .panel {
+  margin: 0 var(--panel-offset, 25px) var(--panel-offset, 25px) 0;
+}
+
+/* The scout-view content sits inside poc's <main class="main">. That element
+   already provides atmosphere + sidebar layout; suppress designs/ pages'
+   duplicate atmosphere/sidebar/topbar if any slip through. */
+.scout-view .atmosphere,
+.scout-view .sidebar,
+.scout-view > main > .topbar,
+.scout-view > .topbar {
+  display: none !important;
+}
+
+/* Some designs/ files wrap content in `<div class="app mode-campaigns">` +
+   `<main>`. Flatten those so the panel is the visible child. */
+.scout-view > .app,
+.scout-view > .app > main {
+  display: contents;
+}
+
+/* First-load skeleton. Rendered until fetch resolves and content lands. */
+.scout-skeleton {
+  padding: 24px;
+  color: #697586;
+  font-size: 14px;
+  letter-spacing: 0.15px;
+  display: flex; align-items: center; gap: 12px;
+}
+.scout-skeleton .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--primary, #5B5BF5);
+  animation: scoutPulse 1.2s ease-in-out infinite;
+}
+@keyframes scoutPulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50%      { opacity: 1;    transform: scale(1.05); }
+}
+
+/* Fetch-injected panels sometimes ship inline <style> blocks that redefine
+   body.mode-campaigns background. Keep the poc app's canvas authoritative. */
+body.mode-campaigns { background: #ECECEC !important; }
+
+/* Injected design pages sometimes rely on being direct children of body with
+   `margin: auto` centering. Inside our .view (flex column), that resolves to
+   0 unless we force full-width stretch. Applies to KB drawer's .stage and
+   composer/failure-modes' .spec content. */
+.scout-view .stage,
+.scout-view .spec {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  align-self: stretch;
+}
+
+/* Hide the designs/*.html "designview" annotation bar if it comes through. */
+.scout-view .designview { display: none !important; }
+
+/* Hide the scout-flow files' own floating mini-menu when they're embedded
+   inside the POC — the POC has its own sidebar for navigation. */
+.scout-view .flow-menu,
+.scout-view .proto-pill {
+  display: none !important;
+}
+
+/* =========================================================================
+   Dashboard restructure — Running Now hero + Up Next row
+   Documented in design-system/campaigns.md §3.10 (dashboard composition).
+   ========================================================================= */
+
+/* --- Running Now hero (full-width horizontal card).
+   Structure: LIVE eyebrow · body (desc + meta) · stats row · foot (author + Open).
+   Font + spacing follow the Figma spec (SF Pro Display, 16px rhythm).
+   Stat-tile design also from the Figma spec — see .camp-hero__stat below. */
+.camp-hero {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 0 0 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+  font-family: 'SF Pro Display', var(--font-sans);
+}
+.camp-hero:hover {
+  box-shadow: 0 4px 12px rgba(17, 17, 20, 0.06), 0 1px 3px rgba(17, 17, 20, 0.04);
+  border-color: #E7E8FF;
+}
+.camp-hero__live {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, monospace);
+  font-size: 11px; letter-spacing: 0.6px;
+  color: #067647;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ECFDF3;
+  border: 1px solid #ABEFC6;
+}
+.camp-hero__live b {
+  color: #067647; font-weight: 600;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 12px; letter-spacing: 0.15px;
+}
+.camp-hero__pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #067647;
+  animation: campHeroPulse 1.8s ease-in-out infinite;
+}
+@keyframes campHeroPulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+
+.camp-hero__body {
+  display: flex; flex-direction: column;
+  gap: 8px;
+}
+
+.camp-hero__left { display: flex; flex-direction: column; gap: 8px; }
+.camp-hero__desc {
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 15px; line-height: 1.5;
+  color: #263238;
+  margin: 0;
+  max-width: 62ch;
+}
+.camp-hero__meta {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 12px; color: #4B5565;
+}
+.camp-hero__meta-item {
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.camp-hero__meta-item svg { width: 12px; height: 12px; color: #697586; }
+
+/* Stat tiles row — Figma spec: label 16/24/500 rgba(0,0,0,0.6) above
+   value 22/29/500 rgba(0,0,0,0.87). Even split, gap 8 label→value,
+   no borders, no uppercase, no left divider. */
+.camp-hero__stats {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  gap: 0;
+  padding: 4px 0 0;
+  border: 0;
+  min-height: 61px;
+}
+.camp-hero__stat {
+  flex: 1;
+  padding: 0 4px;
+  display: flex; flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.camp-hero__stat:first-child { padding-left: 0; }
+.camp-hero__stat-label {
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+  color: rgba(0, 0, 0, 0.6);
+  text-transform: none;
+  margin: 0;
+}
+.camp-hero__stat-value {
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 29px;
+  letter-spacing: 0;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.camp-hero__foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 12px;
+  border-top: 1px dashed #EDEEF2;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 12px; color: #697586;
+}
+.camp-hero__foot-author { font-weight: 500; color: #4B5565; }
+.camp-hero__open {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--camp-primary, #545BD1);
+  font-weight: 500;
+  font-size: 13px;
+}
+.camp-hero__open svg { width: 12px; height: 12px; }
+
+/* --- Up Next row — Scout-authored area.
+   §3.6 gradient rule: the indigo→violet gradient signals Scout authorship,
+   here via the badge alone so the card grid aligns edge-to-edge with the
+   bottom .campaigns__grid (no wrapper padding). */
+.up-next {
+  margin: 0 0 24px;
+  padding: 0;
+  background: none;
+}
+/* Single-line intro caption — no h2 to avoid competing with page h1.
+   Star badge inlines with the sentence; the whole line reads as a section
+   lead-in, not a heading. */
+.up-next__intro {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 14px;
+  padding: 0;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: #4B5565;
+  line-height: 20px;
+  letter-spacing: 0.15px;
+}
+.up-next__intro b {
+  color: #263238;
+  font-weight: 500;
+}
+.up-next__badge {
+  display: inline-grid; place-items: center;
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+}
+.up-next__badge img { width: 20px; height: 20px; display: block; }
+.up-next__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 1280px) { .up-next__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1000px) { .up-next__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px)  { .up-next__grid { grid-template-columns: 1fr; } }
+
+/* Up Next uses the same .camp-card component as the "Everything else" grid
+   below (see poc/styles.css). Cards are clickable — the whole card routes
+   into Phase 2 review. The kebab stops propagation. */
+.up-next .camp-card { cursor: pointer; }
+
+/* Fourth slot — "Start from scratch" escape hatch. Dashed outline to read
+   as a placeholder, indigo hover to match Create Campaign. */
+.camp-card--fresh {
+  background: transparent;
+  border: 1px dashed rgba(84, 91, 209, 0.35);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 159px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+.camp-card--fresh:hover {
+  background: rgba(84, 91, 209, 0.04);
+  border-color: var(--camp-primary, #545BD1);
+  transform: translateY(-1px);
+}
+.camp-card--fresh__inner {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+}
+.camp-card--fresh__icon {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: rgba(84, 91, 209, 0.08);
+  color: var(--camp-primary, #545BD1);
+  margin-bottom: 4px;
+}
+.camp-card--fresh__icon svg { width: 16px; height: 16px; }
+.camp-card--fresh__title {
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 16px; font-weight: 600;
+  color: #263238;
+  margin: 0;
+  line-height: 20px;
+}
+.camp-card--fresh__desc {
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 13px; font-weight: 400;
+  color: #4B5565;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* "Everything else" label above the tab strip when the pinned rows are present */
+.campaigns__rest-label {
+  padding: 4px 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: #263238;
+  margin-top: 8px;
+  border-top: 1px dashed rgba(84, 91, 209, 0.15);
+  padding-top: 16px;
+}
+
+/* =========================================================================
+   Scout note — the merged campaigns header. The tiny "Campaigns" eyebrow
+   names the page; Scout speaks directly underneath. The 4-circle logo (Scout
+   mark) sits to the left of the message; words fade+rise in on mount so the
+   thought reads as being composed in front of you rather than pre-rendered.
+   ========================================================================= */
+.campaigns__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+  padding: 4px 0 4px;
+}
+.campaigns__eyebrow {
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #697586;
+  line-height: 1;
+  opacity: 0;
+  animation: sn-eyebrow 320ms var(--ease-decelerate, cubic-bezier(0, 0, 0.2, 1)) 60ms both;
+}
+@keyframes sn-eyebrow {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scout's front-door note. One line, animates in word by word with a
+   per-word color gradient (indigo → violet → ink) that reads as "just
+   generated." A blinking gradient caret follows the last-rendered word and
+   fades out when Scout stops speaking. */
+.scout-note {
+  --sn-indigo: #5B5BF5;
+  --sn-violet: #8B5CF6;
+  --sn-ink:    #263238;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 20px 0 28px;
+  padding: 20px 22px 22px;
+  background: linear-gradient(180deg, rgba(238, 239, 250, 0.55) 0%, rgba(255, 255, 255, 0.35) 100%);
+  border: 1px solid rgba(91, 91, 245, 0.14);
+  border-radius: 16px;
+}
+
+/* Line + action stack under the mark. */
+.scout-note__body {
+  min-width: 0;
+  display: flex; flex-direction: column;
+  gap: 14px;
+}
+.scout-note__mark {
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 4px;
+  width: 24px; height: 24px;
+  display: inline-grid; place-items: center;
+  color: var(--sn-indigo);
+  opacity: 0;
+  transform: scale(0.6);
+  animation: sn-mark 520ms var(--ease-emphasized, cubic-bezier(0.3, 0, 0, 1)) 60ms both;
+  /* Soft indigo aura — reads as "presence" without a loud pulse. */
+  filter: drop-shadow(0 0 6px rgba(91, 91, 245, 0.35));
+}
+.scout-note__mark svg { width: 24px; height: 24px; display: block; }
+/* Ambient aura behind the mark — slow breath so it feels alive without
+   distracting from the text. */
+.scout-note__mark::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  background: radial-gradient(closest-side, rgba(139, 92, 246, 0.22), rgba(91, 91, 245, 0) 70%);
+  animation: sn-mark-breath 3600ms ease-in-out 400ms infinite;
+  pointer-events: none;
+}
+@keyframes sn-mark {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes sn-mark-breath {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+/* Single-line utterance. Flex-wrap so it breaks naturally on narrow widths
+   without collapsing the per-word spacing. The 8px column-gap replaces the
+   natural inter-word space, so we do NOT emit whitespace text nodes between
+   words. */
+.scout-note__line {
+  margin: 0;
+  min-width: 0;
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: 6px 8px;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 20px;
+  line-height: 1.28;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+  color: var(--sn-ink);
+}
+.scout-note__line .w {
+  position: relative;                  /* anchor for the ::after caret */
+  display: inline-block;
+  color: var(--sn-indigo);             /* start warm, resolve to ink */
+  opacity: 0;
+  transform: translateY(6px);
+  filter: blur(2px);
+  /* Two-track animation: entrance motion (opacity/transform/blur) plus a
+     color transition that carries an "AI just wrote this" feeling. Both use
+     the same per-word delay so the color resolves as the word lands. */
+  animation:
+    sn-word 520ms var(--ease-decelerate, cubic-bezier(0, 0, 0.2, 1)) both,
+    sn-word-color 900ms ease-out both;
+  animation-delay:
+    calc(320ms + var(--i, 0) * 80ms),
+    calc(320ms + var(--i, 0) * 80ms);
+}
+/* Bold marker (**text** in the source string) — reserved for checkable atoms
+   like a number or a date. Color still animates through the gradient. */
+.scout-note__line .w--bold { font-weight: 700; }
+@keyframes sn-word {
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes sn-word-color {
+  0%   { color: var(--sn-indigo); }
+  40%  { color: var(--sn-violet); }
+  100% { color: var(--sn-ink);    }
+}
+
+/* Per-word caret via ::after — appears just as the word arrives, fades out
+   as the next word takes over. This is what makes the caret VISUALLY FOLLOW
+   the text as Scout "speaks," instead of sitting statically at the end. */
+.scout-note__line .w::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 8%;
+  width: 2px;
+  height: 88%;
+  background: linear-gradient(180deg, var(--sn-indigo) 0%, var(--sn-violet) 100%);
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.55);
+  border-radius: 1px;
+  opacity: 0;
+  animation: sn-caret-follow 260ms ease-out both;
+  /* Caret[i] appears when word[i] appears; fades before word[i+1] takes over. */
+  animation-delay: calc(320ms + var(--i, 0) * 80ms);
+}
+@keyframes sn-caret-follow {
+  0%   { opacity: 0; }
+  35%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Last word's caret gets the extended blink+fade lifecycle so Scout appears
+   to "finish speaking" rather than the cursor cutting off mid-thought. Use
+   animation-name (longhand) so the inherited animation-delay from the base
+   .w::after rule survives — otherwise the shorthand would reset delay to 0
+   and the final caret would fire before the sentence even starts.
+   Duration tuned so the caret winds down BEFORE the CTA appears; the CTA
+   delay downstream keys off this timing. */
+.scout-note__line .w--last::after {
+  animation-name: sn-caret-final;
+  animation-duration: 1400ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+@keyframes sn-caret-final {
+  0%   { opacity: 0; }
+  4%   { opacity: 1; }
+  12%  { opacity: 1; }
+  18%  { opacity: 0.15; }
+  26%  { opacity: 1; }
+  34%  { opacity: 0.15; }
+  42%  { opacity: 1; }
+  50%  { opacity: 0.15; }
+  58%  { opacity: 1; }
+  66%  { opacity: 0.15; }
+  74%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* CTA sits on its own row below the utterance so it doesn't clash with the
+   primary top-right "Create Campaign" button and doesn't crowd the sentence.
+   Fades in alongside the text (starts at 320ms — same beat as the first
+   word) so the button reads as part of the message being written, not as a
+   separate "here's what to do next" beat after Scout finishes. */
+.scout-note__action {
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  animation: sn-word 560ms var(--ease-decelerate, cubic-bezier(0, 0, 0.2, 1)) 320ms both;
+}
+
+/* Primary CTA — filled indigo pill. It's the anchor action for Scout's block:
+   inline at the end of the second line so it reads as the sentence's closing
+   beat, not as a floating button. */
+/* Secondary CTA — quiet tinted pill so it doesn't compete with the primary
+   "Create Campaign" button in the top-right. Its reveal timing lives on the
+   parent .scout-note__action so the row (not the pill) does the fade-in. */
+.scout-note__cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px 6px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--camp-primary-tint, #EEEFFA);
+  color: var(--sn-indigo);
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+.scout-note__cta:hover {
+  background: #E4E6F8;
+  border-color: rgba(91, 91, 245, 0.24);
+  transform: translateY(-1px);
+}
+.scout-note__cta:focus-visible {
+  outline: none;
+  border-color: var(--sn-indigo);
+  box-shadow: 0 0 0 3px rgba(91, 91, 245, 0.18);
+}
+.scout-note__cta-arrow { display: inline-flex; }
+.scout-note__cta-arrow svg { width: 14px; height: 14px; }
+
+@media (max-width: 900px) {
+  .scout-note__line { font-size: 17px; gap: 5px 7px; }
+  .scout-note__mark { width: 20px; height: 20px; }
+  .scout-note__mark svg { width: 20px; height: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scout-note__mark,
+  .scout-note__mark::before,
+  .scout-note__line .w,
+  .scout-note__line .w::after,
+  .scout-note__action,
+  .scout-note__cta { animation: none; opacity: 1; transform: none; filter: none; }
+  .scout-note__line .w { color: var(--sn-ink); }
+  .scout-note__line .w::after { display: none; }
+}
+
+/* Quieter Create Campaign — ghost variant. Since Scout has already drafted
+   the primary work, the filled indigo would compete with the message. This
+   variant carries the same affordance without pulling focus. */
+.btn-create--ghost {
+  background: transparent;
+  color: #545BD1;
+  border: 1px solid rgba(84, 91, 209, 0.35);
+  box-shadow: none;
+}
+.btn-create--ghost:hover {
+  background: #EEEFFA;
+  border-color: #545BD1;
+  box-shadow: none;
+}
+.btn-create--ghost .btn-create__icon { color: #545BD1; }
+
+/* =========================================================================
+   Scout rationale side panel — inline sibling of .campaigns-panel.
+   Not an overlay: sits at the same visual level as the campaigns content
+   with an 8px gap between them. Design language follows the Figma spec for
+   right-side info panels (Version History / Post Analytics / X Post):
+     - white surface, 24px radius
+     - header row: title h6 (SF Pro Display 18/500) + 18px X close icon
+     - 1px #EEEEEE divider under the header
+     - stat / info cards on #F8FAFC with 12px radius, 12px padding
+     - lead-axis badge chip, pill radius, small caps
+     - primary action bar at the foot (Adjust brief → back to Phase 1)
+   ========================================================================= */
+body.mode-campaigns #view-campaigns.view-campaigns--split {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 12px;
+}
+body.mode-campaigns #view-campaigns.view-campaigns--split .campaigns-panel {
+  min-width: 0;
+  /* Do not touch background — leave the campaigns-panel at its original
+     rgba(255,255,255,0.4) frosted surface so the dashboard shell reads the
+     same whether the drawer is open or closed. */
+}
+
+/* Right-hand panel — sibling of .campaigns-panel, not an overlay. Matches the
+   campaigns-panel visual language EXACTLY: same rgba(255,255,255,0.4) frosted
+   surface, same 24px radius, same 2px backdrop blur, no border, no shadow,
+   no elevation of any kind. No slide-in transform either — the panel just
+   fades in place, so it never reads as a modal dropping onto the page. The
+   12px gap on the parent (view-campaigns--split) gives the peer spacing. */
+.scout-rationale {
+  flex: 0 0 440px;
+  min-height: 0;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  opacity: 0;
+  transition: opacity 220ms var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  box-shadow: none !important;
+  border: 0 !important;
+  filter: none !important;
+  font-family: 'SF Pro Display', var(--font-sans);
+}
+.scout-rationale--open {
+  opacity: 1;
+}
+
+/* Header — matches the Version History pattern: title + close X, tight top
+   padding, 1px bottom divider. */
+.scout-rationale__head {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid #EEEEEE;
+}
+.scout-rationale__title {
+  margin: 0;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.15px;
+  color: #263238;
+}
+.scout-rationale__close {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  display: inline-grid; place-items: center;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  color: #263238;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+.scout-rationale__close:hover { background: #F4F4F4; }
+.scout-rationale__close svg { width: 18px; height: 18px; }
+
+/* Intro paragraph — sets the framing for the three items. body14, secondary
+   text color. */
+.scout-rationale__intro {
+  margin: 0;
+  flex-shrink: 0;
+  padding: 16px 24px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.15px;
+  color: #4B5565;
+}
+
+/* List — scrollable; each item is a distinct block separated by 24px. */
+.scout-rationale__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 24px 8px;
+  display: flex; flex-direction: column; gap: 24px;
+}
+
+/* Card — each generated draft is a proper card with clear zones:
+   - top: lead-axis badge + arrow (click affordance)
+   - middle: title, why-now, meta chips (dates + post count) — CAMPAIGN DATA
+   - bottom (visually distinct, indigo-tinted): Scout's "pick this if" — SCOUT'S SUGGESTION
+   The two zones use different surfaces so the user can tell campaign facts
+   from Scout's opinion at a glance. */
+/* Drawer cards reuse the dashboard's .camp-card shell so both surfaces read
+   as the same UI element. This modifier only resets button chrome and left-
+   aligns text — everything else (padding, radius, hover, foot) comes from
+   .camp-card in styles.css. */
+.scout-rat__item {
+  width: 100%;
+  border: 0;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+  /* .camp-card already sets background, radius, cursor, transition. */
+}
+
+/* Reasoning — fact first (higher-emphasis body color), move second (muted).
+   Sits in the desc slot; both lines fit inside the card body without needing
+   line-clamp truncation because copy is authored to a fixed shape. */
+.scout-rat__reasoning {
+  display: flex; flex-direction: column;
+  gap: 4px;
+}
+.scout-rat__fact {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--camp-text-primary);
+}
+.scout-rat__move {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--camp-text-secondary);
+}
+
+/* Reasoning banner — compact single-line strip inside the card citing the
+   source Scout drew from. Replaces the axis pill: the card now leads with
+   *why* rather than a decorative label. Icon reinforces the source type at
+   a glance (flame = external signal, trending = past top performer). */
+.scout-rat__banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.1px;
+}
+.scout-rat__banner-icon {
+  display: inline-grid; place-items: center;
+  width: 14px; height: 14px;
+  flex-shrink: 0;
+}
+.scout-rat__banner-icon svg { width: 12px; height: 12px; display: block; }
+.scout-rat__banner-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Palettes match the old axis-pill palette so the axis identity stays
+   consistent across cards, badges, and dashboard states. */
+.scout-rat__banner--reactive     { background: #FFF4E5; border-color: #FCE1B4; color: #663C00; }
+.scout-rat__banner--pattern-echo { background: #F1F2FA; border-color: #DDE0F1; color: #2E3273; }
+.scout-rat__banner--experiment   { background: #F4EEFF; border-color: #D9C9FF; color: #6B2EE0; }
+.scout-rat__banner--default      { background: #F8F9FC; border-color: #E4E4E8; color: #2E3273; }
+
+/* Foot — thin divider above, single ghost link back to Phase-1 curated. */
+.scout-rationale__foot {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px 20px;
+  border-top: 1px solid #EEEEEE;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.15px;
+  color: #455A64;
+}
+.scout-rationale__foot-cta {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 0;
+  background: transparent;
+  color: #545BD1;
+  font-family: 'SF Pro Display', var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 140ms ease;
+}
+.scout-rationale__foot-cta:hover { background: #EEEFFA; }
+.scout-rationale__foot-cta svg { width: 14px; height: 14px; }
+
+/* Responsive — on narrow layouts, panel becomes a bottom sheet so it doesn't
+   crowd the campaigns grid out. */
+@media (max-width: 1100px) {
+  .scout-rationale { flex-basis: 400px; }
+}
+@media (max-width: 860px) {
+  body.mode-campaigns #view-campaigns.view-campaigns--split {
+    flex-direction: column;
+  }
+  .scout-rationale { flex-basis: auto; height: 480px; }
+}
+
+/* ============================================================================
+   Create-campaign landing — Scout's shape-picker, ported inline from
+   designs/create-campaign.html into #view-scout-p1. All rules are scoped
+   under .cc-scope so they can't leak into other views. Sticky positioning
+   and self-owned gutters are dropped — poc's own layout supplies both.
+   ============================================================================ */
+
+.cc-scope {
+  padding: 8px 24px 32px;
+  font-family: var(--font-sans);
+  color: var(--camp-text-primary);
+}
+
+.cc-scope .cc-header {
+  padding: 20px 0 18px;
+  margin: 0;
+  background: transparent;
+}
+.cc-scope .cc-title {
+  font-family: var(--font-sans);
+  font-size: 28px; line-height: 34px; font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--camp-text-primary);
+  margin: 0 0 8px 0;
+}
+.cc-scope .cc-subtitle {
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: 22px; font-weight: 400;
+  letter-spacing: 0.15px;
+  color: var(--camp-text-secondary);
+  margin: 0;
+}
+
+.cc-scope .cc-main { max-width: 820px; padding: 0; margin: 0; }
+
+.cc-scope .cc-landing {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 320ms var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)),
+              transform 320ms var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+.cc-scope .cc-landing.is-leaving {
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+.cc-scope .cc-landing__lead {
+  color: var(--camp-text-secondary);
+  font-size: 13px; line-height: 20px; font-weight: 500;
+  letter-spacing: 0.2px;
+  margin: 0 0 12px 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  opacity: 0;
+  animation: ccShapeCardIn 400ms var(--ease-emphasized, cubic-bezier(0.3, 0, 0, 1)) 60ms both;
+}
+.cc-scope .cc-landing__lead-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  background: var(--camp-primary-tint, #EEEFFA);
+  color: var(--indigo-500, #5B5BF5);
+}
+.cc-scope .cc-landing__lead-badge svg { width: 12px; height: 12px; }
+
+.cc-scope .cc-shape-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 780px;
+}
+@media (max-width: 780px) {
+  .cc-scope .cc-shape-grid { grid-template-columns: 1fr; }
+}
+
+.cc-scope .cc-shape-card {
+  position: relative;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 22px;
+  background: var(--camp-surface, #FFFFFF);
+  border: 1px solid var(--camp-border-hairline, #E4E7EC);
+  border-radius: 16px;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: ccShapeCardIn 520ms var(--ease-emphasized, cubic-bezier(0.3, 0, 0, 1)) both;
+  animation-delay: calc(160ms + var(--cc-card-i, 0) * 90ms);
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+@keyframes ccShapeCardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cc-scope .cc-landing.is-leaving .cc-shape-card {
+  animation: ccShapeCardOut 240ms var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)) both;
+  animation-delay: calc(var(--cc-card-i, 0) * 40ms);
+}
+@keyframes ccShapeCardOut {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+
+.cc-scope .cc-shape-card:hover {
+  border-color: rgba(91, 91, 245, 0.32);
+  box-shadow: 0 12px 28px rgba(91, 91, 245, 0.10);
+  transform: translateY(-1px);
+}
+.cc-scope .cc-shape-card:focus-visible {
+  outline: none;
+  border-color: var(--indigo-500, #5B5BF5);
+  box-shadow: 0 0 0 3px rgba(91, 91, 245, 0.16);
+}
+.cc-scope .cc-shape-card--rec { border-color: rgba(91, 91, 245, 0.24); }
+
+.cc-scope .cc-shape-card__head {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+.cc-scope .cc-shape-card__kind {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--indigo-500, #5B5BF5);
+  background: var(--camp-primary-tint, #EEEFFA);
+  padding: 4px 8px; border-radius: 999px;
+}
+.cc-scope .cc-shape-card__rec {
+  font-size: 11px; font-weight: 600;
+  color: var(--indigo-500, #5B5BF5);
+  background: transparent;
+  border: 1px solid rgba(91, 91, 245, 0.28);
+  padding: 3px 8px; border-radius: 999px;
+  letter-spacing: 0.2px;
+}
+.cc-scope .cc-shape-card__title {
+  font-size: 18px; line-height: 24px; font-weight: 600;
+  letter-spacing: -0.15px;
+  color: var(--camp-text-primary);
+  margin: 0;
+}
+.cc-scope .cc-shape-card__desc {
+  font-size: 14px; line-height: 21px; font-weight: 400;
+  color: var(--camp-text-secondary);
+  margin: 0;
+}
+.cc-scope .cc-shape-card__meta {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(228, 231, 236, 0.9);
+  color: var(--camp-text-tertiary);
+  font-size: 12px; font-weight: 500;
+}
+.cc-scope .cc-shape-card__meta svg { width: 13px; height: 13px; }
+.cc-scope .cc-shape-card__meta-sep { color: rgba(0, 0, 0, 0.14); }
+

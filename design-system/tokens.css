@@ -125,6 +125,7 @@
   --status-warning:    var(--warning-main);
   --status-danger:     var(--error-main);
   --status-info:       var(--info-main);
+  --status-notification: #F44336;   /* Notification dot (per campaigns.md §2) */
 
   /* ---------------------------------------------------------------------
      TYPOGRAPHY — MUI scale

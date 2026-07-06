@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campaigns · Component sheet</title>
+<link rel="stylesheet" href="./_shared.css" />
+<link rel="stylesheet" href="./_campaigns-components.css" />
+<style>
+  /* ===============================================================
+     Component-sheet layout — the Figma-spec-style showcase page.
+     Component styles live in _campaigns-components.css.
+     This <style> block is only the sheet scaffolding (.sheet, .bay,
+     .legend). Do NOT drop component CSS here — put it in the
+     shared stylesheet so other pages can pick it up.
+     =============================================================== */
+  body { background: var(--camp-surface-canvas); overflow-x: auto; }
+  .sheet {
+    position: relative;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+    display: flex; flex-direction: column; gap: 48px;
+  }
+  .sheet__head {
+    display: flex; flex-direction: column; gap: 6px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #DADCE2;
+  }
+  .sheet__eyebrow {
+    font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase;
+    color: var(--camp-primary); font-weight: 500;
+  }
+  .sheet__title { font-size: 28px; font-weight: 500; color: var(--camp-text-primary); letter-spacing: 0.15px; }
+  .sheet__lede { font-size: 14px; color: var(--camp-text-secondary); max-width: 720px; line-height: 1.55; }
+
+  /* How-to-pick-this-up note at the top of the sheet */
+  .sheet__pickup {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px;
+    background: #F1F2FC;
+    border: 1px solid #DADDF6;
+    border-left: 3px solid var(--camp-primary);
+    border-radius: 8px;
+    font-size: 13px; line-height: 1.5;
+    color: var(--camp-text-primary);
+    max-width: 900px;
+  }
+  .sheet__pickup code {
+    background: rgba(84, 91, 209, 0.08);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--camp-primary);
+  }
+
+  .bay { display: flex; flex-direction: column; gap: 14px; }
+  .bay__head { display: flex; align-items: baseline; gap: 12px; }
+  .bay__num { font-size: 12px; font-weight: 500; color: var(--camp-primary); letter-spacing: 0.6px; }
+  .bay__title { font-size: 18px; font-weight: 500; color: var(--camp-text-primary); letter-spacing: 0.15px; }
+  .bay__desc { font-size: 13px; color: var(--camp-text-tertiary); margin-left: auto; text-align: right; max-width: 480px; line-height: 1.5; }
+  .bay__frame {
+    background: #F8F8FA;
+    border: 1px solid #E4E4E8;
+    border-radius: 16px;
+    padding: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 32px;
+    overflow-x: auto;
+  }
+  .bay__frame--dark {
+    background: var(--camp-surface-canvas);
+    background-image:
+      radial-gradient(circle at 15% 100%, rgba(84, 91, 209, 0.12), transparent 55%),
+      radial-gradient(circle at 5% 90%, rgba(224, 225, 255, 0.6), transparent 60%);
+  }
+  .bay__sub {
+    font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
+    color: #8A93A0; text-align: center; margin-top: 8px;
+  }
+  .bay__col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    padding: 20px 24px;
+    background: var(--camp-surface);
+    border-radius: 12px;
+    border: 1px solid #E4E4E8;
+  }
+  .legend__col { display: flex; flex-direction: column; gap: 4px; min-width: 160px; }
+  .legend__label {
+    font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
+    color: var(--camp-text-tertiary);
+  }
+  .legend__value {
+    font-size: 13px; color: var(--camp-text-primary); font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Shared icon sprite
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.3 5.7L12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/>
+    </symbol>
+    <symbol id="i-close-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </symbol>
+    <symbol id="i-verified" viewBox="0 0 22 22" fill="currentColor">
+      <path d="M11 0l2.3 2 3.1-.3 1.2 2.9 2.9 1.2-.3 3.1L22 11l-2 2.3.3 3.1-2.9 1.2-1.2 2.9-3.1-.3L11 22l-2.3-2-3.1.3-1.2-2.9L1.5 16.2l.3-3.1L0 11l2-2.3-.3-3.1L4.6 4.4 5.8 1.5l3.1.3L11 0zm-1 14.5l6-6L14.6 7 10 11.6 7.4 9 6 10.4 10 14.5z"/>
+    </symbol>
+    <symbol id="i-brush" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8.5 1.5L12.5 5.5l-6 6H2.5v-4l6-6z"/>
+      <path d="M4 10L2 12"/>
+    </symbol>
+    <symbol id="i-smile" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="7" cy="7" r="5.5"/><circle cx="5" cy="5.8" r="0.5" fill="currentColor"/><circle cx="9" cy="5.8" r="0.5" fill="currentColor"/><path d="M4.5 8.8c1 1.1 3 1.1 4 0"/>
+    </symbol>
+    <symbol id="i-image" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1.5" y="1.5" width="11" height="11" rx="1.5"/>
+      <circle cx="5" cy="5" r="1"/>
+      <path d="M2 10l3-3 3 3 2-2 2 2"/>
+    </symbol>
+    <symbol id="i-cal" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="3" width="13.5" height="12.75" rx="1.5"/>
+      <path d="M2.25 7h13.5M6 1.5v3M12 1.5v3"/>
+    </symbol>
+    <symbol id="i-cal-sm" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="10" height="9" rx="1"/>
+      <path d="M2 6h10M5 1.5v3M9 1.5v3"/>
+    </symbol>
+    <symbol id="i-plus-sq" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1.5" y="1.5" width="11" height="11" rx="1.5"/>
+      <path d="M7 4.5v5M4.5 7h5"/>
+    </symbol>
+    <symbol id="i-clipboard" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="3.5" width="10" height="12" rx="1.5"/>
+      <path d="M7 2.5h4v2H7z" fill="currentColor" stroke="none"/>
+      <path d="M9 8v3M7.5 9.5h3"/>
+    </symbol>
+    <symbol id="i-user" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="6.5" r="2.75"/>
+      <path d="M3.5 15c1-2.5 3.2-3.75 5.5-3.75s4.5 1.25 5.5 3.75"/>
+    </symbol>
+    <symbol id="i-users" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="7" cy="7" r="2.5"/>
+      <path d="M2 15c.6-2.3 2.4-3.5 5-3.5s4.4 1.2 5 3.5"/>
+      <circle cx="13" cy="6" r="2"/>
+      <path d="M11.5 11c2.5 0 4 1.3 4.5 3"/>
+    </symbol>
+    <symbol id="i-heart" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 5.5c0-1.7 1.3-3 3-3 1.2 0 2.3.8 3 2 .7-1.2 1.8-2 3-2 1.7 0 3 1.3 3 3 0 4-6 8-6 8s-6-4-6-8z"/>
+      <path d="M15 6l-2 2M12.5 5.5l-2 2" opacity="0.6"/>
+    </symbol>
+    <symbol id="i-notes" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="2.5" width="13" height="13" rx="1.75"/>
+      <path d="M5 6h8M5 9h8M5 12h5"/>
+    </symbol>
+    <symbol id="i-kebab-v" viewBox="0 0 20 20" fill="currentColor">
+      <circle cx="10" cy="4" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="16" r="1.5"/>
+    </symbol>
+    <symbol id="i-minus-sq" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="13.5" height="13.5" rx="2"/>
+      <line x1="6" y1="9" x2="12" y2="9"/>
+    </symbol>
+    <symbol id="i-paperclip" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 3.5L5 7.5c-.6.6-.6 1.5 0 2.1.6.6 1.5.6 2.1 0l4.5-4.5c1-1 1-2.6 0-3.6s-2.6-1-3.6 0L3.4 5.9c-1.4 1.4-1.4 3.6 0 5s3.6 1.4 5 0L11.5 8"/>
+    </symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="4" y1="10" x2="10" y2="4"/>
+      <polyline points="5 4 10 4 10 9"/>
+    </symbol>
+    <symbol id="i-stars" viewBox="0 0 11 11" fill="currentColor">
+      <path d="M5.5 0.5L6.4 3.6 9.5 4.5 6.4 5.4 5.5 8.5 4.6 5.4 1.5 4.5 4.6 3.6 5.5 0.5z"/>
+      <path d="M9 7.5L9.4 8.7 10.5 9 9.4 9.3 9 10.5 8.6 9.3 7.5 9 8.6 8.7 9 7.5z" opacity="0.85"/>
+    </symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="7" y1="11" x2="7" y2="3"/><polyline points="3.5 6.5 7 3 10.5 6.5"/>
+    </symbol>
+    <symbol id="i-check-square" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M1.6 2.8C1.6 2.1 2.1 1.6 2.8 1.6h10.4c.7 0 1.2.5 1.2 1.2v10.4c0 .7-.5 1.2-1.2 1.2H2.8c-.7 0-1.2-.5-1.2-1.2V2.8z"/>
+      <path d="M4.5 8l2.2 2.2L11.5 5.4" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-chev-left" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="12.5 15 7.5 10 12.5 5"/>
+    </symbol>
+    <symbol id="i-chev-right" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="7.5 5 12.5 10 7.5 15"/>
+    </symbol>
+    <symbol id="i-chev-down" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="5 7.5 10 12.5 15 7.5"/>
+    </symbol>
+    <symbol id="i-file-check" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12.5 1.7H5A1.7 1.7 0 0 0 3.3 3.3v13.4A1.7 1.7 0 0 0 5 18.3h10a1.7 1.7 0 0 0 1.7-1.7V5.8L12.5 1.7z"/>
+      <polyline points="11.7 1.7 11.7 5.8 15.8 5.8"/>
+      <polyline points="6.7 11.7 8.3 13.3 12.5 9.2"/>
+    </symbol>
+    <symbol id="i-columns" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="2.5" width="15" height="15" rx="2"/>
+      <line x1="10" y1="2.5" x2="10" y2="17.5"/>
+    </symbol>
+    <symbol id="i-x-square" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="2.5" width="15" height="15" rx="2"/>
+      <line x1="7.5" y1="7.5" x2="12.5" y2="12.5"/>
+      <line x1="12.5" y1="7.5" x2="7.5" y2="12.5"/>
+    </symbol>
+    <symbol id="i-heart-msg" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.25 4.75c0-1 .8-1.75 1.75-1.75h10c1 0 1.75.75 1.75 1.75V11c0 1-.75 1.75-1.75 1.75H7L4 15.5V12.75c-1 0-1.75-.75-1.75-1.75V4.75z"/>
+      <path d="M9 9.5s-2-1.2-2-2.5c0-.7.6-1.2 1.2-1.2.4 0 .7.2.8.5.1-.3.4-.5.8-.5.6 0 1.2.5 1.2 1.2 0 1.3-2 2.5-2 2.5z"/>
+    </symbol>
+    <symbol id="i-cal-line" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="3" width="13.5" height="12.75" rx="1.5"/>
+      <path d="M2.25 7h13.5M6 1.5v3M12 1.5v3"/>
+    </symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.15 12s3.6-7 9.85-7 9.85 7 9.85 7-3.6 7-9.85 7S2.15 12 2.15 12z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="sheet">
+
+  <header class="sheet__head">
+    <div class="sheet__eyebrow">Campaigns · Design system</div>
+    <h1 class="sheet__title">Campaign detail components</h1>
+    <p class="sheet__lede">
+      Eleven components used across the campaign detail views — an approval drawer,
+      a generated-post card and its loading state, the campaign detail panel,
+      a compact horizontal post row, an approval drawer variant with post analytics,
+      four popups (date + time picker, dropdown options, campaign disclaimer, rejection feedback), and a read-only banner.
+    </p>
+    <p class="sheet__pickup">
+      <strong style="color: var(--camp-primary);">Picking these up in another page?</strong>
+      &nbsp; Import <code>designs/_campaigns-components.css</code> — it defines
+      module tokens (<code>--camp-*</code>) and every class shown here.
+      Written spec (naming, do's &amp; don'ts, when-to-use) lives at
+      <code>design-system/campaigns.md</code>.
+    </p>
+  </header>
+
+  <!-- =========================================================
+       1) APPROVAL SIDE DRAWER — v1 (post + comments)
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">01</span>
+      <h2 class="bay__title">Approval side drawer</h2>
+      <p class="bay__desc">
+        The right-side drawer opened from any post in a campaign for review.
+        Shows the post, a Refine action, and the comment thread.
+      </p>
+    </div>
+    <div class="bay__frame bay__frame--dark">
+      <aside class="drawer" aria-label="Approval drawer">
+        <div class="drawer__inner">
+
+          <div class="drawer__titlerow">
+            <span class="drawer__title-text">Summer fest Marketing</span>
+            <button class="drawer__close" aria-label="Close">
+              <svg><use href="#i-close"/></svg>
+            </button>
+          </div>
+
+          <div class="drawer__body">
+            <div class="drawer__author-row">
+              <div class="drawer__avatar"></div>
+              <div class="drawer__author">
+                <span class="drawer__author-name">
+                  Lays Inc
+                  <span class="drawer__verified"><svg width="12" height="12"><use href="#i-verified"/></svg></span>
+                </span>
+                <span class="drawer__author-handle">@jd_1</span>
+              </div>
+            </div>
+            <p class="drawer__copy">
+              It's incredible to see our hard work come to life! Grateful for my mentors and peers who inspire me daily. 🌟
+            </p>
+            <div class="drawer__image" role="img" aria-label="Post image"></div>
+            <div class="drawer__meta">
+              <span class="drawer__meta-chip">
+                <span class="drawer__meta-avatar"></span>
+                Lays Inc
+              </span>
+            </div>
+          </div>
+
+          <button class="drawer__refine">
+            <svg><use href="#i-brush"/></svg>
+            Refine Post
+          </button>
+
+          <div class="drawer__comments">
+            <div class="drawer__comment">
+              <div class="drawer__comment-avatar"></div>
+              <div class="drawer__comment-bubble">
+                <div class="drawer__comment-head">
+                  <div>
+                    <div class="drawer__comment-name">David Doe</div>
+                    <div class="drawer__comment-role">Sr. Marketing Manager</div>
+                  </div>
+                  <span class="drawer__comment-time">1d ago</span>
+                </div>
+                <p class="drawer__comment-body">
+                  The post is good but please attach some media to it so that we can engage our audience — also if you can please change the second image as it's capturing the first glance of mine. Otherwise the content is good and the media is ✅. Just do some tweaks and re-schedule it.
+                </p>
+              </div>
+            </div>
+
+            <div class="drawer__compose">
+              <div class="drawer__comment-avatar"></div>
+              <div class="drawer__compose-input">
+                <span>Write a comment</span>
+                <span class="drawer__compose-tools">
+                  <svg><use href="#i-smile"/></svg>
+                  <svg><use href="#i-image"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+      <div class="bay__col">
+        <div class="bay__sub">407 × 876 · white surface · 24px padding</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       2) GENERATED POST — X-style card
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">02</span>
+      <h2 class="bay__title">Generated post — X card</h2>
+      <p class="bay__desc">
+        The drafted-post surface used inside curated campaigns and post detail views.
+        Mirrors an X (Twitter) post layout so authors preview what publishes.
+      </p>
+    </div>
+    <div class="bay__frame">
+      <div class="bay__col">
+        <article class="xpost" aria-label="Generated post">
+          <div class="xpost__body">
+            <div class="xpost__avatar"></div>
+            <div class="xpost__main">
+              <header class="xpost__head">
+                <div class="xpost__idrow">
+                  <span class="xpost__name">Lays Inc</span>
+                  <span class="xpost__verified"><svg width="14" height="14"><use href="#i-verified"/></svg></span>
+                  <span class="xpost__handle">Laysglobaloffical</span>
+                  <span class="xpost__dot">·</span>
+                  <span class="xpost__date">May 29</span>
+                </div>
+                <span class="xpost__kebab" aria-hidden="true"><span></span><span></span><span></span></span>
+              </header>
+              <p class="xpost__text">
+                Some open chips… some open conversations 🍟✨ What's your go-to flavor when you're hanging out with friends? #LaysMoments
+              </p>
+              <div class="xpost__image" role="img" aria-label="Post image"></div>
+            </div>
+          </div>
+
+          <footer class="xpost__footer">
+            <span class="xpost__action">
+              <svg><use href="#i-clipboard"/></svg>
+              Draft
+            </span>
+            <span class="xpost__action">
+              <svg><use href="#i-cal-sm"/></svg>
+              Schedule
+            </span>
+            <span class="xpost__action">
+              <svg><use href="#i-plus-sq"/></svg>
+              Post
+            </span>
+          </footer>
+        </article>
+        <div class="bay__sub">421 wide · shadow 4/4/64 · 24px radius</div>
+      </div>
+
+      <!-- =========================================================
+           3) LOADING STATE — X post null
+           ========================================================= -->
+      <div class="bay__col">
+        <article class="xpost xpost--loading" aria-label="Post loading">
+          <div class="xpost__main" style="width: 100%;">
+            <header class="xpost__head--loading">
+              <span class="skeleton" style="width: 120px; height: 8px;"></span>
+              <span class="xpost__kebab" aria-hidden="true"><span></span><span></span><span></span></span>
+            </header>
+            <div class="xpost__skeleton-lines">
+              <span class="skeleton"></span>
+              <span class="skeleton"></span>
+              <span class="skeleton"></span>
+            </div>
+          </div>
+        </article>
+        <div class="bay__sub">Same shell · skeleton pulse · no image</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       4) CAMPAIGN DETAIL PANEL
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">03</span>
+      <h2 class="bay__title">Campaign detail panel</h2>
+      <p class="bay__desc">
+        The plan-and-configure surface: campaign title, status, and the fields
+        Scout uses when it generates posts. Sticky footer for the run action.
+      </p>
+    </div>
+    <div class="bay__frame">
+      <section class="cpanel" aria-label="Campaign detail">
+        <div class="cpanel__inner">
+          <header class="cpanel__head">
+            <h3 class="cpanel__title">Pepsi 2025</h3>
+            <div class="cpanel__head-right">
+              <span class="cpanel__badge">In Draft</span>
+              <button class="cpanel__kebab" aria-label="More"><svg><use href="#i-kebab-v"/></svg></button>
+            </div>
+          </header>
+
+          <div class="cpanel__fields">
+
+            <div class="cfield">
+              <span class="cfield__icon"><svg><use href="#i-user"/></svg></span>
+              <div class="cfield__body">
+                <div class="cfield__label">Objective</div>
+                <div class="cfield__value">Engagement and growth for clothing Apparel</div>
+              </div>
+            </div>
+
+            <div class="cfield">
+              <span class="cfield__icon"><svg><use href="#i-users"/></svg></span>
+              <div class="cfield__body">
+                <div class="cfield__label">Audience</div>
+                <div class="cfield__chips">
+                  <span class="cfield__chip">18 - 25Y</span>
+                  <span class="cfield__chip">26 - 35Y</span>
+                  <span class="cfield__chip">Male</span>
+                  <span class="cfield__chip">Female</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cfield--split">
+              <div class="cfield">
+                <span class="cfield__icon"><svg><use href="#i-heart"/></svg></span>
+                <div class="cfield__body">
+                  <div class="cfield__label">Categories</div>
+                  <div class="cfield__value cfield__cat">
+                    <span class="cfield__cat-logo">𝕏</span>
+                    1
+                  </div>
+                </div>
+              </div>
+              <div class="cfield">
+                <span class="cfield__icon"><svg><use href="#i-cal"/></svg></span>
+                <div class="cfield__body">
+                  <div class="cfield__label">Timeline</div>
+                  <div class="cfield__value">12 Aug 2025 – 16 Aug 2025</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cfield" style="background: transparent; padding: 0;">
+              <div class="cfield__body">
+                <div class="cfield__label" style="color: #263238;">Locations</div>
+                <div class="cfield__value-loc">
+                  <span class="cfield__loc">California, US</span>
+                  <span class="cfield__loc">Connecticut, US</span>
+                  <span class="cfield__loc">New York, US</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cfield">
+              <span class="cfield__icon"><svg><use href="#i-notes"/></svg></span>
+              <div class="cfield__body">
+                <div class="cfield__label">Notes</div>
+                <div class="cfield__value">
+                  Lean warm and conversational — first-person, question opener, and a low-lift CTA. Avoid the corporate "we are excited" voice.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="cpanel__foot">
+          <button class="cpanel__btn-draft">Save as Draft</button>
+          <button class="cpanel__btn-primary">Run Campaign</button>
+        </footer>
+      </section>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       5) HORIZONTAL POST ROW — no image
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">04</span>
+      <h2 class="bay__title">Horizontal post row</h2>
+      <p class="bay__desc">
+        Compact list row for text-only posts in a scheduled sequence.
+        Drag-handle on the left, pagination + AI signal on the header, quick actions on the right.
+      </p>
+    </div>
+    <div class="bay__frame">
+      <div class="bay__col">
+        <div class="postrow" role="listitem">
+          <div class="postrow__grip" aria-hidden="true">
+            <div class="postrow__grip-row"><span class="postrow__grip-dot"></span><span class="postrow__grip-dot"></span></div>
+            <div class="postrow__grip-row"><span class="postrow__grip-dot"></span><span class="postrow__grip-dot"></span></div>
+            <div class="postrow__grip-row"><span class="postrow__grip-dot"></span><span class="postrow__grip-dot"></span></div>
+          </div>
+          <div class="postrow__cell">
+            <div class="postrow__row">
+              <div class="postrow__main">
+                <div class="postrow__label">
+                  <span class="postrow__label-text">Post 1 out of 12</span>
+                  <span class="postrow__ai-badge"><svg><use href="#i-stars"/></svg></span>
+                </div>
+                <p class="postrow__copy">
+                  Thrilled to unveil my latest project! Teamwork truly makes the dream work, and I owe a huge thanks to my amazing team for their support.
+                </p>
+              </div>
+              <div class="postrow__right">
+                <span class="postrow__status">In Review</span>
+                <button class="postrow__minus" aria-label="Remove"><svg><use href="#i-minus-sq"/></svg></button>
+              </div>
+            </div>
+            <div class="postrow__foot">
+              <span class="postrow__attach">
+                <svg><use href="#i-paperclip"/></svg>
+                2 Attachments
+              </span>
+              <button class="postrow__go" aria-label="Open post"><svg><use href="#i-arrow-up-right"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="bay__sub">842 × 135 · 12px radius · drag grip in reserved 24px gutter</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       6) APPROVAL DRAWER v2 — with analytics
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">05</span>
+      <h2 class="bay__title">Approval drawer — with analytics</h2>
+      <p class="bay__desc">
+        Post-publish variant of the drawer. Same shell as 01, but hashtags in place of the caption image treatment,
+        a 3-up media grid, and a Post Analytics grid below.
+      </p>
+    </div>
+    <div class="bay__frame bay__frame--dark">
+      <aside class="drawer" aria-label="Approval drawer with analytics">
+        <div class="drawer__inner">
+
+          <div class="drawer__titlerow">
+            <span class="drawer__title-heavy">Summer fest Marketing</span>
+            <button class="drawer__close" aria-label="Close">
+              <svg><use href="#i-close"/></svg>
+            </button>
+          </div>
+
+          <div class="drawer__body">
+            <div class="drawer__author-row">
+              <div class="drawer__avatar"></div>
+              <div class="drawer__author">
+                <span class="drawer__author-name">
+                  Lays Inc
+                  <span class="drawer__verified"><svg width="12" height="12"><use href="#i-verified"/></svg></span>
+                </span>
+                <span class="drawer__author-handle">@jd_1</span>
+              </div>
+            </div>
+            <p class="drawer__copy drawer__copy--darker">
+              It's incredible to see our hard work come to life! Grateful for my mentors and peers who inspire me daily. 🌟
+            </p>
+            <div class="drawer__tags">
+              <span class="drawer__tag">#marketing</span>
+              <span class="drawer__tag">#Seo</span>
+              <span class="drawer__tag">#ideas</span>
+            </div>
+
+            <div class="drawer__grid" role="img" aria-label="Three attached images">
+              <div class="drawer__grid-lg"></div>
+              <div class="drawer__grid-col">
+                <div class="drawer__grid-sm"></div>
+                <div class="drawer__grid-sm drawer__grid-sm--alt"></div>
+              </div>
+            </div>
+
+            <div class="drawer__meta">
+              <span class="drawer__meta-chip">
+                <span class="drawer__meta-avatar"></span>
+                Alisa Johnson
+              </span>
+              <span class="drawer__meta-dot">·</span>
+              <span>12 Aug 2025 · 12 am</span>
+            </div>
+          </div>
+
+          <section class="drawer__body" aria-label="Post Analytics" style="gap: 8px;">
+            <h4 class="analytics__title">Post Analytics</h4>
+            <div class="analytics__grid">
+              <div class="analytics__tile">
+                <div class="analytics__tile-label">Likes</div>
+                <div class="analytics__tile-value">
+                  2.2K
+                  <span class="analytics__tile-delta"><svg><use href="#i-arrow-up"/></svg>0.008</span>
+                </div>
+              </div>
+              <div class="analytics__tile">
+                <div class="analytics__tile-label">Repost</div>
+                <div class="analytics__tile-value">
+                  100
+                  <span class="analytics__tile-delta"><svg><use href="#i-arrow-up"/></svg>0.23</span>
+                </div>
+              </div>
+              <div class="analytics__tile">
+                <div class="analytics__tile-label">Replies</div>
+                <div class="analytics__tile-value">
+                  38
+                  <span class="analytics__tile-delta"><svg><use href="#i-arrow-up"/></svg>0.23</span>
+                </div>
+              </div>
+              <div class="analytics__tile">
+                <div class="analytics__tile-label">CTR</div>
+                <div class="analytics__tile-value">86%</div>
+              </div>
+              <div class="analytics__tile">
+                <div class="analytics__tile-label">Engagement</div>
+                <div class="analytics__tile-value">
+                  59%
+                  <span class="analytics__tile-delta"><svg><use href="#i-arrow-up"/></svg>0.43</span>
+                </div>
+              </div>
+              <div class="analytics__tile">
+                <div class="analytics__tile-label">Conversion</div>
+                <div class="analytics__tile-value">
+                  20%
+                  <span class="analytics__tile-delta"><svg><use href="#i-arrow-up"/></svg>0.23</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </aside>
+      <div class="bay__col">
+        <div class="bay__sub">Same shell as 01 · hashtag row + 1-big/2-small grid · analytics grid #EEEFFA tiles</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       6) DATE + TIME PICKER
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">06</span>
+      <h2 class="bay__title">Date + time picker</h2>
+      <p class="bay__desc">
+        The modal opened from the Timeline row. Calendar left, three-column time picker right.
+        Selected day pill is indigo; today is a soft gray disc; events show a small dot below.
+      </p>
+    </div>
+    <div class="bay__frame bay__frame--dark">
+      <div class="dtp" role="dialog" aria-label="Select date and time">
+
+        <header class="dtp__head">
+          <div class="dtp__head-text">
+            <h3 class="dtp__title">Select your preferred time</h3>
+            <p class="dtp__sub">Pick your date and time from calendar &amp; time picker</p>
+          </div>
+          <button class="dtp__close" aria-label="Close"><svg><use href="#i-close-line"/></svg></button>
+        </header>
+
+        <div class="dtp__body">
+          <div class="dtp__cal">
+            <div class="dtp__month">
+              <button class="dtp__nav-btn" aria-label="Previous month"><svg><use href="#i-chev-left"/></svg></button>
+              <span class="dtp__month-label">Aug 2025</span>
+              <button class="dtp__nav-btn" aria-label="Next month"><svg><use href="#i-chev-right"/></svg></button>
+            </div>
+
+            <div class="dtp__actions">
+              <div class="dtp__input">Aug 12, 2025</div>
+              <button class="dtp__today">Today</button>
+            </div>
+
+            <div class="dtp__grid">
+              <span class="dtp__dow">Su</span>
+              <span class="dtp__dow">Mo</span>
+              <span class="dtp__dow">Tu</span>
+              <span class="dtp__dow">We</span>
+              <span class="dtp__dow">Th</span>
+              <span class="dtp__dow">Fr</span>
+              <span class="dtp__dow">Sa</span>
+
+              <!-- Week 1: July 27 – Aug 2 -->
+              <span class="dtp__day dtp__day--muted">27</span>
+              <span class="dtp__day dtp__day--muted">28</span>
+              <span class="dtp__day dtp__day--muted">29</span>
+              <span class="dtp__day dtp__day--muted">30</span>
+              <span class="dtp__day dtp__day--muted">31<span class="dtp__day-dot"></span></span>
+              <span class="dtp__day">1</span>
+              <span class="dtp__day">2</span>
+
+              <!-- Week 2 -->
+              <span class="dtp__day">3</span>
+              <span class="dtp__day">4</span>
+              <span class="dtp__day">5</span>
+              <span class="dtp__day">6</span>
+              <span class="dtp__day">7</span>
+              <span class="dtp__day">8</span>
+              <span class="dtp__day">9</span>
+
+              <!-- Week 3 — 12 is selected -->
+              <span class="dtp__day">10</span>
+              <span class="dtp__day">11</span>
+              <span class="dtp__day dtp__day--selected">12</span>
+              <span class="dtp__day">13</span>
+              <span class="dtp__day dtp__day--has-event">14<span class="dtp__day-dot"></span></span>
+              <span class="dtp__day">15</span>
+              <span class="dtp__day">16</span>
+
+              <!-- Week 4 -->
+              <span class="dtp__day">17</span>
+              <span class="dtp__day">18</span>
+              <span class="dtp__day">19</span>
+              <span class="dtp__day dtp__day--today dtp__day--has-event">20<span class="dtp__day-dot"></span></span>
+              <span class="dtp__day">21</span>
+              <span class="dtp__day">22</span>
+              <span class="dtp__day">23</span>
+
+              <!-- Week 5 -->
+              <span class="dtp__day">24</span>
+              <span class="dtp__day">25</span>
+              <span class="dtp__day">26</span>
+              <span class="dtp__day">27</span>
+              <span class="dtp__day">28</span>
+              <span class="dtp__day">29</span>
+              <span class="dtp__day">30</span>
+
+              <!-- Week 6 -->
+              <span class="dtp__day">31</span>
+              <span class="dtp__day dtp__day--muted">1</span>
+              <span class="dtp__day dtp__day--muted">2</span>
+              <span class="dtp__day dtp__day--muted">3</span>
+              <span class="dtp__day dtp__day--muted">4</span>
+              <span class="dtp__day dtp__day--muted">5</span>
+              <span class="dtp__day dtp__day--muted">6</span>
+            </div>
+          </div>
+
+          <div class="dtp__time">
+            <div class="dtp__time-col" role="listbox" aria-label="Hour">
+              <span class="dtp__time-cell">12</span>
+              <span class="dtp__time-cell is-selected">01</span>
+              <span class="dtp__time-cell">02</span>
+              <span class="dtp__time-cell">03</span>
+              <span class="dtp__time-cell">04</span>
+              <span class="dtp__time-cell">05</span>
+              <span class="dtp__time-cell">06</span>
+              <span class="dtp__time-cell">07</span>
+              <span class="dtp__time-cell">08</span>
+              <span class="dtp__time-cell">09</span>
+              <span class="dtp__time-cell">10</span>
+              <span class="dtp__time-cell">11</span>
+            </div>
+            <div class="dtp__time-col" role="listbox" aria-label="Minute">
+              <span class="dtp__time-cell">00</span>
+              <span class="dtp__time-cell">05</span>
+              <span class="dtp__time-cell">10</span>
+              <span class="dtp__time-cell">15</span>
+              <span class="dtp__time-cell is-selected">20</span>
+              <span class="dtp__time-cell">25</span>
+              <span class="dtp__time-cell">30</span>
+              <span class="dtp__time-cell">35</span>
+              <span class="dtp__time-cell">40</span>
+              <span class="dtp__time-cell">45</span>
+              <span class="dtp__time-cell">50</span>
+              <span class="dtp__time-cell">55</span>
+            </div>
+            <div class="dtp__time-col" role="listbox" aria-label="AM or PM">
+              <span class="dtp__time-cell">AM</span>
+              <span class="dtp__time-cell is-selected">PM</span>
+            </div>
+          </div>
+        </div>
+
+        <footer class="dtp__foot">
+          <button class="dtp__btn-cancel">Cancel</button>
+          <button class="dtp__btn-save">Save time</button>
+        </footer>
+      </div>
+      <div class="bay__col">
+        <div class="bay__sub">516 × 588 · shadow 0/0/72/4 rgba(0,0,0,.12) · 12px radius</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       7) DROPDOWN OPTIONS MENU
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">07</span>
+      <h2 class="bay__title">Dropdown options</h2>
+      <p class="bay__desc">
+        Anchored options menu. 20×20 line icon + label per row, 6px inner radius on hover,
+        12px outer radius on the container.
+      </p>
+    </div>
+    <div class="bay__frame">
+      <div class="bay__col">
+        <div class="ddmenu" role="menu">
+          <div class="ddmenu__item" role="menuitem">
+            <div class="ddmenu__item-inner">
+              <span class="ddmenu__item-icon"><svg><use href="#i-file-check"/></svg></span>
+              <span class="ddmenu__item-label">Save as Draft</span>
+            </div>
+          </div>
+          <div class="ddmenu__item" role="menuitem">
+            <div class="ddmenu__item-inner">
+              <span class="ddmenu__item-icon"><svg><use href="#i-columns"/></svg></span>
+              <span class="ddmenu__item-label">Duplicate</span>
+            </div>
+          </div>
+          <div class="ddmenu__item" role="menuitem">
+            <div class="ddmenu__item-inner">
+              <span class="ddmenu__item-icon"><svg><use href="#i-x-square"/></svg></span>
+              <span class="ddmenu__item-label">Cancel Campaign</span>
+            </div>
+          </div>
+        </div>
+        <div class="bay__sub">320w · shadow-sm · 4px vertical padding · 46px row height</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       8) CAMPAIGN DISCLAIMER — confirmation modal
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">08</span>
+      <h2 class="bay__title">Campaign disclaimer</h2>
+      <p class="bay__desc">
+        Pre-launch confirmation. Indigo gradient hero with concentric rings + floating example post chips,
+        review-details title, Categories + Timeline (start/end), duration line, Cancel + Confirm.
+      </p>
+    </div>
+    <div class="bay__frame bay__frame--dark">
+      <div class="cfm" role="dialog" aria-label="Confirm campaign launch">
+
+        <div class="cfm__hero" aria-hidden="true">
+          <div class="cfm__rings">
+            <div class="cfm__rings-inner">
+              <span class="cfm__ring cfm__ring--6"></span>
+              <span class="cfm__ring cfm__ring--5"></span>
+              <span class="cfm__ring cfm__ring--4"></span>
+              <span class="cfm__ring cfm__ring--3"></span>
+              <span class="cfm__ring cfm__ring--2"></span>
+              <span class="cfm__ring cfm__ring--1"></span>
+              <span class="cfm__logo">𝕏</span>
+            </div>
+          </div>
+
+          <div class="cfm__chip cfm__chip--blue cfm__chip--1">
+            <span class="cfm__chip-text">A huge shoutout to my amazing team for their dedication and creativity. 🙌</span>
+            <span class="cfm__chip-icon">𝕏</span>
+          </div>
+          <div class="cfm__chip cfm__chip--blue cfm__chip--2">
+            <span class="cfm__chip-text">Excited to share more milestones ahead — thanks for supporting the launch.</span>
+            <span class="cfm__chip-icon">𝕏</span>
+          </div>
+          <div class="cfm__chip cfm__chip--purple cfm__chip--3">
+            <span class="cfm__chip-text">Just hit 100k on X</span>
+            <span class="cfm__chip-icon">𝕏</span>
+          </div>
+        </div>
+
+        <button class="cfm__close" aria-label="Close"><svg><use href="#i-close-line"/></svg></button>
+
+        <div class="cfm__content">
+          <div>
+            <h3 class="cfm__title">Are you sure you want to run this campaign?</h3>
+            <p class="cfm__desc">Review your campaign details. You can update posts and dates anytime.</p>
+          </div>
+
+          <div class="cfm__fields">
+            <div class="cfm__field">
+              <span class="cfm__field-icon"><svg><use href="#i-heart-msg"/></svg></span>
+              <div class="cfm__field-body">
+                <div class="cfm__field-label">Categories</div>
+                <div class="cfm__field-value">
+                  <span class="cfm__cat-logo">𝕏</span>
+                  1
+                </div>
+              </div>
+            </div>
+
+            <div class="cfm__field-row">
+              <div class="cfm__field">
+                <span class="cfm__field-icon"><svg><use href="#i-cal-line"/></svg></span>
+                <div class="cfm__field-body">
+                  <div class="cfm__field-label">Start Date</div>
+                  <div class="cfm__field-value">12 Aug 2025</div>
+                </div>
+              </div>
+              <div class="cfm__field">
+                <span class="cfm__field-icon"><svg><use href="#i-cal-line"/></svg></span>
+                <div class="cfm__field-body">
+                  <div class="cfm__field-label">End Date</div>
+                  <div class="cfm__field-value">25 Aug 2025</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="cfm__divider"></div>
+              <p class="cfm__duration">Your overall campaign duration will last for 16 days.</p>
+            </div>
+          </div>
+
+          <div class="cfm__foot">
+            <button class="cfm__btn-cancel">Cancel</button>
+            <button class="cfm__btn-confirm">Confirm</button>
+          </div>
+        </div>
+      </div>
+      <div class="bay__col">
+        <div class="bay__sub">469 × 519 · gradient 5D64D7 → EBECFF · shadow-lg</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       9) REJECTION FEEDBACK MODAL
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">09</span>
+      <h2 class="bay__title">Rejection feedback</h2>
+      <p class="bay__desc">
+        Minimal single-field feedback modal on rejection. Title + supporting text, one reason dropdown,
+        Cancel + Submit.
+      </p>
+    </div>
+    <div class="bay__frame">
+      <div class="bay__col">
+        <div class="fbmodal" role="dialog" aria-label="Reject campaign">
+          <header class="fbmodal__head">
+            <h3 class="fbmodal__title">Reject Campaign</h3>
+            <p class="fbmodal__sub">Let the team know why you're rejecting — this feeds Scout's next iteration.</p>
+            <button class="fbmodal__close" aria-label="Close"><svg><use href="#i-close-line"/></svg></button>
+          </header>
+
+          <div class="fbmodal__body">
+            <div class="fbmodal__field">
+              <label class="fbmodal__label">Reason</label>
+              <button class="fbmodal__select fbmodal__select--placeholder">
+                <span>Select a reason for rejection</span>
+                <svg><use href="#i-chev-down"/></svg>
+              </button>
+            </div>
+
+            <div class="fbmodal__foot">
+              <button class="fbmodal__btn-cancel">Cancel</button>
+              <button class="fbmodal__btn-submit">Submit</button>
+            </div>
+          </div>
+        </div>
+        <div class="bay__sub">469 × 230 · 18px radius</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       10) READ-ONLY MODE BANNER
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">10</span>
+      <h2 class="bay__title">Read-only banner</h2>
+      <p class="bay__desc">
+        Full-width banner shown above a campaign or post surface when the current viewer has view-only access.
+        Eye icon + explanation on the left, primary action + dismiss X on the right.
+      </p>
+    </div>
+    <div class="bay__frame">
+      <div class="bay__col" style="width: 100%; max-width: 1256px;">
+        <div class="robanner" role="status" aria-live="polite">
+          <div class="robanner__body">
+            <span class="robanner__icon"><svg><use href="#i-eye"/></svg></span>
+            <p class="robanner__text">You're viewing this campaign in read-only mode. Ask an editor for permission to make changes.</p>
+          </div>
+          <div class="robanner__actions">
+            <button class="robanner__btn">Request Edit</button>
+            <button class="robanner__close" aria-label="Dismiss"><svg><use href="#i-close-line"/></svg></button>
+          </div>
+        </div>
+        <div class="bay__sub">Stretches to container · min-height 48 · 12px radius</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       TOKEN LEGEND
+       ========================================================= -->
+  <section class="bay">
+    <div class="bay__head">
+      <span class="bay__num">·</span>
+      <h2 class="bay__title">Module tokens</h2>
+      <p class="bay__desc">
+        Every value the components lean on. Defined in <code>_campaigns-components.css</code> at <code>:root</code>;
+        base app-wide tokens come from <code>design-system/tokens.css</code>.
+      </p>
+    </div>
+    <div class="legend">
+      <div class="legend__col"><span class="legend__label">Surface</span><span class="legend__value">--camp-surface  #FFFFFF</span></div>
+      <div class="legend__col"><span class="legend__label">Canvas</span><span class="legend__value">--camp-surface-canvas  #ECECEC</span></div>
+      <div class="legend__col"><span class="legend__label">Field bg</span><span class="legend__value">--camp-surface-field  #F8FAFC</span></div>
+      <div class="legend__col"><span class="legend__label">Analytics tile</span><span class="legend__value">--camp-primary-tint  #EEEFFA</span></div>
+      <div class="legend__col"><span class="legend__label">Primary</span><span class="legend__value">--camp-primary  #545BD1</span></div>
+      <div class="legend__col"><span class="legend__label">Primary hover</span><span class="legend__value">--camp-primary-hover  #4848E0</span></div>
+      <div class="legend__col"><span class="legend__label">Text primary</span><span class="legend__value">--camp-text-primary  #263238</span></div>
+      <div class="legend__col"><span class="legend__label">Text secondary</span><span class="legend__value">--camp-text-secondary  #4B5565</span></div>
+      <div class="legend__col"><span class="legend__label">Text tertiary</span><span class="legend__value">--camp-text-tertiary  #697586</span></div>
+      <div class="legend__col"><span class="legend__label">Modal border</span><span class="legend__value">--camp-border  #ECEFF1</span></div>
+      <div class="legend__col"><span class="legend__label">Input border</span><span class="legend__value">--camp-border-input  #D0D5DD</span></div>
+      <div class="legend__col"><span class="legend__label">Status In Progress</span><span class="legend__value">--camp-status-progress-* (bg/fg/bd/solid)</span></div>
+      <div class="legend__col"><span class="legend__label">Skeleton</span><span class="legend__value">--camp-skeleton  rgba(0,0,0,.08)</span></div>
+      <div class="legend__col"><span class="legend__label">Post shadow</span><span class="legend__value">--camp-shadow-post</span></div>
+      <div class="legend__col"><span class="legend__label">Modal shadow (dtp)</span><span class="legend__value">--camp-shadow-dtp</span></div>
+      <div class="legend__col"><span class="legend__label">Modal shadow (cfm)</span><span class="legend__value">--camp-shadow-modal</span></div>
+      <div class="legend__col"><span class="legend__label">Menu shadow (ddmenu)</span><span class="legend__value">--camp-shadow-menu</span></div>
+      <div class="legend__col"><span class="legend__label">Font — X preview</span><span class="legend__value">--font-x-preview  'Outfit', …</span></div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
