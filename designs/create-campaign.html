@@ -479,6 +479,9 @@
     --cc-chat-max: 780px;
     --cc-split-gap: 18px;
     --cc-draft-chat-w: clamp(360px, 30vw, 520px);
+    --cc-draft-rail-top: 176px;
+    --cc-draft-rail-bottom: 20px;
+    --cc-draft-rail-pad: 14px;
     /* Landing container now sized to the two-card grid + heading gutter. */
     --cc-landing-max: 820px;
     /* Top chrome (topbar + campaign header) that stays stuck to viewport.
@@ -654,57 +657,47 @@
      internal scroll, composer integrated at the bottom edge.
      ================================================================== */
   body.has-drafts .cc-main {
-    /* The chat now flows in the natural document column instead of
-       becoming a bounded card. This matches the pre-draft experience —
-       transparent surface, no border, no rounded frame, no backdrop
-       blur — so the drafts panel is the only visible container in the
-       drafting state. Chat sits centered in the remaining left column. */
-    position: relative;
-    left: auto;
-    right: auto;
-    top: auto;
-    bottom: auto;
-    max-width: none;
+    position: fixed;
+    left: var(--cc-gutter-left);
+    top: var(--cc-draft-rail-top);
+    bottom: var(--cc-draft-rail-bottom);
+    width: var(--cc-draft-chat-w);
+    max-width: var(--cc-draft-chat-w);
     margin: 0;
-    padding: 8px var(--cc-rail-inset) 140px var(--cc-rail-inset);
-    background: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 0;
-    border-radius: 0;
-    display: block;
-    gap: 0;
-    overflow: visible;
-    z-index: auto;
-    transition: none;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08),
+                0 1px 2px rgba(15, 23, 42, 0.04);
+    backdrop-filter: blur(8px) saturate(1.04);
+    -webkit-backdrop-filter: blur(8px) saturate(1.04);
+    display: flex;
+    overflow: hidden;
+    z-index: 18;
+    transition: width 260ms var(--ease-standard);
   }
   body.has-drafts.has-side-panel .cc-main {
-    padding-left: var(--cc-gutter-left);
-    padding-right: calc(var(--cc-panel-w) + var(--cc-split-gap));
+    padding: 0;
   }
-  /* The chatlog now scrolls INSIDE the card, not with the page. Gives
-     each message a consistent 24px rhythm and 16/24 inner padding.
-     Stacked class selector `.has-drafts.has-side-panel` beats the plain
-     `.has-side-panel` rule further down in the sheet (both classes are
-     always present together in drafting state). */
+  /* The chatlog scrolls inside the rail, so older planning cards never sit
+     underneath the post workspace. */
   body.has-drafts.has-side-panel .cc-main .cc-chat,
   body.has-drafts .cc-main .cc-chat {
     flex: 1 1 auto;
     align-self: stretch;
     min-height: 0;
     overflow-y: auto;
-    padding: 16px 24px 24px 24px;
+    padding: 18px 18px 92px 18px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 24px;
-    /* The AI side stays intentionally narrower than the post panel.
-       Width is driven by the split variables above so the rail responds
-       with the viewport instead of drifting under the drafts panel. */
-    max-width: min(100%, var(--cc-draft-chat-w));
+    gap: 18px;
+    max-width: none;
     margin: 0;
     width: 100%;
     box-sizing: border-box;
+    overscroll-behavior: contain;
   }
   /* Custom scroll rail on the right — 4px, muted, rounded. Firefox uses
      `scrollbar-width: thin` as a graceful fallback; Chromium/WebKit gets
@@ -719,20 +712,17 @@
     background: #D8D8D8;
     border-radius: 8px;
   }
-  /* Composer floats fixed, positioned to visually sit INSIDE the card's
-     bottom edge. Its horizontal bounds match the card's inner padding,
-     its vertical position hugs the card's bottom. 50px height, 16px
-     radius, white surface — matches Figma spec. */
+  /* Composer floats visually inside the rail. Its bounds follow the rail
+     padding so it reads as part of the panel, not as a detached page pill. */
   body.has-drafts .cc-composer-dock {
     position: fixed;
-    left: var(--cc-gutter-left);
+    left: calc(var(--cc-gutter-left) + var(--cc-draft-rail-pad));
     right: auto;
-    bottom: 40px; /* card bottom (24) + inner padding (16) */
-    /* End-to-end within the left rail, while staying clear of the posts panel. */
-    width: calc(100vw - var(--cc-gutter-left) - var(--cc-panel-w) - var(--cc-split-gap));
+    bottom: calc(var(--cc-draft-rail-bottom) + var(--cc-draft-rail-pad));
+    width: calc(var(--cc-draft-chat-w) - (var(--cc-draft-rail-pad) * 2));
     max-width: none;
     padding: 0;
-    z-index: 15;
+    z-index: 24;
     margin: 0;
     box-sizing: border-box;
   }
@@ -750,9 +740,9 @@
     align-items: center;
     gap: 8px;
   }
-  /* Give the chat log enough bottom padding so the last message doesn't
-     tuck under the composer overlay. 50 (composer) + 16 (breathing) = 66. */
-  body.has-drafts .cc-main .cc-chat { padding-bottom: 82px; }
+  /* Give the chat log enough bottom padding so the last message clears the
+     internal composer overlay. */
+  body.has-drafts .cc-main .cc-chat { padding-bottom: 96px; }
   /* Bottom mask + qdock scrim don't apply inside the card — they were
      designed for the page-scroll world. Turn them off in drafting state
      so the card's own boundary reads as the edge of the conversation. */
@@ -901,11 +891,20 @@
       --cc-draft-chat-w: clamp(280px, 34vw, 320px);
       --cc-panel-w: calc(100vw - var(--sidebar-w, 80px) - var(--cc-rail-inset) - var(--cc-draft-chat-w) - var(--cc-split-gap));
     }
+    body.has-drafts {
+      --cc-draft-rail-top: 156px;
+    }
   }
   @media (max-width: 720px) {
     body.has-side-panel {
-      --cc-draft-chat-w: 250px;
-      --cc-panel-w: calc(100vw - var(--sidebar-w, 80px) - var(--cc-rail-inset) - var(--cc-draft-chat-w) - var(--cc-split-gap));
+      --cc-draft-chat-w: calc(100vw - var(--sidebar-w, 80px) - (var(--cc-rail-inset) * 2));
+      --cc-panel-w: 0px;
+    }
+    body.has-drafts .side-panel {
+      display: none;
+    }
+    body.has-drafts .cc-header {
+      padding-right: var(--cc-rail-inset);
     }
   }
   /* Inline drafts panel — no shadow, no rounded corners on the outer
@@ -925,6 +924,7 @@
     box-shadow: none !important;
     background: var(--camp-surface-canvas, #ECECEC) !important;
   }
+  .side-panel[hidden] { display: none !important; }
   .side-panel__body { overflow-y: auto; padding: 16px 20px 40px !important; }
   .side-panel__header--toolbar {
     padding: 14px 20px !important;
@@ -974,7 +974,9 @@
      without leaving the flow. Only the bottom position shifts up so it
      doesn't overlap the drafts panel footer.
      (The old rule that hid this dock has been retired.) */
-  body.has-drafts .cc-composer-dock { bottom: 20px; }
+  body.has-drafts .cc-composer-dock {
+    bottom: calc(var(--cc-draft-rail-bottom) + var(--cc-draft-rail-pad));
+  }
 
   /* Hide the empty user-avatar circle — per design-language §8 the user side
      is right-aligned, no avatar. Scoped locally so other flows using
@@ -3750,19 +3752,23 @@
     --cc-panel-w: calc(100vw - var(--sidebar-w, 80px) - var(--cc-rail-inset) - var(--cc-draft-chat-w) - var(--cc-split-gap));
   }
   body.has-drafts.has-side-panel .cc-main {
-    padding-left: var(--cc-gutter-left) !important;
-    padding-right: calc(var(--cc-panel-w) + var(--cc-split-gap)) !important;
-  }
-  body.has-drafts.has-side-panel .cc-main .cc-chat {
+    left: var(--cc-gutter-left) !important;
+    top: var(--cc-draft-rail-top) !important;
+    bottom: var(--cc-draft-rail-bottom) !important;
     width: var(--cc-draft-chat-w) !important;
     max-width: var(--cc-draft-chat-w) !important;
+    padding: 0 !important;
+  }
+  body.has-drafts.has-side-panel .cc-main .cc-chat {
+    width: 100% !important;
+    max-width: none !important;
     margin: 0 !important;
   }
   body.has-drafts.has-side-panel .cc-composer-dock {
-    left: var(--cc-gutter-left) !important;
+    left: calc(var(--cc-gutter-left) + var(--cc-draft-rail-pad)) !important;
     right: auto !important;
-    width: var(--cc-draft-chat-w) !important;
-    max-width: var(--cc-draft-chat-w) !important;
+    width: calc(var(--cc-draft-chat-w) - (var(--cc-draft-rail-pad) * 2)) !important;
+    max-width: calc(var(--cc-draft-chat-w) - (var(--cc-draft-rail-pad) * 2)) !important;
   }
   body.has-drafts.has-side-panel .chatmsg--user,
   body.has-drafts.has-side-panel .chatmsg--post-instruction {
@@ -3807,7 +3813,8 @@
   }
   @media (max-width: 720px) {
     body.has-drafts.has-side-panel {
-      --cc-draft-chat-w: 250px;
+      --cc-draft-chat-w: calc(100vw - var(--sidebar-w, 80px) - (var(--cc-rail-inset) * 2));
+      --cc-panel-w: 0px;
     }
   }
 
@@ -4052,7 +4059,7 @@
      minimal — the campaign heading in the top-left of the page carries
      the identity, so the panel only holds the toolbar (schedule + revise
      + close). This mirrors the campaigns dashboard right-panel pattern. -->
-<aside class="side-panel" id="cc-panel" aria-hidden="true" role="dialog" aria-labelledby="cc-title">
+<aside class="side-panel" id="cc-panel" hidden aria-hidden="true" role="dialog" aria-labelledby="cc-title">
   <div class="side-panel__header side-panel__header--toolbar">
     <span class="side-panel__count" id="cc-panel-count">Four drafts ready</span>
     <div class="side-panel__toolbar">
@@ -4647,7 +4654,13 @@
       // fixed composer so a fresh Scout message never renders behind it.
       // `scroll-padding-bottom` on <html> handles this for scrollIntoView.
       const last = chatlog.lastElementChild;
-      if (last) last.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      if (!last) return;
+      const rail = document.querySelector('.cc-chat');
+      if (document.body.classList.contains('has-drafts') && rail) {
+        rail.scrollTo({ top: rail.scrollHeight, behavior: 'smooth' });
+        return;
+      }
+      last.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
 
     // Composer disabled/enabled state (Scout is speaking → disabled).
@@ -5423,6 +5436,7 @@
       if (countEl) countEl.textContent = 'Drafting…';
       document.body.classList.add('has-drafts');
       document.body.classList.add('has-side-panel');
+      panel.hidden = false;
       panel.classList.add('is-open');
       panel.classList.add('side-panel--loading');
       panel.setAttribute('aria-hidden', 'false');
@@ -6344,6 +6358,7 @@
     function closePanel() {
       panel.classList.remove('is-open');
       panel.setAttribute('aria-hidden', 'true');
+      panel.hidden = true;
       document.body.classList.remove('has-side-panel');
     }
     document.addEventListener('click', (e) => {
