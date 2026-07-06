@@ -4072,16 +4072,26 @@
       if (statusLabel) statusLabel.textContent = entry.label;
     }
 
+    function setCampaignHeader(title, subtitle, { remember = true } = {}) {
+      if (titleEl && title != null) titleEl.textContent = title;
+      if (subEl && subtitle != null) subEl.textContent = subtitle;
+      if (remember) {
+        if (titleEl && title && title !== 'Drafting your campaign') {
+          titleEl.dataset.campaignTitle = title;
+        }
+        if (subEl && subtitle != null) {
+          subEl.dataset.campaignSubtitle = subtitle;
+        }
+      }
+    }
+
     // Header title crossfade — the surface commits to a name once the
     // shape lands. Also swaps the subtitle to a factual summary.
     async function swapHeader(title, subtitle) {
       titleEl.classList.add('is-swapping');
       subEl.classList.add('is-swapping');
       await beat(200);
-      titleEl.textContent = title;
-      if (subtitle != null) subEl.textContent = subtitle;
-      if (title && title !== 'Drafting your campaign') titleEl.dataset.campaignTitle = title;
-      if (subtitle != null) subEl.dataset.campaignSubtitle = subtitle;
+      setCampaignHeader(title, subtitle);
       await beat(20);
       titleEl.classList.remove('is-swapping');
       subEl.classList.remove('is-swapping');
@@ -5192,8 +5202,7 @@
       // heading in the top-left so the whole page moves into the
       // "drafting" state together. The subtitle carries the progress cue.
       if (!preserveHeader) {
-        if (titleEl) titleEl.textContent = 'Drafting your campaign';
-        if (subEl)   subEl.textContent   = 'Pulling voice and shaping the posts…';
+        setCampaignHeader('Drafting your campaign', 'Pulling voice and shaping the posts…', { remember: false });
       }
       const countEl = document.getElementById('cc-panel-count');
       if (countEl) countEl.textContent = 'Drafting…';
@@ -6109,9 +6118,14 @@
     function fillDrafts() {
       initPostState();
       renderPostCards();
+      composerResolver = null;
+      input.placeholder = 'Tell Scout what to adjust across this campaign...';
+      setComposerEnabled(true);
     }
 
-    // Side-panel close (unchanged).
+    // Side-panel close. Escape is intentionally not wired here: the
+    // drafts panel is the primary workspace, so accidental Esc presses
+    // should only dismiss transient overlays, not collapse the panel.
     function closePanel() {
       panel.classList.remove('is-open');
       panel.setAttribute('aria-hidden', 'true');
@@ -6119,9 +6133,6 @@
     }
     document.addEventListener('click', (e) => {
       if (e.target.closest('[data-cc-close]')) closePanel();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && panel.classList.contains('is-open')) closePanel();
     });
 
     // -----------------------------------------------------------------
@@ -6133,10 +6144,28 @@
      // silent flag tells the submit handler NOT to append a user bubble
      // (useful when the caller wants to render its own designed pill).
     let composerResolver = null;
+    async function handleDraftComposerRequest(text) {
+      setComposerEnabled(false);
+      await appendScoutMsg(
+        'Got it. I\'ll use that as a campaign-level instruction. For a specific post, use the Scout button on that post so I can target the edit precisely.',
+        { thinkFor: 220, beatAfter: 220 }
+      );
+      input.placeholder = 'Tell Scout what to adjust across this campaign...';
+      setComposerEnabled(true);
+    }
+
     composer.addEventListener('submit', (e) => {
       e.preventDefault();
       const text = (input.value || '').trim();
-      if (!text || !composerResolver) return;
+      if (!text) return;
+      if (!composerResolver) {
+        if (!document.body.classList.contains('has-drafts')) return;
+        input.value = '';
+        syncSend();
+        appendUserMsg(text);
+        handleDraftComposerRequest(text);
+        return;
+      }
       input.value = '';
       syncSend();
       const spec = (typeof composerResolver === 'function')
@@ -6793,8 +6822,7 @@
       if (skip === 'drafts') {
         leaveLanding();
         const shape = SHAPES.reactive;
-        titleEl.textContent = shape.title;
-        subEl.textContent = shape.subtitleFactual;
+        setCampaignHeader(shape.title, shape.subtitleFactual);
         showShapeSummary({ kind: shape.kind, title: shape.title, meta: shape.summary });
         setStatus('drafting');
         openPanelLoading();
@@ -6829,8 +6857,7 @@
           landingEl.classList.remove('is-leaving');
         }
         const briefShape = SHAPES[(shapeParam && SHAPES[shapeParam]) ? shapeParam : 'holiday'];
-        titleEl.textContent = campaignTitle || briefShape.title;
-        subEl.textContent = briefShape.subtitleFactual;
+        setCampaignHeader(campaignTitle || briefShape.title, briefShape.subtitleFactual);
         showShapeSummary({ kind: briefShape.kind, title: campaignTitle || briefShape.title, meta: briefShape.summary });
         setStatus('drafting');
         openPanelLoading({ preserveHeader: true });
@@ -6841,8 +6868,7 @@
         // "Drafting…" / hardcoded 1989 copy. Re-apply the campaign
         // identity so the detail view carries the clicked campaign's
         // title, not the default template.
-        if (campaignTitle) titleEl.textContent = campaignTitle;
-        subEl.textContent = briefShape.subtitleFactual;
+        setCampaignHeader(campaignTitle || briefShape.title, briefShape.subtitleFactual);
         fireToast({ title: 'Drafts ready', desc: 'Four posts on the right. Tap any card to refine.', duration: 4200 });
         return;
       } else if (seed) {
